@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 function normalizePostalCode(value: string) {
@@ -15,10 +15,7 @@ export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
   const router = useRouter();
 
-  const isValid = useMemo(
-    () => isValidGermanPostalCode(postalCode),
-    [postalCode]
-  );
+  const isValid = isValidGermanPostalCode(postalCode);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

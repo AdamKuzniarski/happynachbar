@@ -2,20 +2,30 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #132A13;
+  --evergreen: #132A13;
+  --hunter: #31572C;
+  --fern: #4F772D;
+  --palm: #90A955;
+  --limecream: #ECF39E;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-evergreen: var(--evergreen);
+  --color-hunter: var(--hunter);
+  --color-fern: var(--fern);
+  --color-palm: var(--palm);
+  --color-limecream: var(--limecream);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #132A13;
+    --foreground: #ECF39E;
   }
 }
 

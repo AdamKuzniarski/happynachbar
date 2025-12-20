@@ -2,12 +2,12 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #132A13;
-  --evergreen: #132A13;
-  --hunter: #31572C;
-  --fern: #4F772D;
-  --palm: #90A955;
-  --limecream: #ECF39E;
+  --foreground: #132a13;
+  --evergreen: #132a13;
+  --hunter: #31572c;
+  --fern: #4f772d;
+  --palm: #90a955;
+  --limecream: #ecf39e;
 }
 
 @theme inline {
@@ -24,8 +24,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #132A13;
-    --foreground: #ECF39E;
+    --background: #132a13;
+    --foreground: #ecf39e;
   }
 }
 

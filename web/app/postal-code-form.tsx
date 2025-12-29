@@ -27,8 +27,8 @@ export function PostalCodeForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <label htmlFor="postalCode" className="text-sm font-medium">
+    <form onSubmit={onSubmit} className="flex flex-col items-center gap-2">
+      <label htmlFor="postalCode" className="text-xs font-medium text-center">
         Postal Code
       </label>
 
@@ -40,12 +40,21 @@ export function PostalCodeForm() {
         placeholder="e.g. 10115"
         value={postalCode}
         onChange={(e) => setPostalCode(normalizePostalCode(e.target.value))}
-        className="w-full rounded-md border px-3 py-2"
+        className="
+        h-8
+        w-32
+        rounded-md
+        border
+        px-2
+        text-sm
+        text-center
+        sm:w-40
+      "
         aria-invalid={postalCode.length > 0 && !isValid}
       />
 
       {postalCode.length > 0 && !isValid && (
-        <p className="text-sm text-red-600">
+        <p className="text-xs text-red-600 text-center">
           Please enter a valid 5-digit postal code.
         </p>
       )}
@@ -53,7 +62,22 @@ export function PostalCodeForm() {
       <button
         type="submit"
         disabled={!isValid}
-        className="mt-2 rounded-md border px-4 py-2 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="
+        mt-1
+        h-8
+        w-48
+        rounded-md
+        border-2 border-fern
+        bg-palm
+        text-xs
+        font-medium
+        text-white
+        hover:bg-hunter
+        transition-colors
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        sm:w-64
+      "
       >
         Submit
       </button>

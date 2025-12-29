@@ -7,6 +7,9 @@
   --color-palm: #90a955;
   --color-limecream: #ecf39e;
 
+  --color-background: #ffffff;
+  --color-foreground: var(--color-evergreen);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -14,20 +17,17 @@
 @layer base {
   :root {
     color-scheme: light;
-    --background: #ffffff;
-    --foreground: #132a13;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       color-scheme: dark;
-      --background: #132a13;
-      --foreground: #ecf39e;
+      --color-background: var(--color-evergreen);
+      --color-foreground: var(--color-limecream);
     }
   }
 
   body {
-    @apply bg-white text-evergreen;
-    font-family: Arial, Helvetica, sans-serif;
+    @apply bg-background text-foreground font-sans;
   }
 }

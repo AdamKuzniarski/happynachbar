@@ -13,7 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
         secret: config.get<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: config.get<string>('JWT_EXPIRES_IN') ?? '15m',
-        },
+        } as any,
       }),
     }),
   ],

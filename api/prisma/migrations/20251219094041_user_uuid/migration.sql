@@ -10,5 +10,5 @@
 ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
 ADD COLUMN     "passwordHash" TEXT NOT NULL,
 DROP COLUMN "id",
-ADD COLUMN     "id" UUID NOT NULL,
+ADD COLUMN     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
 ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");

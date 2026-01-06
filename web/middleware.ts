@@ -23,6 +23,11 @@ export function middleware(req: NextRequest) {
     return buildRedirect(req, "/homepage");
   }
 
+  // If already logged in, never show landing page
+  if (isLoggedIn && pathname === "/") {
+    return buildRedirect(req, "/homepage");
+  }
+
   // Allow public routes
   if (PUBLIC_PATHS.has(pathname)) {
     return NextResponse.next();

@@ -10,6 +10,21 @@ model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
   passwordHash String
+  lastActiveAt DateTime?
+  profile UserProfile?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserProfile{
+userId String @id @db.Uuid
+user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+
+plz String?
+
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+@@index([plz])
 }

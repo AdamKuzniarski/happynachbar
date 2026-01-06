@@ -56,3 +56,8 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
+
+# Prisma build artifacts (should never be committed)
+prisma/*.js
+prisma/*.js.map
+prisma/*.d.ts

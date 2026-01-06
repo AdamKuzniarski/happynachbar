@@ -1,5 +1,6 @@
 "use client";
 
+import { loginAndSetCookie } from "./actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const emailInvalid = email.length > 0 && !isValidEmail(email);
   const passwordInvalid = false;
@@ -24,9 +26,16 @@ export default function LoginPage() {
     e.preventDefault();
     if (!canSubmit) return;
 
+    setFormError(null);
     setSubmitting(true);
     try {
-      // UI-only: später API call
+      const result = await loginAndSetCookie(email, password);
+
+      if (!result.ok) {
+        setFormError(result.error);
+        return;
+      }
+
       router.push("/homepage");
     } finally {
       setSubmitting(false);
@@ -126,6 +135,16 @@ export default function LoginPage() {
                     ].join(" ")}
                   />
                 </div>
+
+                {formError && (
+                  <p
+                    className="text-xs text-red-600 text-center"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    {formError}
+                  </p>
+                )}
 
                 <button
                   type="submit"

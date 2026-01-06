@@ -47,7 +47,7 @@ export class NeighborsController {
     if (!profile?.plz) {
       throw new ConflictException('PLZ not set'); //response for 409/400
     }
-    const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 1000);
+    const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
 
     // alle außer DICH
     const count = await this.prisma.userProfile.count({

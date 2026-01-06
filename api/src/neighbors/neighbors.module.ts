@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
-
+import { Module } from '@nestjs/common';
+import { NeighborsController } from './neighbors.controller';
 
 @Module({
-    controllers: [Ne]
+  controllers: [NeighborsController],
 })
+export class NeighborsModule {}

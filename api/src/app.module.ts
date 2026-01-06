@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { PublicNeighborsModule } from './public/public-neighbors.module';
+import { NeighborsModule } from './neighbors/neighbors.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PublicNeighborsModule } from './public/public-neighbors.module';
     PrismaModule,
     UsersModule,
     PublicNeighborsModule,
+    NeighborsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

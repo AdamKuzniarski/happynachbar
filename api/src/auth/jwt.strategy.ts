@@ -22,8 +22,7 @@ function cookieExtractor(cookieName: string) {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(config: ConfigService) {
-    const cookieName =
-      config.get<string>('AUTH_COOKIE_NAME') ?? 'happynachbar_token';
+    const cookieName = 'happynachbar_token';
     const jwtSecret = config.getOrThrow<string>('JWT_SECRET');
 
     super({

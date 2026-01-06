@@ -24,7 +24,7 @@ user User @relation(fields: [userId],references: [id], onDelete: Cascade)
 plz String?
 
 createdAt DateTime @default(now())
-updateAt DateTime @updatedAt
+updatedAt DateTime @updatedAt
 
 @@index([plz])
 }

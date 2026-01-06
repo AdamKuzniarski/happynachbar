@@ -53,3 +53,9 @@ export async function loginAndSetCookie(
 
   return { ok: true };
 }
+
+// Clears auth token cookie; moves web app into unauthenticated state
+export async function logout() {
+  const cookieStore = await cookies();
+  cookieStore.delete("happynachbar_token");
+}

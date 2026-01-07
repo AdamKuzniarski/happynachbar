@@ -30,5 +30,19 @@ services:
         condition: service_healthy
     command: ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
 
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: happynachbar-web
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+
+    ports:
+      - "3000:3000"
+
 volumes:
   db_data:

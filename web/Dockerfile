@@ -8,6 +8,10 @@ RUN npm ci
 
 # Copy source and build
 COPY . .
+
+# Ensure public/ exists (some projects don't have it)
+RUN mkdir -p public
+
 RUN npm run build
 
 # --- Runtime Stage ---

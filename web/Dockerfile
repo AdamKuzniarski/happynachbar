@@ -14,6 +14,9 @@ RUN mkdir -p public
 
 RUN npm run build
 
+# Dev deps rauswerfen => kleiner Runtime
+RUN npm prune --omit=dev
+
 # --- Runtime Stage ---
 FROM node:20-alpine AS runner
 WORKDIR /usr/src/app

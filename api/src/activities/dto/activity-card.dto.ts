@@ -54,4 +54,10 @@ export class ActivityCardDto {
 
   @ApiPropertyOptional({ example: false })
   isFavorited?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'https://picsum.photos/seed/happynachbar/640/480',
+    nullable: true,
+  })
+  thumbnailUrl?: string | null;
 }

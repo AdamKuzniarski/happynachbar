@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class ListingImageDto {
+export class ActivityImageDto {
   @ApiProperty({ example: 'https://picsum.photos/seed/happynachbar/800/600' })
   url!: string;
 

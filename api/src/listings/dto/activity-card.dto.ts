@@ -13,9 +13,9 @@ export class ActivityCardDto {
   category!: ActivityCategory;
 
   @ApiProperty({
-    example: '2026-01-09T18:00:000Z',
+    example: '2026-01-09T18:00:00.000Z',
     format: 'date-time',
-    description: 'Start timestamp (ISO). Frontend formats as "Heute, 18:00',
+    description: 'Start timestamp (ISO). Frontend formats as "Heute, 18:00"',
   })
   startAt!: Date;
 
@@ -34,15 +34,15 @@ export class ActivityCardDto {
   @ApiProperty({ type: () => UserSummaryDto })
   createdBy!: UserSummaryDto;
 
-  @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date time' })
+  @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
   createdAt!: Date;
 
-  @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date time' })
+  @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
   updatedAt!: Date;
 
   @ApiPropertyOptional({
     example: false,
-    description: 'Optional user-context filed - has the user joined',
+    description: 'Optional user-context field - has the user joined',
   })
   isJoined?: boolean;
 

@@ -7,5 +7,5 @@ export class ActivityDetailDto extends ActivityCardDto {
   description?: string;
 
   @ApiProperty({ type: () => [ActivityImageDto] })
-  images!: ActivityCardDto[];
+  images!: ActivityImageDto[];
 }

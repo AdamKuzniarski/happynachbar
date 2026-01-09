@@ -1,16 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useTransition } from "react";
+import { useEffect } from "react";
 import { logout } from "../login/actions";
 
 export default function LogoutPage() {
-  const [pending, startTransition] = useTransition();
-
   useEffect(() => {
-    startTransition(async () => {
-      await logout();
-    });
+    logout();
   }, []);
 
   return (
@@ -42,8 +38,6 @@ export default function LogoutPage() {
             <h1 className="text-xl font-semibold text-evergreen sm:text-2xl">
               Du bist erfolgreich ausgeloggt
             </h1>
-
-            {pending && <p className="mt-3 text-sm">Logout läuft …</p>}
 
             <div className="mt-6 flex flex-col gap-3">
               <Link

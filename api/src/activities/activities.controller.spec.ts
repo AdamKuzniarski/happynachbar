@@ -1,20 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { ActivitiesController } from './activities.controller';
 import { ActivitiesService } from './activities.service';
 
 describe('ActivitiesController', () => {
-  let controller: ActivitiesController;
+  it('delegates to ActivitiesService.list()', async () => {
+    const listMock = jest.fn().mockReturnValue({ items: [], nextCursor: null });
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [ActivitiesController],
-      providers: [ActivitiesService],
+      providers: [{ provide: ActivitiesService, useValue: { list: listMock } }],
     }).compile();
 
-    controller = module.get<ActivitiesController>(ActivitiesController);
-  });
+    const controller = moduleRef.get(ActivitiesController);
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    const q = { plz: '10115', take: 20 };
+    const res = controller.List(q as any);
+
+    expect(listMock).toHaveBeenCalledTimes(1);
+    expect(listMock).toHaveBeenCalledWith(q);
+    expect(res).toEqual({ items: [], nextCursor: null });
   });
 });

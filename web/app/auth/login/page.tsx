@@ -168,6 +168,15 @@ export default function LoginPage() {
                 >
                   {submitting ? "Logging in..." : "Login"}
                 </button>
+                <p className="mt-4 text-xs text-center">
+                  Don&apos;t have an account yet?{" "}
+                  <Link
+                    href="/auth/register"
+                    className="font-semibold underline hover:opacity-80"
+                  >
+                    Sign up here !
+                  </Link>
+                </p>
               </form>
             </div>
           </div>

@@ -32,7 +32,15 @@ export default function LoginPage() {
       const result = await loginAndSetCookie(email, password);
 
       if (!result.ok) {
-        setFormError(result.error);
+        const err = (result.error ?? "").toLowerCase();
+
+        if (err.includes("invalid credentials")) {
+          setFormError(
+            "We couldn’t log you in. Please check your email and password.\nOr sign up if you don’t have an account."
+          );
+        } else {
+          setFormError(result.error);
+        }
         return;
       }
 
@@ -138,7 +146,7 @@ export default function LoginPage() {
 
                 {formError && (
                   <p
-                    className="text-xs text-red-600 text-center"
+                    className="text-xs text-red-600 text-center whitespace-pre-line"
                     role="alert"
                     aria-live="polite"
                   >
@@ -168,13 +176,14 @@ export default function LoginPage() {
                 >
                   {submitting ? "Logging in..." : "Login"}
                 </button>
+
                 <p className="mt-4 text-xs text-center">
                   Don&apos;t have an account yet?{" "}
                   <Link
                     href="/auth/register"
                     className="font-semibold underline hover:opacity-80"
                   >
-                    Sign up here !
+                    Sign up here!
                   </Link>
                 </p>
               </form>

@@ -6,6 +6,7 @@ describe('ActivitiesController', () => {
   it('delegates to ActivitiesService.list()', async () => {
     const listMock = jest.fn().mockReturnValue({ items: [], nextCursor: null });
 
+    // test comment
     const moduleRef = await Test.createTestingModule({
       controllers: [ActivitiesController],
       providers: [{ provide: ActivitiesService, useValue: { list: listMock } }],

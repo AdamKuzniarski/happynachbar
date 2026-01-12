@@ -6,6 +6,7 @@ const COOKIE_NAME = "happynachbar_token";
 const PUBLIC_PATHS = new Set<string>([
   "/", // landing page
   "/auth/login", // login page
+  "/auth/register", // register page
 ]);
 
 function buildRedirect(req: NextRequest, pathname: string) {

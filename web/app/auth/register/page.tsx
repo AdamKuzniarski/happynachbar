@@ -1,6 +1,6 @@
 "use client";
 
-import { loginAndSetCookie } from "./actions";
+import { registerUser } from "./actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,13 +9,15 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   const emailInvalid = email.length > 0 && !isValidEmail(email);
   const passwordInvalid = false;
@@ -27,24 +29,21 @@ export default function LoginPage() {
     if (!canSubmit) return;
 
     setFormError(null);
+    setFormSuccess(null);
     setSubmitting(true);
+
     try {
-      const result = await loginAndSetCookie(email, password);
+      const cleanEmail = email.trim().toLowerCase();
+      const result = await registerUser(cleanEmail, password);
 
       if (!result.ok) {
-        const err = (result.error ?? "").toLowerCase();
-
-        if (err.includes("invalid credentials")) {
-          setFormError(
-            "We couldn’t log you in. Please check your email and password.\nOr sign up if you don’t have an account."
-          );
-        } else {
-          setFormError(result.error);
-        }
+        setFormError(result.error);
         return;
       }
 
-      router.push("/homepage");
+      setFormSuccess("Registration successful. Redirecting to login...");
+      // kurz zeigen, dann weiter
+      setTimeout(() => router.push("/auth/login?registered=1"), 500);
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +76,7 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
           <div className="mx-auto w-full max-w-md">
             <h1 className="text-center text-2xl font-bold leading-tight text-evergreen sm:text-4xl">
-              Login
+              Register
             </h1>
 
             <div className="mt-8 sm:mt-10">
@@ -109,6 +108,7 @@ export default function LoginPage() {
                         : "",
                     ].join(" ")}
                     aria-invalid={emailInvalid}
+                    disabled={submitting}
                   />
 
                   {emailInvalid && (
@@ -131,7 +131,7 @@ export default function LoginPage() {
                     name="password"
                     type="password"
                     required
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -141,16 +141,27 @@ export default function LoginPage() {
                         ? "border-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                         : "",
                     ].join(" ")}
+                    disabled={submitting}
                   />
                 </div>
 
                 {formError && (
                   <p
-                    className="text-xs text-red-600 text-center whitespace-pre-line"
+                    className="text-xs text-red-600 text-center"
                     role="alert"
                     aria-live="polite"
                   >
                     {formError}
+                  </p>
+                )}
+
+                {formSuccess && (
+                  <p
+                    className="text-xs text-green-700 text-center"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {formSuccess}
                   </p>
                 )}
 
@@ -174,17 +185,18 @@ export default function LoginPage() {
                     disabled:opacity-50
                   "
                 >
-                  {submitting ? "Logging in..." : "Login"}
+                  {submitting ? "Creating account..." : "Create account"}
                 </button>
 
                 <p className="mt-4 text-xs text-center">
-                  Don&apos;t have an account yet?{" "}
+                  Already have an account?{" "}
                   <Link
-                    href="/auth/register"
+                    href="/auth/login"
                     className="font-semibold underline hover:opacity-80"
                   >
-                    Sign up here!
+                    Log in here
                   </Link>
+                  !
                 </p>
               </form>
             </div>

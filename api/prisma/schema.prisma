@@ -28,3 +28,63 @@ updatedAt DateTime @updatedAt
 
 @@index([plz])
 }
+
+enum ActivityStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ActivityCategory {
+  OUTDOOR
+  SOCIAL
+  SPORT
+  INDOOR
+  HELP
+  OTHER
+
+}
+
+model Activity {
+  id String @id @default(uuid()) @db.Uuid
+  title String
+  description String?
+  cetegory ActivityCategory
+  status ActivityStatus @default(ACTIVE)
+
+  // Fur Feed-Filterung (plz optional in Query, aber am Activity-Datensatz wird required)
+
+  plz String @db.VarChar(5)
+
+  // Optional für die Zukunf mit RealTime zu abeiten
+  when DateTime?
+
+  // Owner / Creator (für favorites und die Rechte)
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+ 
+  images ActivityImage[]
+  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // "Listing(createdAt, plz, status, category)" - für Filter u. Sort-Optionen
+  @@index([plz,status, cetegory,createdAt])
+  @@index([createdAt])
+}
+
+model ActivityImage {
+id String @id @default(uuid()) @db.Uuid
+activityId String @db.Uuid
+activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+url String
+sortOrder Int @default(0)
+alt String?
+
+createdAt DateTime @default(now())
+updateAt DateTime @updatedAt
+
+@@index([activityId])
+@@unique([activityId, sortOrder]) // eine ID pro Activity = keine Dopplungen 
+}

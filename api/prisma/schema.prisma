@@ -86,8 +86,8 @@ alt String?
 
 
 createdAt DateTime @default(now())
-updateAt DateTime @updatedAt
+updatedAt DateTime @updatedAt
 
 @@index([activityId])
-@@unique([activityId, sortOrder]) // eine ID pro Activity = keine Dopplungen 
+@@unique([activityId, sortOrder]) // Innerhalb einer Activity darf keinen zweiten Datensatz mit selben sortOrder geben 
 }

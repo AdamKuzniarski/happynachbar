@@ -2,11 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const COOKIE_NAME = "happynachbar_token";
 
+// Normalize paths so "/activity/" behaves like "/activity" (but keep "/" as-is)
+function normalizePath(pathname: string) {
+  if (pathname === "/") return "/";
+  return pathname.replace(/\/+$/, "");
+}
+
 // List of public routes (no login redirect needed)
 const PUBLIC_PATHS = new Set<string>([
   "/", // landing page
   "/auth/login", // login page
   "/auth/register", // register page
+  "/activity", // activity teaser page
 ]);
 
 function buildRedirect(req: NextRequest, pathname: string) {
@@ -16,7 +23,7 @@ function buildRedirect(req: NextRequest, pathname: string) {
 }
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const pathname = normalizePath(req.nextUrl.pathname);
   const isLoggedIn = !!req.cookies.get(COOKIE_NAME)?.value;
 
   // If already logged in, never show login page
@@ -26,6 +33,11 @@ export function middleware(req: NextRequest) {
 
   // If already logged in, never show landing page
   if (isLoggedIn && pathname === "/") {
+    return buildRedirect(req, "/homepage");
+  }
+
+  // If already logged in, skip the public teaser funnel and go straight to the homepage
+  if (isLoggedIn && pathname === "/activity") {
     return buildRedirect(req, "/homepage");
   }
 

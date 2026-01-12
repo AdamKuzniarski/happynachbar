@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { PublicNeighborsModule } from './public/public-neighbors.module';
 import { NeighborsModule } from './neighbors/neighbors.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NeighborsModule } from './neighbors/neighbors.module';
     UsersModule,
     PublicNeighborsModule,
     NeighborsModule,
+    ActivitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

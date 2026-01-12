@@ -7,27 +7,27 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  passwordHash String
-  lastActiveAt DateTime?
-  profile UserProfile?
+  id                String       @id @default(uuid()) @db.Uuid
+  email             String       @unique
+  passwordHash      String
+  lastActiveAt      DateTime?
+  profile           UserProfile?
   createdActivities Activity[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model UserProfile{
-userId String @id @db.Uuid
-user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+model UserProfile {
+  userId String @id @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-plz String?
+  plz String?
 
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-@@index([plz])
+  @@index([plz])
 }
 
 enum ActivityStatus {
@@ -42,52 +42,49 @@ enum ActivityCategory {
   INDOOR
   HELP
   OTHER
-
 }
 
 model Activity {
-  id String @id @default(uuid()) @db.Uuid
-  title String
+  id          String           @id @default(uuid()) @db.Uuid
+  title       String
   description String?
-  category ActivityCategory
-  status ActivityStatus @default(ACTIVE)
+  category    ActivityCategory
+  status      ActivityStatus   @default(ACTIVE)
 
   // Fur Feed-Filterung (plz optional in Query, aber am Activity-Datensatz wird required)
 
   plz String @db.VarChar(5)
 
-  // Optional für die Zukunft mit RealTime zu arbeiten
+  // Optional für RealTime zu arbeiten
 
-  when DateTime?
+  scheduledAt DateTime?
 
   // Owner / Creator (für favorites und die Rechte)
   createdById String @db.Uuid
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
- 
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
   images ActivityImage[]
-  
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // "Listing(createdAt, plz, status, category)" - für Filter u. Sort-Optionen
-  @@index([plz,status, category,createdAt])
+  @@index([plz, status, category, createdAt])
   @@index([createdAt])
 }
 
 model ActivityImage {
-id String @id @default(uuid()) @db.Uuid
-activityId String @db.Uuid
-activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  activityId String   @db.Uuid
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
-url String
-sortOrder Int @default(0)
-alt String?
+  url       String
+  sortOrder Int     @default(0)
+  alt       String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
-
-@@index([activityId])
-@@unique([activityId, sortOrder]) // Innerhalb einer Activity darf keinen zweiten Datensatz mit selben sortOrder geben 
+  @@unique([activityId, sortOrder]) // Innerhalb einer Activity darf keinen zweiten Datensatz mit selben sortOrder geben 
+  @@index([activityId])
 }

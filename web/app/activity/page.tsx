@@ -1,39 +1,38 @@
 import Link from "next/link";
-import { PostalCodeForm } from "../postal-code-form";
+import Image from "next/image";
+import { redirect } from "next/navigation";
 
 function isValidGermanPostalCode(value: string) {
   return /^\d{5}$/.test(value);
 }
 
+type SP = { postalCode?: string | string[] };
+
 export default async function ActivityTeaserPage({
   searchParams,
 }: {
-  searchParams: { postalCode?: string };
+  searchParams: SP | Promise<SP>;
 }) {
-  const postalCode = searchParams.postalCode;
+  const sp = await Promise.resolve(searchParams);
+  const raw = sp.postalCode;
+  const postalCode = Array.isArray(raw) ? raw[0] : raw;
 
+  // Nur Format-Check: 5 Ziffern. Wenn fehlt/ungültig -> zurück zur Landing
   if (!postalCode || !isValidGermanPostalCode(postalCode)) {
-    return (
-      <div className="mx-auto w-full max-w-md px-4 pt-10 pb-12 sm:max-w-2xl sm:pt-16">
-        <h1 className="text-center text-2xl font-bold sm:text-4xl">Activity</h1>
-        <p className="mt-2 text-center text-sm text-hunter sm:text-base">
-          Enter your postal code to discover activities in your area.
-        </p>
-        <div className="mt-8 sm:mt-10">
-          <PostalCodeForm />
-        </div>
-      </div>
-    );
+    redirect("/");
   }
 
-  const apiBase = process.env.API_BASE_URL; 
+  const apiBase = process.env.API_URL ?? "http://localhost:4000";
+
+  if (!apiBase) {
+    return <div className="p-6">API_BASE_URL is not set.</div>;
+  }
+
   const res = await fetch(
     `${apiBase}/activities?plz=${encodeURIComponent(postalCode)}&status=ACTIVE`,
     { cache: "no-store" }
   );
-
   const json = await res.json();
-
 
   const count = Array.isArray(json?.items)
     ? json.items.length
@@ -42,23 +41,52 @@ export default async function ActivityTeaserPage({
     : 0;
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 pt-10 pb-12 sm:max-w-2xl sm:pt-16">
-      <h1 className="text-center text-2xl font-bold sm:text-4xl">
-        Activity in {postalCode}
-      </h1>
+    <div className="min-h-screen bg-white text-evergreen">
+      <header className="border-b-2 border-fern">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div
+              className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
+              aria-hidden="true"
+            />
+            <span className="text-sm font-semibold sm:text-lg text-evergreen">
+              happynachbar
+            </span>
+          </div>
 
-      <p className="mt-4 text-center text-sm text-hunter sm:text-base">
-        Currently <span className="font-semibold">{count}</span> activities are
-        active in your area.
-      </p>
+          <Link
+            href="/auth/login"
+            className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
+          >
+            Login
+          </Link>
+        </div>
+      </header>
 
-      <div className="mt-8 flex justify-center">
-        <Link href="/auth/login">
-          <button className="h-10 rounded-md border-2 border-fern bg-palm px-4 text-sm font-medium text-white hover:bg-hunter transition-colors">
-            Get to know your neighborhood
-          </button>
-        </Link>
-      </div>
+      <main className="px-4">
+        <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
+          <div className="mx-auto w-full max-w-md">
+            <div className="min-h-[420px] rounded-[32px] bg-white px-6 py-10 shadow-lg sm:px-10 sm:py-12">
+              <p className="text-center text-lg">
+                <span className="font-bold">{count}</span>{" "}
+                {count === 1 ? "neighbor is" : "neighbors are"} active near you!
+              </p>
+
+              <div className="mt-12 flex justify-center">
+                <div className="relative h-[220px] w-[220px] overflow-hidden rounded-full bg-black p-6 sm:h-[240px] sm:w-[240px]">
+                  <Image
+                    src="/images/hn-logo.png"
+                    alt="Happy Nachbar logo"
+                    fill
+                    priority
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

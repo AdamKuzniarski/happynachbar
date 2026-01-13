@@ -270,12 +270,12 @@ export default function HomepagePage() {
               </div>
             )}
 
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
               {!loading &&
                 activities.map((a) => (
                   <div
                     key={a.id}
-                    className="rounded-md border-2 border-fern bg-limecream overflow-hidden"
+                    className="rounded-md bg-limecream overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="relative">
                       {a.thumbnailUrl ? (
@@ -328,7 +328,7 @@ export default function HomepagePage() {
                 type="button"
                 onClick={handleCreateActivity}
                 disabled={creating}
-                className="min-h-[96px] rounded-md border-2 border-fern bg-white p-3 hover:bg-limecream transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-[96px] rounded-md bg-white p-3 shadow-sm hover:shadow-md hover:bg-limecream transition-all ..."
                 aria-label="Neue Aktivität erstellen"
                 title="Neue Aktivität erstellen"
               >

@@ -199,8 +199,8 @@ export default function HomepagePage() {
         <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl lg:max-w-5xl sm:pt-10">
           <section className="mx-auto w-full max-w-none">
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
-              <div className="mx-auto w-full md:w-fit rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
-                <div className="flex flex-wrap sm:flex-nowrap items-center">
+              <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center">
                   {/* 🔎 Search */}
                   <div className="flex items-center w-full sm:w-[260px] shrink-0 min-w-0">
                     <div className="pl-3 text-hunter/70" aria-hidden="true">
@@ -216,11 +216,8 @@ export default function HomepagePage() {
                     />
                   </div>
 
-                  {/* divider */}
-                  <div className="hidden sm:block h-6 w-px bg-fern/20" />
-
                   {/* Category */}
-                  <div className="flex items-center min-w-[180px]">
+                  <div className="flex items-center w-full sm:min-w-[180px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
@@ -235,11 +232,8 @@ export default function HomepagePage() {
                     </select>
                   </div>
 
-                  {/* divider */}
-                  <div className="hidden sm:block h-6 w-px bg-fern/20" />
-
                   {/* PLZ */}
-                  <div className="flex items-center min-w-[160px]">
+                  <div className="flex items-center w-full sm:min-w-[160px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
                     <input
                       value={plz}
                       onChange={(e) => setPlz(e.target.value)}
@@ -250,11 +244,11 @@ export default function HomepagePage() {
                   </div>
 
                   {/* Button */}
-                  <div className="flex items-center pr-1 sm:pr-2">
+                  <div className="flex items-center w-full sm:w-auto border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20 p-1 sm:p-0">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="m-1 h-9 rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60"
+                      className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1"
                     >
                       {loading ? "…" : "Finden"}
                     </button>
@@ -344,7 +338,7 @@ export default function HomepagePage() {
                 type="button"
                 onClick={handleCreateActivity}
                 disabled={creating}
-                className="min-h-[96px] rounded-md bg-white p-3 shadow-sm hover:shadow-md hover:bg-limecream transition-all ..."
+                className="min-h-[96px] rounded-md bg-white p-3 shadow-sm hover:shadow-md hover:bg-limecream transition-all"
                 aria-label="Neue Aktivität erstellen"
                 title="Neue Aktivität erstellen"
               >

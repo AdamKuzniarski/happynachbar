@@ -14,12 +14,17 @@ async function readJsonSafe(res: Response) {
 
 export async function registerUser(
   email: string,
-  password: string
+  password: string,
+  displayName?: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const dn = displayName?.trim();
+
   const response = await fetch(`${getApiUrl()}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(
+      dn ? { email, password, displayName: dn } : { email, password }
+    ),
   });
 
   const payload = await readJsonSafe(response);

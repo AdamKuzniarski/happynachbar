@@ -88,17 +88,14 @@ export default function HomepagePage() {
   // Abort ongoing fetch when a new one starts (prevents race conditions)
   const abortRef = React.useRef<AbortController | null>(null);
 
-  async function fetchActivities(params: {
-    cursor?: string | null;
-    reset: boolean;
-  }) {
+  async function requestActivities(cursor: string | null) {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
 
     const qs = buildQuery({
       take: TAKE,
-      cursor: params.cursor ?? null,
+      cursor,
       q: query,
       plz,
       category: category || undefined,
@@ -110,25 +107,23 @@ export default function HomepagePage() {
       signal: ac.signal,
     });
 
-    if (!res.ok)
+    if (!res.ok) {
       throw new Error(`Activities fetch failed (HTTP ${res.status})`);
-
-    const payload = (await res.json()) as ListActivitiesResponse;
-
-    if (params.reset) {
-      setActivities(payload.items ?? []);
-    } else {
-      setActivities((prev) => [...prev, ...(payload.items ?? [])]);
     }
-    setNextCursor(payload.nextCursor ?? null);
+
+    return (await res.json()) as ListActivitiesResponse;
   }
 
   async function loadFirstPage() {
     setLoading(true);
     setError(null);
+
     try {
       setNextCursor(null);
-      await fetchActivities({ reset: true, cursor: null });
+
+      const payload = await requestActivities(null);
+      setActivities(payload.items ?? []);
+      setNextCursor(payload.nextCursor ?? null);
     } catch (e) {
       if ((e as any)?.name === "AbortError") return;
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -144,32 +139,9 @@ export default function HomepagePage() {
 
     setLoadingMore(true);
     setError(null);
+
     try {
-      // do NOT abort the main list load if we're loading more
-      // (but still abort any prior "load more" call)
-      abortRef.current?.abort();
-      const ac = new AbortController();
-      abortRef.current = ac;
-
-      const qs = buildQuery({
-        take: TAKE,
-        cursor: nextCursor,
-        q: query,
-        plz,
-        category: category || undefined,
-      });
-
-      const res = await fetch(`${apiBase}/activities?${qs}`, {
-        cache: "no-store",
-        credentials: "include",
-        signal: ac.signal,
-      });
-
-      if (!res.ok)
-        throw new Error(`Activities fetch failed (HTTP ${res.status})`);
-
-      const payload = (await res.json()) as ListActivitiesResponse;
-
+      const payload = await requestActivities(nextCursor);
       setActivities((prev) => [...prev, ...(payload.items ?? [])]);
       setNextCursor(payload.nextCursor ?? null);
     } catch (e) {
@@ -276,7 +248,7 @@ export default function HomepagePage() {
             </form>
           </section>
 
-          <section className="mx-auto mt-6 w-full max-w-md">
+          <section className="mx-auto mt-6 w-full max-w-md sm:max-w-2xl">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-semibold text-evergreen">
                 Aktivitäten
@@ -298,50 +270,52 @@ export default function HomepagePage() {
               </div>
             )}
 
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
               {!loading &&
                 activities.map((a) => (
                   <div
                     key={a.id}
                     className="rounded-md border-2 border-fern bg-limecream overflow-hidden"
                   >
-                    {a.thumbnailUrl ? (
-                      <img
-                        src={a.thumbnailUrl}
-                        alt={a.title ?? "Activity"}
-                        className="h-40 w-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : null}
+                    <div className="relative">
+                      {a.thumbnailUrl ? (
+                        <img
+                          src={a.thumbnailUrl}
+                          alt={a.title ?? "Activity"}
+                          className="h-36 w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-36 w-full bg-white" />
+                      )}
+
+                      <span className="absolute right-2 top-2 rounded border border-fern bg-white/90 px-2 py-1 text-[11px]">
+                        {a.category ?? "—"}
+                      </span>
+                    </div>
 
                     <div className="p-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="text-sm font-semibold leading-snug">
-                          {a.title ?? "—"}
-                        </div>
-                        <span className="text-[11px] rounded border border-fern px-2 py-1 bg-white">
-                          {a.category ?? "—"}
-                        </span>
+                      <div className="text-sm font-semibold truncate">
+                        {a.title ?? "—"}
                       </div>
 
-                      <div className="mt-2 text-[12px] leading-relaxed">
+                      <div className="mt-2 text-xs leading-relaxed">
                         <div>
                           <span className="font-medium">Start:</span>{" "}
                           {formatDate(a.startAt)}
                         </div>
-                        <div>
-                          <span className="font-medium">PLZ:</span>{" "}
-                          {a.plz ?? "—"}
+
+                        <div className="mt-1 inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">PLZ:</span>
+                          <span>{a.plz ?? "—"}</span>
                         </div>
-                        <div>
-                          <span className="font-medium">Created by:</span>{" "}
-                          {a.createdBy?.displayName ?? "—"}{" "}
+
+                        <div className="mt-1 truncate opacity-80">
+                          <span className="font-medium">By:</span>{" "}
+                          {a.createdBy?.displayName?.trim() || "Neighbor"}
                         </div>
-                        <div>
-                          <span className="font-medium">Created:</span>{" "}
-                          {formatDate(a.createdAt)}
-                        </div>
-                        <div>
+
+                        <div className="mt-2 opacity-80">
                           <span className="font-medium">Updated:</span>{" "}
                           {formatDate(a.updatedAt)}
                         </div>

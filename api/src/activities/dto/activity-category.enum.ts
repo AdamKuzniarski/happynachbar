@@ -3,5 +3,6 @@ export enum ActivityCategory {
   SOCIAL = 'SOCIAL',
   SPORT = 'SPORT',
   INDOOR = 'INDOOR',
+  HELP = 'HELP',
   OTHER = 'OTHER',
 }

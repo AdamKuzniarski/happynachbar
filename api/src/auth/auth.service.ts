@@ -18,15 +18,17 @@ export class AuthService {
     return email.toLowerCase().trim();
   }
 
-  async signup(email: string, password: string) {
+  async signup(email: string, password: string, displayName?: string) {
     const passwordHash = await bcrypt.hash(password, 12);
+
+    const dn = displayName?.trim() ? displayName.trim() : undefined;
 
     try {
       const user = await this.prisma.user.create({
         data: {
           email: this.normalizeEmail(email),
           passwordHash,
-          profile: { create: {} },
+          profile: { create: dn ? { displayName: dn } : {} },
         },
         select: { id: true, email: true, createdAt: true, updatedAt: true },
       });

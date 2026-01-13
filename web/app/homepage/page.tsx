@@ -4,89 +4,92 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
+const CREATE_ACTIVITY_ROUTE = "/create-activity";
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
 type Activity = {
   id: string;
   title: string;
   category: string;
-  location: string;
-  when: string;
+  startAt?: string;
+  plz?: string;
+  thumbnailUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: { id?: string; displayName?: string };
 };
 
-const CREATE_ACTIVITY_ROUTE = "/create-activity";
 
-const mockActivities: Activity[] = [
-  {
-    id: "a1",
-    title: "Spaziergang",
-    category: "Outdoor",
-    location: "10115",
-    when: "Heute, 18:00",
-  },
-  {
-    id: "a2",
-    title: "Kaffee & Quatschen",
-    category: "Social",
-    location: "Prenzlauer Berg",
-    when: "Morgen, 10:30",
-  },
-  {
-    id: "a3",
-    title: "Jogging Runde",
-    category: "Sport",
-    location: "Berlin",
-    when: "Sa, 09:00",
-  },
-  {
-    id: "a4",
-    title: "Brettspiele",
-    category: "Indoor",
-    location: "10557",
-    when: "So, 17:00",
-  },
-  {
-    id: "a5",
-    title: "Hunde treffen",
-    category: "Outdoor",
-    location: "Park",
-    when: "Heute, 19:30",
-  },
-];
+// Formats an ISO date string into a human-friendly German date/time in the Europe/Berlin timezone.
+// Returns "—" if no value is provided, and falls back to the original string if the date is invalid.
 
-async function routeExists(href: string) {
-  for (const method of ["HEAD", "GET"] as const) {
-    try {
-      const res = await fetch(href, { method });
-      if (res.ok) return true;
-      if (res.status === 404) return false;
-    } catch {
-      // ignore
-    }
-  }
-  return false;
+function formatDate(iso?: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Berlin",
+  }).format(d);
+}
+
+function buildQuery(params: {
+  take?: number;
+  q?: string;
+  plz?: string;
+  category?: string;
+}) {
+  const sp = new URLSearchParams();
+  sp.set("take", String(params.take ?? 10));
+  if (params.q?.trim()) sp.set("q", params.q.trim());
+  if (params.plz?.trim()) sp.set("plz", params.plz.trim());
+  if (params.category && params.category !== "Alle Kategorien")
+    sp.set("category", params.category.toUpperCase());
+  return sp.toString();
 }
 
 export default function HomepagePage() {
   const router = useRouter();
 
-  const [query, setQuery] = React.useState("");
+  const [q, setQ] = React.useState("");
   const [category, setCategory] = React.useState("Alle Kategorien");
   const [plz, setPlz] = React.useState("");
-  const [creating, setCreating] = React.useState(false);
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    // placeholder – später echte Suche/Filter
+  const [activities, setActivities] = React.useState<Activity[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const qs = buildQuery({ take: 10, q, plz, category });
+      const res = await fetch(`${apiBase}/activities?${qs}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error(`Fetch failed (HTTP ${res.status})`);
+
+
+      const payload: { items?: Activity[] } = await res.json();
+      setActivities(payload.items ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+      setActivities([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  async function handleCreateActivity() {
-    setCreating(true);
-    try {
-      const exists = await routeExists(CREATE_ACTIVITY_ROUTE);
-      if (exists) router.push(CREATE_ACTIVITY_ROUTE);
-      else alert("Create-Activity Seite ist noch nicht implementiert.");
-    } finally {
-      setCreating(false);
-    }
+  React.useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    load(); 
   }
 
   return (
@@ -94,10 +97,7 @@ export default function HomepagePage() {
       <header className="border-b-2 border-fern">
         <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
           <Link href="/homepage" className="flex items-center gap-2 sm:gap-3">
-            <div
-              className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
-              aria-hidden="true"
-            />
+            <div className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10" />
             <span className="text-sm font-semibold sm:text-lg text-evergreen">
               happynachbar
             </span>
@@ -115,7 +115,7 @@ export default function HomepagePage() {
       <main className="px-4">
         <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl sm:pt-10">
           <section className="mx-auto w-full max-w-md">
-            <form onSubmit={handleSearch} className="flex flex-col gap-3">
+            <form onSubmit={onSubmit} className="flex flex-col gap-3">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-medium text-center block">
@@ -149,17 +149,16 @@ export default function HomepagePage() {
 
               <div className="flex gap-2">
                 <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
                   placeholder="Aktivität suchen…"
                   className="h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
                 />
-
                 <button
                   type="submit"
                   className="h-10 shrink-0 rounded-md border-2 border-fern bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors"
                 >
-                  Find/Search
+                  {loading ? "…" : "Suchen"}
                 </button>
               </div>
             </form>
@@ -171,43 +170,76 @@ export default function HomepagePage() {
                 Aktivitäten
               </h2>
               <span className="text-xs text-hunter">
-                {mockActivities.length} Vorschläge
+                {loading ? "Lade…" : `${activities.length} Vorschläge`}
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {mockActivities.map((a) => (
-                <button
+            {error && (
+              <div className="mt-3 rounded-md border-2 border-fern bg-limecream p-3 text-sm">
+                Fehler beim Laden: {error}
+              </div>
+            )}
+
+            {!loading && !error && activities.length === 0 && (
+              <div className="mt-3 rounded-md border-2 border-fern bg-white p-3 text-sm">
+                Keine Aktivitäten gefunden.
+              </div>
+            )}
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {activities.map((a) => (
+                <div
                   key={a.id}
-                  type="button"
-                  onClick={() =>
-                    alert(`(Placeholder) Öffne Aktivität: ${a.title}`)
-                  }
-                  className="min-h-[96px] rounded-md border-2 border-fern bg-limecream p-3 text-left hover:bg-palm hover:text-limecream transition-colors"
+                  className="rounded-md border-2 border-fern bg-limecream overflow-hidden"
                 >
-                  <div className="text-sm font-semibold leading-snug">
-                    {a.title}
+                  {a.thumbnailUrl ? (
+                    <img
+                      src={a.thumbnailUrl}
+                      alt={a.title}
+                      className="h-40 w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : null}
+
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-sm font-semibold leading-snug">
+                        {a.title}
+                      </div>
+                      <span className="text-[11px] rounded border border-fern px-2 py-1 bg-white">
+                        {a.category}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 text-[12px] leading-relaxed">
+                      <div>
+                        <span className="font-medium">Start:</span>{" "}
+                        {formatDate(a.startAt)}
+                      </div>
+                      <div>
+                        <span className="font-medium">PLZ:</span> {a.plz ?? "—"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Created by:</span>{" "}
+                        {a.createdBy?.displayName ?? "—"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Created:</span>{" "}
+                        {formatDate(a.createdAt)}
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-1 text-xs opacity-90">{a.category}</div>
-                  <div className="mt-2 text-[11px] leading-tight opacity-90">
-                    <div className="truncate">{a.location}</div>
-                    <div className="truncate">{a.when}</div>
-                  </div>
-                </button>
+                </div>
               ))}
 
-              {/* "+" tile */}
               <button
                 type="button"
-                onClick={handleCreateActivity}
-                disabled={creating}
-                className="min-h-[96px] rounded-md border-2 border-fern bg-white p-3 hover:bg-limecream transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Neue Aktivität erstellen"
-                title="Neue Aktivität erstellen"
+                onClick={() => router.push(CREATE_ACTIVITY_ROUTE)}
+                className="min-h-[96px] rounded-md border-2 border-fern bg-white p-3 hover:bg-limecream transition-colors"
               >
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="text-4xl font-bold leading-none text-evergreen">
-                    {creating ? "…" : "+"}
+                    +
                   </div>
                   <div className="mt-1 text-xs font-medium text-hunter">
                     Neu

@@ -196,54 +196,70 @@ export default function HomepagePage() {
       </header>
 
       <main className="px-4">
-        <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl sm:pt-10">
-          <section className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl lg:max-w-5xl sm:pt-10">
+          <section className="mx-auto w-full max-w-none">
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="text-xs font-medium text-center block">
-                    Kategorie
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                  >
-                    <option value="">Alle Kategorien</option>
-                    <option value="OUTDOOR">Outdoor</option>
-                    <option value="SPORT">Sport</option>
-                    <option value="SOCIAL">Social</option>
-                    <option value="INDOOR">Indoor</option>
-                  </select>
-                </div>
+              <div className="mx-auto w-full md:w-fit rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
+                <div className="flex flex-wrap sm:flex-nowrap items-center">
+                  {/* 🔎 Search */}
+                  <div className="flex items-center w-full sm:w-[260px] shrink-0 min-w-0">
+                    <div className="pl-3 text-hunter/70" aria-hidden="true">
+                      🔎
+                    </div>
 
-                <div>
-                  <label className="text-xs font-medium text-center block">
-                    PLZ
-                  </label>
-                  <input
-                    value={plz}
-                    onChange={(e) => setPlz(e.target.value)}
-                    placeholder="z.B. 10115"
-                    className="mt-1 h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                  />
-                </div>
-              </div>
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Aktivität suchen"
+                      aria-label="Aktivität suchen"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    />
+                  </div>
 
-              <div className="flex gap-2">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Aktivität suchen…"
-                  className="h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                />
-                <button
-                  type="submit"
-                  className="h-10 shrink-0 rounded-md border-2 border-fern bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60"
-                  disabled={loading}
-                >
-                  {loading ? "…" : "Suchen"}
-                </button>
+                  {/* divider */}
+                  <div className="hidden sm:block h-6 w-px bg-fern/20" />
+
+                  {/* Category */}
+                  <div className="flex items-center min-w-[180px]">
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      aria-label="Kategorie"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    >
+                      <option value="">Alle Kategorien</option>
+                      <option value="OUTDOOR">Outdoor</option>
+                      <option value="SPORT">Sport</option>
+                      <option value="SOCIAL">Social</option>
+                      <option value="INDOOR">Indoor</option>
+                    </select>
+                  </div>
+
+                  {/* divider */}
+                  <div className="hidden sm:block h-6 w-px bg-fern/20" />
+
+                  {/* PLZ */}
+                  <div className="flex items-center min-w-[160px]">
+                    <input
+                      value={plz}
+                      onChange={(e) => setPlz(e.target.value)}
+                      placeholder="PLZ"
+                      aria-label="PLZ"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    />
+                  </div>
+
+                  {/* Button */}
+                  <div className="flex items-center pr-1 sm:pr-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="m-1 h-9 rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60"
+                    >
+                      {loading ? "…" : "Finden"}
+                    </button>
+                  </div>
+                </div>
               </div>
             </form>
           </section>

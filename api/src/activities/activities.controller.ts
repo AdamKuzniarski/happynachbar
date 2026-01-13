@@ -15,11 +15,10 @@ export class ActivitiesController {
   @ApiQuery({ name: 'take', required: false, example: 20 })
   @ApiQuery({ name: 'cursor', required: false, example: 'act_0001' })
   @ApiQuery({ name: 'category', required: false, example: 'OUTDOOR' })
-  @ApiOkResponse({
-    type: ListActivitiesResponseDto,
-    description: 'Stub feed so Frontend can build UI without DB connection',
-  })
-  List(@Query() q: ListActivitiesQueryDto): ListActivitiesResponseDto {
+  @ApiOkResponse({ type: ListActivitiesResponseDto })
+  async list(
+    @Query() q: ListActivitiesQueryDto,
+  ): Promise<ListActivitiesResponseDto> {
     return this.activities.list(q);
   }
 }

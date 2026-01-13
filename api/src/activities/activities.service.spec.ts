@@ -2,71 +2,68 @@ import { ActivitiesService } from './activities.service';
 import { ActivityCategory } from './dto/activity-category.enum';
 
 describe('ActivitiesService', () => {
-  let service: ActivitiesService;
+  it('returns items + nextCursor with deterministic pagination', async () => {
+    const prismaMock = {
+      activity: { findMany: jest.fn() },
+    };
 
-  beforeEach(() => {
-    service = new ActivitiesService();
-  });
+    const service = new ActivitiesService(prismaMock as any);
 
-  it('returns stable shape { items, nextCursor }', () => {
-    const res = service.list({});
-    expect(Array.isArray(res.items)).toBe(true);
-    expect(res).toHaveProperty('nextCursor');
-  });
+    const row = (id: string) => ({
+      id,
+      title: 'Spaziergang',
+      description: null,
+      category: 'OUTDOOR',
+      status: 'ACTIVE',
+      plz: '10115',
+      scheduledAt: null,
+      createdBy: { id: 'u1', profile: { displayName: 'Anna' } },
+      images: [{ url: 'https://picsum.photos/seed/x/640/480', sortOrder: 0 }],
+      createdAt: new Date('2026-01-01T10:00:00.000Z'),
+      updatedAt: new Date('2026-01-01T10:00:00.000Z'),
+    });
 
-  it('sorts newest first by createdAt', () => {
-    const res = service.list({});
-    expect(res.items.length).toBeGreaterThan(0);
+    prismaMock.activity.findMany.mockResolvedValue([
+      row('a1'),
+      row('a2'),
+      row('a3'),
+    ]); // take+1
 
-    for (let i = 1; i < res.items.length; i++) {
-      expect(res.items[i - 1].createdAt.getTime()).toBeGreaterThanOrEqual(
-        res.items[i].createdAt.getTime(),
-      );
-    }
-  });
+    const res = await service.list({
+      take: 2,
+      category: ActivityCategory.OUTDOOR,
+    } as any);
 
-  it('filters by plz', () => {
-    const res = service.list({ plz: '10115' });
-    expect(res.items.length).toBeGreaterThan(0);
-    expect(res.items.every((x) => x.plz === '10115')).toBe(true);
-  });
-
-  it('filters by category', () => {
-    const res = service.list({ category: ActivityCategory.SOCIAL });
-    expect(res.items.length).toBeGreaterThan(0);
-    expect(res.items.every((x) => x.category === ActivityCategory.SOCIAL)).toBe(
-      true,
+    expect(prismaMock.activity.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 3,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        where: expect.objectContaining({ status: 'ACTIVE' }),
+      }),
     );
+
+    expect(res.items).toHaveLength(2);
+    expect(res.nextCursor).toBe('a2');
+    expect(res.items[0]).toMatchObject({
+      id: 'a1',
+      thumbnailUrl: expect.any(String),
+      createdBy: { displayName: 'Anna' },
+    });
   });
 
-  it('filters by q (title/locationLabel)', () => {
-    const res = service.list({ q: 'kaffee' });
-    expect(res.items.length).toBeGreaterThan(0);
-    expect(
-      res.items.every(
-        (x) =>
-          (x.title ?? '').toLowerCase().includes('kaffee') ||
-          (x.locationLabel ?? '').toLowerCase().includes('kaffee'),
-      ),
-    ).toBe(true);
-  });
+  it('uses cursor + skip:1', async () => {
+    const prismaMock = {
+      activity: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+    const service = new ActivitiesService(prismaMock as any);
 
-  it('paginates with cursor', () => {
-    const page1 = service.list({ take: 1 });
-    expect(page1.items.length).toBe(1);
-    expect(page1.nextCursor).not.toBeNull();
+    await service.list({ cursor: 'a2', take: 20 } as any);
 
-    const page2 = service.list({ take: 1, cursor: page1.nextCursor! });
-    // bei 2 fixtures: page2 hat 1 item, dann Ende
-    expect(page2.items.length).toBe(1);
-    expect(page2.items[0].id).not.toBe(page1.items[0].id);
-  });
-
-  it('clamps take (min 1, max 50)', () => {
-    const minRes = service.list({ take: 0 as any });
-    expect(minRes.items.length).toBe(1);
-
-    const maxRes = service.list({ take: 999 as any });
-    expect(maxRes.items.length).toBeLessThanOrEqual(50);
+    expect(prismaMock.activity.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: { id: 'a2' },
+        skip: 1,
+      }),
+    );
   });
 });

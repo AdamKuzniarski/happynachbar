@@ -1,75 +1,110 @@
 import { Injectable } from '@nestjs/common';
-import { ActivityCategory } from './dto/activity-category.enum';
-import { ActivityCardDto } from './dto/activity-card.dto';
+import {
+  ActivityCategory as PrismaActivityCategory,
+  Prisma,
+} from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { ListActivitiesQueryDto } from './dto/list-activities.query.dto';
 import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
+import { ActivityCardDto } from './dto/activity-card.dto';
+import { ActivityCategory as ApiActivityCategory } from './dto/activity-category.enum';
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function includesText(value: string | undefined, q: string) {
-  return (value ?? '').toLowerCase().includes(q.toLocaleLowerCase());
-}
-
 @Injectable()
 export class ActivitiesService {
-  // Dummy Daten, dass irgendwas zum Fetchen wird ohne DB
-  private readonly data: ActivityCardDto[] = [
-    {
-      id: 'act_0001',
-      title: 'Spaziergang',
-      category: ActivityCategory.OUTDOOR,
-      startAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      locationLabel: 'Park',
-      plz: '10115',
-      createdBy: { id: 'u_01', displayName: 'Anna' },
-      createdAt: new Date(Date.now() - 60 * 60 * 1000),
-      updatedAt: new Date(Date.now() - 60 * 60 * 1000),
-      isFavorited: false,
-    },
-    {
-      id: 'act_0002',
-      title: 'Kaffee & Quatschen',
-      category: ActivityCategory.SOCIAL,
-      startAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      locationLabel: 'Prenzlauer Berg',
-      plz: '10405',
-      createdBy: { id: 'u_02', displayName: 'Ben' },
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      isFavorited: true,
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  list(q: ListActivitiesQueryDto): ListActivitiesResponseDto {
+  async list(q: ListActivitiesQueryDto): Promise<ListActivitiesResponseDto> {
     const take = clamp(q.take ?? 20, 1, 50);
 
-    // sort newest first
-    let items = [...this.data].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
-    // filters
-    if (q.plz) items = items.filter((x) => x.plz === q.plz);
-    if (q.category) items = items.filter((x) => x.category === q.category);
+    const where: Prisma.ActivityWhereInput = { status: 'ACTIVE' };
 
-    if (q.q) {
-      items = items.filter(
-        (x) =>
-          includesText(x.title, q.q!) || includesText(x.locationLabel, q.q!),
-      );
-    }
-    // cursor pagination
-    let startIndex = 0;
-    if (q.cursor) {
-      const idx = items.findIndex((x) => x.id === q.cursor);
-      if (idx >= 0) startIndex = idx + 1;
+    if (q.plz) where.plz = q.plz;
+    if (q.category)
+      where.category = q.category as unknown as PrismaActivityCategory;
+    if (q.createdById) where.createdById = q.createdById;
+
+    if (q.q?.trim()) {
+      const term = q.q.trim();
+      where.OR = [
+        { title: { contains: term, mode: 'insensitive' } },
+        { description: { contains: term, mode: 'insensitive' } },
+      ];
     }
 
-    const page = items.slice(startIndex, startIndex + take);
-    const hasMore = startIndex + take < items.length;
+    // optional: Zeitraumfilter
+    if (q.startFrom || q.startTo) {
+      const createdRange: Prisma.DateTimeFilter = {};
+      const scheduledRange: Prisma.DateTimeNullableFilter = {};
+
+      if (q.startFrom) {
+        const date = new Date(q.startFrom);
+        createdRange.gte = date;
+        scheduledRange.gte = date;
+      }
+
+      if (q.startTo) {
+        const date = new Date(q.startTo);
+        createdRange.lte = date;
+        scheduledRange.lte = date;
+      }
+
+      const existingAnd = Array.isArray(where.AND)
+        ? where.AND
+        : where.AND
+          ? [where.AND]
+          : [];
+
+      where.AND = [
+        ...existingAnd,
+        {
+          OR: [
+            { scheduledAt: scheduledRange },
+            { scheduledAt: null, createdAt: createdRange },
+          ],
+        },
+      ];
+    }
+
+    const rows = await this.prisma.activity.findMany({
+      where,
+      take: take + 1,
+      ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      include: {
+        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        createdBy: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true } },
+          },
+        },
+      },
+    });
+
+    const hasMore = rows.length > take;
+    const page = rows.slice(0, take);
     const nextCursor = hasMore && page.length ? page[page.length - 1].id : null;
 
-    return { items: page, nextCursor };
+    const items: ActivityCardDto[] = page.map((a) => ({
+      id: a.id,
+      title: a.title,
+      category: a.category as unknown as ApiActivityCategory,
+      startAt: a.scheduledAt ?? a.createdAt,
+      locationLabel: undefined, // optional in DTO
+      plz: a.plz,
+      createdBy: {
+        id: a.createdBy.id,
+        displayName: a.createdBy.profile?.displayName ?? 'Neighbor',
+      },
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+      thumbnailUrl: a.images[0]?.url ?? null,
+    }));
+
+    return { items, nextCursor };
   }
 }

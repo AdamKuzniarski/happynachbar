@@ -9,9 +9,15 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function isValidDisplayName(value: string) {
+  const v = value.trim();
+  return v.length >= 2 && v.length <= 50;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
 
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -19,10 +25,15 @@ export default function RegisterPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+  const displayNameInvalid =
+    displayName.length > 0 && !isValidDisplayName(displayName);
   const emailInvalid = email.length > 0 && !isValidEmail(email);
   const passwordInvalid = false;
 
-  const canSubmit = isValidEmail(email) && password.length > 0;
+  const canSubmit =
+    isValidDisplayName(displayName) &&
+    isValidEmail(email) &&
+    password.length > 0;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,7 +45,9 @@ export default function RegisterPage() {
 
     try {
       const cleanEmail = email.trim().toLowerCase();
-      const result = await registerUser(cleanEmail, password);
+      const cleanDisplayName = displayName.trim();
+
+      const result = await registerUser(cleanEmail, password, cleanDisplayName);
 
       if (!result.ok) {
         setFormError(result.error);
@@ -42,7 +55,6 @@ export default function RegisterPage() {
       }
 
       setFormSuccess("Registration successful. Redirecting to login...");
-      // kurz zeigen, dann weiter
       setTimeout(() => router.push("/auth/login?registered=1"), 500);
     } finally {
       setSubmitting(false);
@@ -84,6 +96,42 @@ export default function RegisterPage() {
                 onSubmit={onSubmit}
                 className="flex flex-col items-center gap-3"
               >
+                {/* Display name */}
+                <div className="w-full max-w-sm">
+                  <label
+                    htmlFor="displayName"
+                    className="text-xs font-medium text-center block"
+                  >
+                    Display name
+                  </label>
+
+                  <input
+                    id="displayName"
+                    name="displayName"
+                    type="text"
+                    required
+                    autoComplete="nickname"
+                    placeholder="e.g. Julia"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className={[
+                      "mt-1 h-10 w-full rounded-md px-3 text-sm border",
+                      displayNameInvalid
+                        ? "border-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                        : "",
+                    ].join(" ")}
+                    aria-invalid={displayNameInvalid}
+                    disabled={submitting}
+                  />
+
+                  {displayNameInvalid && (
+                    <p className="mt-1 text-xs text-red-600 text-center">
+                      Display name must be 2–50 characters.
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
                 <div className="w-full max-w-sm">
                   <label
                     htmlFor="email"
@@ -118,6 +166,7 @@ export default function RegisterPage() {
                   )}
                 </div>
 
+                {/* Password */}
                 <div className="w-full max-w-sm">
                   <label
                     htmlFor="password"

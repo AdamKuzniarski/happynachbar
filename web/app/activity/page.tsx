@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 function isValidGermanPostalCode(value: string) {
@@ -73,15 +72,12 @@ export default async function ActivityTeaserPage({
               </p>
 
               <div className="mt-12 flex justify-center">
-                <div className="relative h-[220px] w-[220px] overflow-hidden rounded-full bg-black p-6 sm:h-[240px] sm:w-[240px]">
-                  <Image
-                    src="/images/hn-logo.png"
-                    alt="Happy Nachbar logo"
-                    fill
-                    priority
-                    className="object-contain"
-                  />
-                </div>
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-limecream px-5 py-3 text-base font-semibold text-evergreen hover:bg-palm hover:text-limecream transition-colors"
+                >
+                  Get to know your neighborhood
+                </Link>
               </div>
             </div>
           </div>

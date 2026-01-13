@@ -31,7 +31,7 @@ export class ListActivitiesQueryDto {
   @Max(50)
   take?: number;
 
-  @ApiPropertyOptional({ example: 'act_01HZZZKJ8K2Q3N6X7Y8Z9' })
+  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   @IsOptional()
   @IsString()
   cursor?: string;

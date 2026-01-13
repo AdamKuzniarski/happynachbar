@@ -1,5 +1,11 @@
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SignupDto {
   @IsEmail()
@@ -14,12 +20,13 @@ export class SignupDto {
   })
   password: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'julia@shark.de',
     minLength: 2,
     maxLength: 50,
     description: 'at least 2 and less than 50 characters',
   })
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(50)

@@ -11,7 +11,7 @@ const TAKE = 10;
 type Activity = {
   id: string;
   title: string;
-  category: string; 
+  category: string;
   startAt?: string;
   plz?: string;
   thumbnailUrl?: string | null;
@@ -27,7 +27,6 @@ type ListActivitiesResponse = {
   items: Activity[];
   nextCursor: string | null;
 };
-
 
 // Formats an ISO date string into a human-friendly German date/time in the Europe/Berlin timezone.
 // Returns "—" if no value is provided, and falls back to the original string if the date is invalid.
@@ -48,10 +47,10 @@ function buildQuery(params: {
   cursor?: string | null;
   q?: string;
   plz?: string;
-  category?: string; 
+  category?: string;
   createdById?: string;
-  startFrom?: string; 
-  startTo?: string; 
+  startFrom?: string;
+  startTo?: string;
 }) {
   const sp = new URLSearchParams();
   sp.set("take", String(params.take ?? TAKE));
@@ -107,7 +106,7 @@ export default function HomepagePage() {
 
     const res = await fetch(`${apiBase}/activities?${qs}`, {
       cache: "no-store",
-      credentials: "include", 
+      credentials: "include",
       signal: ac.signal,
     });
 
@@ -337,9 +336,6 @@ export default function HomepagePage() {
                         <div>
                           <span className="font-medium">Created by:</span>{" "}
                           {a.createdBy?.displayName ?? "—"}{" "}
-                          <span className="text-[11px] opacity-80 break-all">
-                            ({a.createdBy?.id ?? "—"})
-                          </span>
                         </div>
                         <div>
                           <span className="font-medium">Created:</span>{" "}

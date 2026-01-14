@@ -20,6 +20,10 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
+function toIso(d: Date): string {
+  return d.toISOString();
+}
+
 @Injectable()
 export class ActivitiesService {
   constructor(private prisma: PrismaService) {}
@@ -101,15 +105,15 @@ export class ActivitiesService {
       id: a.id,
       title: a.title,
       category: a.category as ApiActivityCategory,
-      startAt: a.scheduledAt ?? a.createdAt,
+      startAt: toIso(a.scheduledAt ?? a.createdAt),
       locationLabel: undefined, // optional in DTO
       plz: a.plz,
       createdBy: {
         id: a.createdBy.id,
         displayName: a.createdBy.profile?.displayName ?? 'Neighbor',
       },
-      createdAt: a.createdAt,
-      updatedAt: a.updatedAt,
+      createdAt: toIso(a.createdAt),
+      updatedAt: toIso(a.updatedAt),
       thumbnailUrl: a.images[0]?.url ?? null,
     }));
 
@@ -136,7 +140,7 @@ export class ActivitiesService {
       title: a.title,
       description: a.description ?? undefined,
       category: a.category as ApiActivityCategory,
-      startAt: a.scheduledAt ?? a.createdAt,
+      startAt: toIso(a.scheduledAt ?? a.createdAt),
       plz: a.plz,
       locationLabel: undefined,
       thumbnailUrl: a.images[0]?.url ?? null,
@@ -149,8 +153,8 @@ export class ActivitiesService {
         sortOrder: img.sortOrder,
         alt: img.alt ?? undefined,
       })),
-      createdAt: a.createdAt,
-      updatedAt: a.updatedAt,
+      createdAt: toIso(a.createdAt),
+      updatedAt: toIso(a.updatedAt),
     };
   }
 

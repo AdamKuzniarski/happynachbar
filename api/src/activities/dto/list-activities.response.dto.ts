@@ -8,6 +8,7 @@ export class ListActivitiesResponseDto {
   @ApiProperty({
     example: null,
     nullable: true,
+    type: String,
     description: 'If null => no more pages',
   })
   nextCursor!: string | null;

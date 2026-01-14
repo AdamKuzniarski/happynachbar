@@ -18,7 +18,7 @@ export class ListActivitiesQueryDto {
   @Matches(/^\d{5}$/)
   plz?: string;
 
-  @ApiPropertyOptional({ example: 'wal - the whole query should be "walk"' })
+  @ApiPropertyOptional({ example: 'walk' })
   @IsOptional()
   @IsString()
   q?: string;
@@ -31,7 +31,10 @@ export class ListActivitiesQueryDto {
   @Max(50)
   take?: number;
 
-  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
+  @ApiPropertyOptional({
+    example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsString()
   cursor?: string;
@@ -44,7 +47,10 @@ export class ListActivitiesQueryDto {
   @IsEnum(ActivityCategory)
   category?: ActivityCategory;
 
-  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
+  @ApiPropertyOptional({
+    example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsString()
   createdById?: string;

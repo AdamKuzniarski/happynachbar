@@ -3,7 +3,8 @@ import { ActivityCategory } from './activity-category.enum';
 import { UserSummaryDto } from './user-summary.dto';
 
 export class ActivityCardDto {
-  @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
+ 59-32-improve-swaggeropenapi-documentation
+  @ApiProperty({ example: 'lst-1231dsf-123-fsd5', format: 'uuid' })
   id!: string;
 
   @ApiProperty({ example: 'A walk with happynachbar' })
@@ -53,6 +54,8 @@ export class ActivityCardDto {
   @ApiPropertyOptional({
     example: 'https://picsum.photos/seed/happynachbar/640/480',
     nullable: true,
+    format: 'uri',
+    type: String,
   })
   thumbnailUrl?: string | null;
 }

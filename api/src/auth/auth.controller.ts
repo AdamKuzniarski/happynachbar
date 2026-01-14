@@ -12,7 +12,7 @@ export class AuthController {
 
   @Post('signup')
   signup(@Body() dto: SignupDto) {
-    return this.auth.signup(dto.email, dto.password);
+    return this.auth.signup(dto.email, dto.password, dto.displayName);
   }
 
   @Post('login')

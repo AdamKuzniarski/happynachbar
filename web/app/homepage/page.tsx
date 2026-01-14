@@ -4,86 +4,169 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
+const CREATE_ACTIVITY_ROUTE = "/create-activity";
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const TAKE = 10;
+
 type Activity = {
   id: string;
   title: string;
   category: string;
-  location: string;
-  when: string;
+  startAt?: string;
+  plz?: string;
+  thumbnailUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: {
+    id?: string;
+    displayName?: string;
+  };
 };
 
-const CREATE_ACTIVITY_ROUTE = "/create-activity";
+type ListActivitiesResponse = {
+  items: Activity[];
+  nextCursor: string | null;
+};
 
-const mockActivities: Activity[] = [
-  {
-    id: "a1",
-    title: "Spaziergang",
-    category: "Outdoor",
-    location: "10115",
-    when: "Heute, 18:00",
-  },
-  {
-    id: "a2",
-    title: "Kaffee & Quatschen",
-    category: "Social",
-    location: "Prenzlauer Berg",
-    when: "Morgen, 10:30",
-  },
-  {
-    id: "a3",
-    title: "Jogging Runde",
-    category: "Sport",
-    location: "Berlin",
-    when: "Sa, 09:00",
-  },
-  {
-    id: "a4",
-    title: "Brettspiele",
-    category: "Indoor",
-    location: "10557",
-    when: "So, 17:00",
-  },
-  {
-    id: "a5",
-    title: "Hunde treffen",
-    category: "Outdoor",
-    location: "Park",
-    when: "Heute, 19:30",
-  },
-];
+// Formats an ISO date string into a human-friendly German date/time in the Europe/Berlin timezone.
+// Returns "—" if no value is provided, and falls back to the original string if the date is invalid.
+function formatDate(iso?: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
 
-async function routeExists(href: string) {
-  for (const method of ["HEAD", "GET"] as const) {
-    try {
-      const res = await fetch(href, { method });
-      if (res.ok) return true;
-      if (res.status === 404) return false;
-    } catch {
-      // ignore
-    }
-  }
-  return false;
+  return new Intl.DateTimeFormat("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Berlin",
+  }).format(d);
+}
+
+function buildQuery(params: {
+  take?: number;
+  cursor?: string | null;
+  q?: string;
+  plz?: string;
+  category?: string;
+  createdById?: string;
+  startFrom?: string;
+  startTo?: string;
+}) {
+  const sp = new URLSearchParams();
+  sp.set("take", String(params.take ?? TAKE));
+
+  if (params.cursor) sp.set("cursor", params.cursor);
+  if (params.q?.trim()) sp.set("q", params.q.trim());
+  if (params.plz?.trim()) sp.set("plz", params.plz.trim());
+  if (params.category) sp.set("category", params.category);
+
+  if (params.createdById) sp.set("createdById", params.createdById);
+  if (params.startFrom) sp.set("startFrom", params.startFrom);
+  if (params.startTo) sp.set("startTo", params.startTo);
+
+  return sp.toString();
 }
 
 export default function HomepagePage() {
   const router = useRouter();
 
+  // Filter UI (category value = API Enum; "" = alle)
   const [query, setQuery] = React.useState("");
-  const [category, setCategory] = React.useState("Alle Kategorien");
+  const [category, setCategory] = React.useState<string>("");
   const [plz, setPlz] = React.useState("");
+
+  // Data + pagination
+  const [activities, setActivities] = React.useState<Activity[]>([]);
+  const [nextCursor, setNextCursor] = React.useState<string | null>(null);
+
+  // UI states
+  const [loading, setLoading] = React.useState(true);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [creating, setCreating] = React.useState(false);
+
+  // Abort ongoing fetch when a new one starts (prevents race conditions)
+  const abortRef = React.useRef<AbortController | null>(null);
+
+  async function requestActivities(cursor: string | null) {
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+
+    const qs = buildQuery({
+      take: TAKE,
+      cursor,
+      q: query,
+      plz,
+      category: category || undefined,
+    });
+
+    const res = await fetch(`${apiBase}/activities?${qs}`, {
+      cache: "no-store",
+      credentials: "include",
+      signal: ac.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Activities fetch failed (HTTP ${res.status})`);
+    }
+
+    return (await res.json()) as ListActivitiesResponse;
+  }
+
+  async function loadFirstPage() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      setNextCursor(null);
+
+      const payload = await requestActivities(null);
+      setActivities(payload.items ?? []);
+      setNextCursor(payload.nextCursor ?? null);
+    } catch (e) {
+      if ((e as any)?.name === "AbortError") return;
+      setError(e instanceof Error ? e.message : "Unknown error");
+      setActivities([]);
+      setNextCursor(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadMore() {
+    if (!nextCursor || loadingMore) return;
+
+    setLoadingMore(true);
+    setError(null);
+
+    try {
+      const payload = await requestActivities(nextCursor);
+      setActivities((prev) => [...prev, ...(payload.items ?? [])]);
+      setNextCursor(payload.nextCursor ?? null);
+    } catch (e) {
+      if ((e as any)?.name === "AbortError") return;
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  React.useEffect(() => {
+    loadFirstPage();
+    return () => abortRef.current?.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    // placeholder – später echte Suche/Filter
+    loadFirstPage(); // reset + refetch with current filters
   }
 
   async function handleCreateActivity() {
     setCreating(true);
     try {
-      const exists = await routeExists(CREATE_ACTIVITY_ROUTE);
-      if (exists) router.push(CREATE_ACTIVITY_ROUTE);
-      else alert("Create-Activity Seite ist noch nicht implementiert.");
+      router.push(CREATE_ACTIVITY_ROUTE);
     } finally {
       setCreating(false);
     }
@@ -113,95 +196,149 @@ export default function HomepagePage() {
       </header>
 
       <main className="px-4">
-        <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl sm:pt-10">
-          <section className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl lg:max-w-5xl sm:pt-10">
+          <section className="mx-auto w-full max-w-none">
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="text-xs font-medium text-center block">
-                    Kategorie
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                  >
-                    <option>Alle Kategorien</option>
-                    <option>Outdoor</option>
-                    <option>Sport</option>
-                    <option>Social</option>
-                    <option>Indoor</option>
-                  </select>
+              <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center">
+                  {/* 🔎 Search */}
+                  <div className="flex items-center w-full sm:w-[260px] shrink-0 min-w-0">
+                    <div className="pl-3 text-hunter/70" aria-hidden="true">
+                      🔎
+                    </div>
+
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Aktivität suchen"
+                      aria-label="Aktivität suchen"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div className="flex items-center w-full sm:min-w-[180px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      aria-label="Kategorie"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    >
+                      <option value="">Alle Kategorien</option>
+                      <option value="OUTDOOR">Outdoor</option>
+                      <option value="SPORT">Sport</option>
+                      <option value="SOCIAL">Social</option>
+                      <option value="INDOOR">Indoor</option>
+                    </select>
+                  </div>
+
+                  {/* PLZ */}
+                  <div className="flex items-center w-full sm:min-w-[160px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
+                    <input
+                      value={plz}
+                      onChange={(e) => setPlz(e.target.value)}
+                      placeholder="PLZ"
+                      aria-label="PLZ"
+                      className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+                    />
+                  </div>
+
+                  {/* Button */}
+                  <div className="flex items-center w-full sm:w-auto border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20 p-1 sm:p-0">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1"
+                    >
+                      {loading ? "…" : "Finden"}
+                    </button>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="text-xs font-medium text-center block">
-                    PLZ oder Ort
-                  </label>
-                  <input
-                    value={plz}
-                    onChange={(e) => setPlz(e.target.value)}
-                    placeholder="z.B. 10115"
-                    className="mt-1 h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Aktivität suchen…"
-                  className="h-10 w-full rounded-md px-3 text-sm border-2 border-fern bg-white focus:outline-none focus:ring-2 focus:ring-palm/40"
-                />
-
-                <button
-                  type="submit"
-                  className="h-10 shrink-0 rounded-md border-2 border-fern bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors"
-                >
-                  Find/Search
-                </button>
               </div>
             </form>
           </section>
 
-          <section className="mx-auto mt-6 w-full max-w-md">
+          <section className="mx-auto mt-6 w-full max-w-md sm:max-w-2xl">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-semibold text-evergreen">
                 Aktivitäten
               </h2>
               <span className="text-xs text-hunter">
-                {mockActivities.length} Vorschläge
+                {loading ? "Lade…" : `${activities.length} Vorschläge`}
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {mockActivities.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() =>
-                    alert(`(Placeholder) Öffne Aktivität: ${a.title}`)
-                  }
-                  className="min-h-[96px] rounded-md border-2 border-fern bg-limecream p-3 text-left hover:bg-palm hover:text-limecream transition-colors"
-                >
-                  <div className="text-sm font-semibold leading-snug">
-                    {a.title}
-                  </div>
-                  <div className="mt-1 text-xs opacity-90">{a.category}</div>
-                  <div className="mt-2 text-[11px] leading-tight opacity-90">
-                    <div className="truncate">{a.location}</div>
-                    <div className="truncate">{a.when}</div>
-                  </div>
-                </button>
-              ))}
+            {error && (
+              <div className="mt-3 rounded-md border-2 border-fern bg-limecream p-3 text-sm">
+                Fehler beim Laden: {error}
+              </div>
+            )}
 
-              {/* "+" tile */}
+            {!loading && !error && activities.length === 0 && (
+              <div className="mt-3 rounded-md border-2 border-fern bg-white p-3 text-sm">
+                Keine Aktivitäten gefunden.
+              </div>
+            )}
+
+            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
+              {!loading &&
+                activities.map((a) => (
+                  <div
+                    key={a.id}
+                    className="rounded-md bg-limecream overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="relative">
+                      {a.thumbnailUrl ? (
+                        <img
+                          src={a.thumbnailUrl}
+                          alt={a.title ?? "Activity"}
+                          className="h-36 w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-36 w-full bg-white" />
+                      )}
+
+                      <span className="absolute right-2 top-2 rounded border border-fern bg-white/90 px-2 py-1 text-[11px]">
+                        {a.category ?? "—"}
+                      </span>
+                    </div>
+
+                    <div className="p-3">
+                      <div className="text-sm font-semibold truncate">
+                        {a.title ?? "—"}
+                      </div>
+
+                      <div className="mt-2 text-xs leading-relaxed">
+                        <div>
+                          <span className="font-medium">Start:</span>{" "}
+                          {formatDate(a.startAt)}
+                        </div>
+
+                        <div className="mt-1 inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">PLZ:</span>
+                          <span>{a.plz ?? "—"}</span>
+                        </div>
+
+                        <div className="mt-1 truncate opacity-80">
+                          <span className="font-medium">By:</span>{" "}
+                          {a.createdBy?.displayName?.trim() || "Neighbor"}
+                        </div>
+
+                        <div className="mt-2 opacity-80">
+                          <span className="font-medium">Updated:</span>{" "}
+                          {formatDate(a.updatedAt)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
               <button
                 type="button"
                 onClick={handleCreateActivity}
                 disabled={creating}
-                className="min-h-[96px] rounded-md border-2 border-fern bg-white p-3 hover:bg-limecream transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-[96px] rounded-md bg-white p-3 shadow-sm hover:shadow-md hover:bg-limecream transition-all"
                 aria-label="Neue Aktivität erstellen"
                 title="Neue Aktivität erstellen"
               >
@@ -213,6 +350,21 @@ export default function HomepagePage() {
                     Neu
                   </div>
                 </div>
+              </button>
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={!nextCursor || loadingMore || loading}
+                className="rounded-md border-2 border-fern bg-white px-4 py-2 text-xs font-medium text-evergreen hover:bg-limecream transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loadingMore
+                  ? "Lade mehr…"
+                  : nextCursor
+                  ? "Mehr laden"
+                  : "Keine weiteren"}
               </button>
             </div>
           </section>

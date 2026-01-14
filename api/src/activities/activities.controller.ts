@@ -1,14 +1,36 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 import { ActivitiesService } from './activities.service';
 import { ListActivitiesQueryDto } from './dto/list-activities.query.dto';
 import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
+import { ActivityDetailDto } from './dto/activity-detail.dto';
+import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @ApiTags('activities')
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
+  //Public feed
   @Get()
   @ApiQuery({ name: 'plz', required: false, example: '10115' })
   @ApiQuery({ name: 'q', required: false, example: 'coffee' })
@@ -39,5 +61,40 @@ export class ActivitiesController {
     @Query() q: ListActivitiesQueryDto,
   ): Promise<ListActivitiesResponseDto> {
     return this.activities.list(q);
+  }
+
+  //Public detail
+  @Get(':id')
+  @ApiOkResponse({ type: ActivityDetailDto })
+  getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.getById(id);
+  }
+
+  //Create auth
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  create(@Req() req: any, @Body() dto: CreateActivityDto) {
+    return this.activities.create(req.user.userId, dto);
+  }
+
+  //Update auth + owner
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  update(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateActivityDto,
+  ) {
+    return this.activities.update(req.user.userId, id, dto);
+  }
+
+  // Delete auth + owner → ARCHIVED
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  archive(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.archive(req.user.userId, id);
   }
 }

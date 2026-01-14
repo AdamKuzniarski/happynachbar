@@ -3,6 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  Prisma,
+  ActivityCategory as PrismaActivityCategory,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
@@ -10,6 +14,7 @@ import { ListActivitiesQueryDto } from './dto/list-activities.query.dto';
 import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
 import { ActivityCardDto } from './dto/activity-card.dto';
 import { ActivityDetailDto } from './dto/activity-detail.dto';
+import { ActivityCategory as ApiActivityCategory } from './dto/activity-category.enum';
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -95,7 +100,7 @@ export class ActivitiesService {
     const items: ActivityCardDto[] = page.map((a) => ({
       id: a.id,
       title: a.title,
-      category: a.category as unknown as ApiActivityCategory,
+      category: a.category as ApiActivityCategory,
       startAt: a.scheduledAt ?? a.createdAt,
       locationLabel: undefined, // optional in DTO
       plz: a.plz,
@@ -130,7 +135,7 @@ export class ActivitiesService {
       id: a.id,
       title: a.title,
       description: a.description ?? undefined,
-      category: a.category as any,
+      category: a.category as ApiActivityCategory,
       startAt: a.scheduledAt ?? a.createdAt,
       plz: a.plz,
       locationLabel: undefined,
@@ -159,7 +164,7 @@ export class ActivitiesService {
       data: {
         title: dto.title,
         description: dto.description,
-        category: dto.category as any,
+        category: dto.category as PrismaActivityCategory,
         status: 'ACTIVE',
         plz: dto.plz,
         scheduledAt: dto.startAt ? new Date(dto.startAt) : null,
@@ -220,7 +225,7 @@ export class ActivitiesService {
       data: {
         title: dto.title,
         description: dto.description,
-        category: dto.category as any,
+        category: dto.category as PrismaActivityCategory,
         plz: dto.plz,
         scheduledAt: dto.startAt ? new Date(dto.startAt) : undefined,
       },
@@ -231,15 +236,20 @@ export class ActivitiesService {
 
   // Delete(auth + owner) -> soft delete -die Dateien werden Archiviert- nicht mehr auf der seite zu sehen, aber in DB existent
   async archive(userId: string, id: string): Promise<{ ok: true }> {
-    const exisiting = await this.prisma.activity.findUnique({
+    const existing = await this.prisma.activity.findUnique({
       where: { id },
       select: { id: true, createdById: true, status: true },
     });
 
-    if (!exisiting || exisiting.status !== 'ACTIVE')
+    if (!existing || existing.status !== 'ACTIVE')
       throw new NotFoundException('Activity not found');
-    if (exisiting.createdById !== userId)
+    if (existing.createdById !== userId)
       throw new ForbiddenException('Not owner');
+
+    await this.prisma.activity.update({
+      where: { id },
+      data: { status: 'ARCHIVED' },
+    });
 
     return { ok: true };
   }

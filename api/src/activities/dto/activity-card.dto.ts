@@ -3,7 +3,6 @@ import { ActivityCategory } from './activity-category.enum';
 import { UserSummaryDto } from './user-summary.dto';
 
 export class ActivityCardDto {
- 59-32-improve-swaggeropenapi-documentation
   @ApiProperty({ example: 'lst-1231dsf-123-fsd5', format: 'uuid' })
   id!: string;
 

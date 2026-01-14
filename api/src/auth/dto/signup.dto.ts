@@ -12,7 +12,7 @@ export class SignupDto {
     example: 'test@user.de',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'test12345',
@@ -21,7 +21,7 @@ export class SignupDto {
   })
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @ApiPropertyOptional({
     example: 'Julia',

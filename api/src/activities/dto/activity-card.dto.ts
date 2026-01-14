@@ -3,6 +3,7 @@ import { ActivityCategory } from './activity-category.enum';
 import { UserSummaryDto } from './user-summary.dto';
 
 export class ActivityCardDto {
+ 59-32-improve-swaggeropenapi-documentation
   @ApiProperty({ example: 'lst-1231dsf-123-fsd5', format: 'uuid' })
   id!: string;
 
@@ -17,7 +18,7 @@ export class ActivityCardDto {
     format: 'date-time',
     description: 'Start timestamp (ISO). Frontend formats as "Heute, 18:00"',
   })
-  startAt!: Date;
+  startAt!: string;
 
   @ApiPropertyOptional({
     example: 'Prenzlauer Berg',
@@ -35,21 +36,16 @@ export class ActivityCardDto {
   createdBy!: UserSummaryDto;
 
   @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
-  createdAt!: Date;
+  createdAt!: string;
 
   @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
-  updatedAt!: Date;
+  updatedAt!: string;
 
-  @ApiPropertyOptional({
-    example: false,
-    description: 'Optional user-context field - has the user joined',
-  })
+  // user-context (optional – später für "joined" / favorites)
+  @ApiPropertyOptional({ example: false })
   isJoined?: boolean;
 
-  @ApiPropertyOptional({
-    example: 5,
-    description: 'Optional: number of participants',
-  })
+  @ApiPropertyOptional({ example: 5 })
   participantsCount?: number;
 
   @ApiPropertyOptional({ example: false })

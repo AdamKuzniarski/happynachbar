@@ -24,7 +24,7 @@ export class CreateActivityDto {
   description?: string;
 
   @IsEnum(ActivityCategory)
-  category!: string;
+  category!: ActivityCategory;
 
   //führende nullen erlaubt
   @Matches(/^\d{5}$/)

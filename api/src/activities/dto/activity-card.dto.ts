@@ -59,6 +59,7 @@ export class ActivityCardDto {
     example: 'https://picsum.photos/seed/happynachbar/640/480',
     nullable: true,
     format: 'uri',
+    type: String,
   })
   thumbnailUrl?: string | null;
 }

@@ -3,7 +3,7 @@ import { ActivityCategory } from './activity-category.enum';
 import { UserSummaryDto } from './user-summary.dto';
 
 export class ActivityCardDto {
-  @ApiProperty({ example: 'lst-1231dsf-123-fsd5' })
+  @ApiProperty({ example: 'lst-1231dsf-123-fsd5', format: 'uuid' })
   id!: string;
 
   @ApiProperty({ example: 'A walk with happynachbar' })
@@ -58,6 +58,7 @@ export class ActivityCardDto {
   @ApiPropertyOptional({
     example: 'https://picsum.photos/seed/happynachbar/640/480',
     nullable: true,
+    format: 'uri',
   })
   thumbnailUrl?: string | null;
 }

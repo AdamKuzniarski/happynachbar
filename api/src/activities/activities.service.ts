@@ -21,10 +21,6 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function toIso(d: Date): string {
-  return d.toISOString();
-}
-
 @Injectable()
 export class ActivitiesService {
   constructor(private prisma: PrismaService) {}

@@ -29,7 +29,7 @@ export function PostalCodeForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col items-center gap-2">
       <label htmlFor="postalCode" className="text-xs font-medium text-center">
-        Postal Code
+        Postleitzahl
       </label>
 
       <input
@@ -37,7 +37,7 @@ export function PostalCodeForm() {
         name="postalCode"
         inputMode="numeric"
         autoComplete="postal-code"
-        placeholder="e.g. 10115"
+        placeholder="z.B. 10115"
         value={postalCode}
         onChange={(e) => setPostalCode(normalizePostalCode(e.target.value))}
         className="
@@ -55,7 +55,7 @@ export function PostalCodeForm() {
 
       {postalCode.length > 0 && !isValid && (
         <p className="text-xs text-red-600 text-center">
-          Please enter a valid 5-digit postal code.
+          Bitte gib eine gültige 5-stellige Postleitzahl ein.
         </p>
       )}
 
@@ -79,7 +79,7 @@ export function PostalCodeForm() {
         sm:w-64
       "
       >
-        Submit
+        Weiter
       </button>
     </form>
   );

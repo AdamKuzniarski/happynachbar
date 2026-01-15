@@ -28,6 +28,7 @@ export default function LoginPage() {
 
     setFormError(null);
     setSubmitting(true);
+
     try {
       const result = await loginAndSetCookie(email, password);
 
@@ -36,7 +37,7 @@ export default function LoginPage() {
 
         if (err.includes("invalid credentials")) {
           setFormError(
-            "We couldn’t log you in. Please check your email and password.\nOr sign up if you don’t have an account."
+            "Wir konnten dich nicht einloggen. Bitte prüfe deine E-Mail und dein Passwort.\nOder registriere dich, falls du noch kein Konto hast."
           );
         } else {
           setFormError(result.error);
@@ -68,7 +69,7 @@ export default function LoginPage() {
             href="/"
             className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
           >
-            Back
+            Zurück
           </Link>
         </div>
       </header>
@@ -77,7 +78,7 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
           <div className="mx-auto w-full max-w-md">
             <h1 className="text-center text-2xl font-bold leading-tight text-evergreen sm:text-4xl">
-              Login
+              Anmelden
             </h1>
 
             <div className="mt-8 sm:mt-10">
@@ -90,7 +91,7 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="text-xs font-medium text-center block"
                   >
-                    Email
+                    E-Mail
                   </label>
 
                   <input
@@ -99,7 +100,7 @@ export default function LoginPage() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="you@example.com"
+                    placeholder="du@beispiel.de"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={[
@@ -113,7 +114,7 @@ export default function LoginPage() {
 
                   {emailInvalid && (
                     <p className="mt-1 text-xs text-red-600 text-center">
-                      Please enter a valid email address.
+                      Bitte gib eine gültige E-Mail-Adresse ein.
                     </p>
                   )}
                 </div>
@@ -123,7 +124,7 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="text-xs font-medium text-center block"
                   >
-                    Password
+                    Passwort
                   </label>
 
                   <input
@@ -132,7 +133,7 @@ export default function LoginPage() {
                     type="password"
                     required
                     autoComplete="current-password"
-                    placeholder="Password"
+                    placeholder="Passwort"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={[
@@ -174,16 +175,16 @@ export default function LoginPage() {
                     disabled:opacity-50
                   "
                 >
-                  {submitting ? "Logging in..." : "Login"}
+                  {submitting ? "Anmelden..." : "Anmelden"}
                 </button>
 
                 <p className="mt-4 text-xs text-center">
-                  Don&apos;t have an account yet?{" "}
+                  Du hast noch kein Konto?{" "}
                   <Link
                     href="/auth/register"
                     className="font-semibold underline hover:opacity-80"
                   >
-                    Sign up here!
+                    Hier registrieren!
                   </Link>
                 </p>
               </form>

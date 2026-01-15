@@ -20,7 +20,7 @@ export default function LandingPage() {
             href="/auth/login"
             className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
           >
-            Login
+            Anmelden
           </Link>
         </div>
       </header>
@@ -29,11 +29,12 @@ export default function LandingPage() {
         <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
           <div className="mx-auto w-full max-w-md">
             <h1 className="text-center text-2xl font-bold leading-tight text-evergreen sm:text-4xl">
-              Welcome to happynachbar
+              Willkommen bei happynachbar
             </h1>
 
             <p className="mt-2 text-center text-sm leading-relaxed text-hunter sm:mt-3 sm:text-base">
-              Enter your postal code to discover activities in your area.
+              Gib deine Postleitzahl ein, um Aktivitäten in deiner Nähe zu
+              entdecken.
             </p>
 
             <div className="mt-8 sm:mt-10">

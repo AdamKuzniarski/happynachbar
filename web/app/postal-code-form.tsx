@@ -22,8 +22,7 @@ export function PostalCodeForm() {
     if (!isValid) return;
 
     localStorage.setItem("postalCode", postalCode);
-
-    router.push(`/activity?postalCode=${encodeURIComponent(postalCode)}`);
+    router.push(`/teaser?postalCode=${encodeURIComponent(postalCode)}`);
   }
 
   return (
@@ -41,15 +40,15 @@ export function PostalCodeForm() {
         value={postalCode}
         onChange={(e) => setPostalCode(normalizePostalCode(e.target.value))}
         className="
-        h-8
-        w-32
-        rounded-md
-        border
-        px-2
-        text-sm
-        text-center
-        sm:w-40
-      "
+          h-8
+          w-32
+          rounded-md
+          border
+          px-2
+          text-sm
+          text-center
+          sm:w-40
+        "
         aria-invalid={postalCode.length > 0 && !isValid}
       />
 
@@ -63,21 +62,21 @@ export function PostalCodeForm() {
         type="submit"
         disabled={!isValid}
         className="
-        mt-1
-        h-8
-        w-48
-        rounded-md
-        border-2 border-fern
-        bg-palm
-        text-xs
-        font-medium
-        text-white
-        hover:bg-hunter
-        transition-colors
-        disabled:cursor-not-allowed
-        disabled:opacity-50
-        sm:w-64
-      "
+          mt-1
+          h-8
+          w-48
+          rounded-md
+          border-2 border-fern
+          bg-palm
+          text-xs
+          font-medium
+          text-white
+          hover:bg-hunter
+          transition-colors
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+          sm:w-64
+        "
       >
         Weiter
       </button>

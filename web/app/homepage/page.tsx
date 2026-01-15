@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-const CREATE_ACTIVITY_ROUTE = "/create-activity";
+const CREATE_ACTIVITY_ROUTE = "/activities/new";
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const TAKE = 10;
 

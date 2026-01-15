@@ -30,10 +30,10 @@ export default function RegisterPage() {
   const emailInvalid = email.length > 0 && !isValidEmail(email);
   const passwordInvalid = false;
 
-  const canSubmit =
-    isValidDisplayName(displayName) &&
-    isValidEmail(email) &&
-    password.length > 0;
+  const displayNameOk =
+    displayName.trim().length === 0 || isValidDisplayName(displayName);
+
+  const canSubmit = displayNameOk && isValidEmail(email) && password.length > 0;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,7 +47,11 @@ export default function RegisterPage() {
       const cleanEmail = email.trim().toLowerCase();
       const cleanDisplayName = displayName.trim();
 
-      const result = await registerUser(cleanEmail, password, cleanDisplayName);
+      const result = await registerUser(
+        cleanEmail,
+        password,
+        cleanDisplayName.length ? cleanDisplayName : undefined
+      );
 
       if (!result.ok) {
         setFormError(result.error);
@@ -109,7 +113,6 @@ export default function RegisterPage() {
                     id="displayName"
                     name="displayName"
                     type="text"
-                    required
                     autoComplete="nickname"
                     placeholder="z.B. Julia"
                     value={displayName}

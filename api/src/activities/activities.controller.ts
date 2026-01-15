@@ -19,11 +19,13 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { ActivitiesService } from './activities.service';
-import { ListActivitiesQueryDto } from './dto/list-activities.query.dto';
+import {
+  ListActivitiesQueryDto,
+  CreateActivityDto,
+  UpdateActivityDto,
+} from './dto/activities.input.dto';
 import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
-import { ActivityDetailDto } from './dto/activity-detail.dto';
-import { CreateActivityDto } from './dto/create-activity.dto';
-import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ActivityDetailDto } from './dto/activity.dto';
 
 @ApiTags('activities')
 @Controller('activities')

@@ -1,17 +1,58 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+// Input DTO
+
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsDateString,
   IsEnum,
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   Matches,
   Max,
+  MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
 import { ActivityCategory } from './activity-category.enum';
 
+export class CreateActivityDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  title!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @IsEnum(ActivityCategory)
+  category!: ActivityCategory;
+
+  // führende Nullen erlaubt
+  @Matches(/^\d{5}$/)
+  plz!: string;
+
+  // ISO datetime
+  @IsOptional()
+  @IsDateString()
+  startAt?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5)
+  @IsUrl({}, { each: true })
+  imageUrls?: string[];
+}
+
+export class UpdateActivityDto extends PartialType(CreateActivityDto) {}
+
+//------------------------------------------------------------------------------------------------------------
+//Query DTO
 export class ListActivitiesQueryDto {
   @ApiPropertyOptional({ example: '63073' })
   @IsOptional()
@@ -31,10 +72,7 @@ export class ListActivitiesQueryDto {
   @Max(50)
   take?: number;
 
-  @ApiPropertyOptional({
-    example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc',
-    format: 'uuid',
-  })
+  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   @IsOptional()
   @IsString()
   cursor?: string;
@@ -47,10 +85,7 @@ export class ListActivitiesQueryDto {
   @IsEnum(ActivityCategory)
   category?: ActivityCategory;
 
-  @ApiPropertyOptional({
-    example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc',
-    format: 'uuid',
-  })
+  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   @IsOptional()
   @IsString()
   createdById?: string;

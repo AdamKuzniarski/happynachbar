@@ -30,7 +30,11 @@ describe('AuthController (unit)', () => {
 
     const res = await controller.signup({ email: 'A@B.DE', password: 'pw' });
 
-    expect(authServiceMock.signup).toHaveBeenCalledWith('A@B.DE', 'pw');
+    expect(authServiceMock.signup).toHaveBeenCalledWith(
+      'A@B.DE',
+      'pw',
+      undefined,
+    );
     expect(res).toEqual({ id: 'u1' });
   });
 

@@ -1,9 +1,29 @@
+// Output DTO
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ActivityCategory } from './activity-category.enum';
-import { UserSummaryDto } from './user-summary.dto';
+
+export class UserSummaryDto {
+  @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
+  id!: string;
+
+  @ApiProperty({ example: 'Julia S.' })
+  displayName!: string;
+}
+
+export class ActivityImageDto {
+  @ApiProperty({ example: 'https://picsum.photos/seed/happynachbar/800/600' })
+  url!: string;
+
+  @ApiProperty({ example: 0, description: 'Lower comes first' })
+  sortOrder!: number;
+
+  @ApiPropertyOptional({ example: 'Example alt description for your picture' })
+  alt?: string;
+}
 
 export class ActivityCardDto {
-  @ApiProperty({ example: 'lst-1231dsf-123-fsd5', format: 'uuid' })
+  @ApiProperty({ example: 'lst-1231dsf-123-fsd5' })
   id!: string;
 
   @ApiProperty({ example: 'A walk with happynachbar' })
@@ -17,7 +37,7 @@ export class ActivityCardDto {
     format: 'date-time',
     description: 'Start timestamp (ISO). Frontend formats as "Heute, 18:00"',
   })
-  startAt!: string;
+  startAt!: Date;
 
   @ApiPropertyOptional({
     example: 'Prenzlauer Berg',
@@ -35,16 +55,21 @@ export class ActivityCardDto {
   createdBy!: UserSummaryDto;
 
   @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
-  createdAt!: string;
+  createdAt!: Date;
 
   @ApiProperty({ example: '2026-01-09T12:30:00.000Z', format: 'date-time' })
-  updatedAt!: string;
+  updatedAt!: Date;
 
-  // user-context (optional – später für "joined" / favorites)
-  @ApiPropertyOptional({ example: false })
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Optional user-context field - has the user joined',
+  })
   isJoined?: boolean;
 
-  @ApiPropertyOptional({ example: 5 })
+  @ApiPropertyOptional({
+    example: 5,
+    description: 'Optional: number of participants',
+  })
   participantsCount?: number;
 
   @ApiPropertyOptional({ example: false })
@@ -53,8 +78,14 @@ export class ActivityCardDto {
   @ApiPropertyOptional({
     example: 'https://picsum.photos/seed/happynachbar/640/480',
     nullable: true,
-    format: 'uri',
-    type: String,
   })
   thumbnailUrl?: string | null;
+}
+
+export class ActivityDetailDto extends ActivityCardDto {
+  @ApiPropertyOptional({ example: 'We walk together and talk, talk, talk!' })
+  description?: string;
+
+  @ApiProperty({ type: () => [ActivityImageDto] })
+  images!: ActivityImageDto[];
 }

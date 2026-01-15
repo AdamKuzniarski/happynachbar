@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ActivityCardDto } from './activity-card.dto';
+import { ActivityCardDto } from './activity.dto';
 
 export class ListActivitiesResponseDto {
   @ApiProperty({ type: () => [ActivityCardDto] })

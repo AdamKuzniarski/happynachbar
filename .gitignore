@@ -21,3 +21,7 @@ out/
 .idea/
 .vscode/
 coverage/
+
+# presigned / debug payloads
+presign.json
+**/presign*.json

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import * as React from "react";
 
 const CREATE_ACTIVITY_ROUTE = "/activities/new";
@@ -68,8 +67,6 @@ function buildQuery(params: {
 }
 
 export default function HomepagePage() {
-  const router = useRouter();
-
   // Filter UI (category value = API Enum; "" = alle)
   const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState<string>("");
@@ -83,16 +80,14 @@ export default function HomepagePage() {
   const [loading, setLoading] = React.useState(true);
   const [loadingMore, setLoadingMore] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [creating, setCreating] = React.useState(false);
 
-  // Abort ongoing fetch when a new one starts (prevents race conditions)
+  // Abort only for "first page" fetches (search/reset)
   const abortRef = React.useRef<AbortController | null>(null);
 
-  async function requestActivities(cursor: string | null) {
-    abortRef.current?.abort();
-    const ac = new AbortController();
-    abortRef.current = ac;
-
+  async function requestActivities(
+    cursor: string | null,
+    signal?: AbortSignal
+  ) {
     const qs = buildQuery({
       take: TAKE,
       cursor,
@@ -104,7 +99,7 @@ export default function HomepagePage() {
     const res = await fetch(`${apiBase}/activities?${qs}`, {
       cache: "no-store",
       credentials: "include",
-      signal: ac.signal,
+      signal,
     });
 
     if (!res.ok) {
@@ -114,42 +109,53 @@ export default function HomepagePage() {
     return (await res.json()) as ListActivitiesResponse;
   }
 
-  async function loadFirstPage() {
-    setLoading(true);
+  async function fetchPage(opts: {
+    cursor: string | null;
+    append: boolean;
+    signal?: AbortSignal;
+  }) {
+    const { cursor, append, signal } = opts;
+
+    if (append) setLoadingMore(true);
+    else setLoading(true);
+
     setError(null);
 
     try {
-      setNextCursor(null);
+      const payload = await requestActivities(cursor, signal);
 
-      const payload = await requestActivities(null);
-      setActivities(payload.items ?? []);
+      setActivities((prev) =>
+        append ? [...prev, ...(payload.items ?? [])] : payload.items ?? []
+      );
       setNextCursor(payload.nextCursor ?? null);
     } catch (e) {
       if ((e as any)?.name === "AbortError") return;
+
       setError(e instanceof Error ? e.message : "Unknown error");
-      setActivities([]);
-      setNextCursor(null);
+
+      if (!append) {
+        setActivities([]);
+        setNextCursor(null);
+      }
     } finally {
-      setLoading(false);
+      if (append) setLoadingMore(false);
+      else setLoading(false);
     }
   }
 
-  async function loadMore() {
-    if (!nextCursor || loadingMore) return;
+  function loadFirstPage() {
+    // Abort any previous "first page" request
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
 
-    setLoadingMore(true);
-    setError(null);
+    setNextCursor(null);
+    return fetchPage({ cursor: null, append: false, signal: ac.signal });
+  }
 
-    try {
-      const payload = await requestActivities(nextCursor);
-      setActivities((prev) => [...prev, ...(payload.items ?? [])]);
-      setNextCursor(payload.nextCursor ?? null);
-    } catch (e) {
-      if ((e as any)?.name === "AbortError") return;
-      setError(e instanceof Error ? e.message : "Unknown error");
-    } finally {
-      setLoadingMore(false);
-    }
+  function loadMore() {
+    if (!nextCursor || loadingMore || loading) return;
+    return fetchPage({ cursor: nextCursor, append: true });
   }
 
   React.useEffect(() => {
@@ -160,16 +166,7 @@ export default function HomepagePage() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    loadFirstPage(); // reset + refetch with current filters
-  }
-
-  async function handleCreateActivity() {
-    setCreating(true);
-    try {
-      router.push(CREATE_ACTIVITY_ROUTE);
-    } finally {
-      setCreating(false);
-    }
+    loadFirstPage();
   }
 
   return (
@@ -236,9 +233,12 @@ export default function HomepagePage() {
                   <div className="flex items-center w-full sm:min-w-[160px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
                     <input
                       value={plz}
-                      onChange={(e) => setPlz(e.target.value)}
+                      onChange={(e) =>
+                        setPlz(e.target.value.replace(/\D/g, "").slice(0, 5))
+                      }
                       placeholder="PLZ"
                       aria-label="PLZ"
+                      maxLength={5}
                       className="h-11 w-full bg-transparent px-3 text-sm outline-none"
                     />
                   </div>
@@ -283,9 +283,12 @@ export default function HomepagePage() {
             <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
               {!loading &&
                 activities.map((a) => (
-                  <div
+                  <Link
                     key={a.id}
-                    className="rounded-md bg-limecream overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                    href={`/activities/${a.id}`}
+                    className="block rounded-md bg-limecream overflow-hidden shadow-sm hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-palm/40"
+                    aria-label={`Aktivität öffnen: ${a.title ?? "Aktivität"}`}
+                    title={a.title ?? "Aktivität öffnen"}
                   >
                     <div className="relative">
                       {a.thumbnailUrl ? (
@@ -331,26 +334,25 @@ export default function HomepagePage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
 
-              <button
-                type="button"
-                onClick={handleCreateActivity}
-                disabled={creating}
+              {/* Create tile */}
+              <Link
+                href={CREATE_ACTIVITY_ROUTE}
                 className="min-h-[96px] rounded-md bg-white p-3 shadow-sm hover:shadow-md hover:bg-limecream transition-all"
                 aria-label="Neue Aktivität erstellen"
                 title="Neue Aktivität erstellen"
               >
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="text-4xl font-bold leading-none text-evergreen">
-                    {creating ? "…" : "+"}
+                    +
                   </div>
                   <div className="mt-1 text-xs font-medium text-hunter">
                     Neu
                   </div>
                 </div>
-              </button>
+              </Link>
             </div>
 
             <div className="mt-4 flex justify-center">

@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { PublicNeighborsModule } from './public/public-neighbors.module';
 import { NeighborsModule } from './neighbors/neighbors.module';
 import { ActivitiesModule } from './activities/activities.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ActivitiesModule } from './activities/activities.module';
     PublicNeighborsModule,
     NeighborsModule,
     ActivitiesModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

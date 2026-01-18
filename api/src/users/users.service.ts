@@ -47,9 +47,6 @@ export class UsersService {
 
     const missing: string[] = [];
 
-    // displayName: optionaler Produkt-Twist:
-    // Wenn ihr "Neighbor" als Default habt, zählt das sonst immer als "ausgefüllt".
-    // Ich würde Default als "nicht wirklich ausgefüllt" werten.
     const dn = profile?.displayName?.trim();
     if (!dn || dn === 'Neighbor') missing.push('displayName');
 

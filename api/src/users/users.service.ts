@@ -25,4 +25,51 @@ export class UsersService {
 
     return { ok: true };
   }
+
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        profile: {
+          select: {
+            displayName: true,
+            plz: true,
+            avatarUrl: true,
+            bio: true,
+          },
+        },
+      },
+    });
+
+    const profile = user?.profile ?? null;
+
+    const missing: string[] = [];
+
+    // displayName: optionaler Produkt-Twist:
+    // Wenn ihr "Neighbor" als Default habt, zählt das sonst immer als "ausgefüllt".
+    // Ich würde Default als "nicht wirklich ausgefüllt" werten.
+    const dn = profile?.displayName?.trim();
+    if (!dn || dn === 'Neighbor') missing.push('displayName');
+
+    if (!profile?.plz?.trim()) missing.push('plz');
+    if (!profile?.avatarUrl?.trim()) missing.push('avatarUrl');
+    if (!profile?.bio?.trim()) missing.push('bio');
+
+    const total = 4;
+    const done = total - missing.length;
+    const percent = Math.round((done / total) * 100);
+
+    return {
+      id: user?.id ?? userId,
+      email: user?.email ?? null,
+      profile,
+      profileCompletion: {
+        isComplete: missing.length === 0,
+        percent,
+        missing,
+      },
+    };
+  }
 }

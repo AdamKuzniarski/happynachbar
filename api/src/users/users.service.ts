@@ -7,13 +7,21 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async updateMe(userId: string, dto: UpdateMeDto) {
-    if (dto.plz !== undefined) {
-      await this.prisma.userProfile.upsert({
-        where: { userId },
-        update: { plz: dto.plz },
-        create: { userId, plz: dto.plz },
-      });
+    const data: Record<string, unknown> = {};
+    if (dto.plz !== undefined) data.plz = dto.plz;
+    if (dto.displayName !== undefined) data.displayName = dto.displayName;
+    if (dto.avatarUrl !== undefined) data.avatarUrl = dto.avatarUrl;
+    if (dto.bio !== undefined) data.bio = dto.bio;
+
+    if (Object.keys(data).length === 0) {
+      return { ok: true };
     }
+
+    await this.prisma.userProfile.upsert({
+      where: { userId },
+      update: data,
+      create: { userId, ...data },
+    });
 
     return { ok: true };
   }

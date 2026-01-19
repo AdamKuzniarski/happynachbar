@@ -8,10 +8,11 @@ export class UsersService {
 
   async updateMe(userId: string, dto: UpdateMeDto) {
     const data: Record<string, unknown> = {};
-    if (dto.plz !== undefined) data.plz = dto.plz;
-    if (dto.displayName !== undefined) data.displayName = dto.displayName;
-    if (dto.avatarUrl !== undefined) data.avatarUrl = dto.avatarUrl;
-    if (dto.bio !== undefined) data.bio = dto.bio;
+
+    if (dto.plz != null) data.plz = dto.plz;
+    if (dto.displayName != null) data.displayName = dto.displayName;
+    if (dto.avatarUrl != null) data.avatarUrl = dto.avatarUrl;
+    if (dto.bio != null) data.bio = dto.bio;
 
     if (Object.keys(data).length === 0) {
       return { ok: true };

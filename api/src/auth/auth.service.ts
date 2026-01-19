@@ -44,7 +44,7 @@ export class AuthService {
   private async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { email: this.normalizeEmail(email) },
-      select: { id: true, email: true, passwordHash: true },
+      select: { id: true, email: true, passwordHash: true, role: true },
     });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
@@ -62,7 +62,7 @@ export class AuthService {
       data: { lastActiveAt: new Date() },
     });
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role};
     const access_token = await this.jwt.signAsync(payload);
 
     return { access_token };

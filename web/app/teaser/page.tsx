@@ -24,7 +24,7 @@ export default async function ActivityTeaserPage({
   const apiBase = process.env.API_URL ?? "http://localhost:4000";
 
   if (!apiBase) {
-    return <div className="p-6">API_BASE_URL is not set.</div>;
+    return <div className="p-6">API_BASE_URL ist nicht gesetzt.</div>;
   }
 
   const res = await fetch(
@@ -38,6 +38,9 @@ export default async function ActivityTeaserPage({
     : Array.isArray(json)
     ? json.length
     : 0;
+
+  const personLabel = count === 1 ? "Person" : "Personen";
+  const verbLabel = count === 1 ? "ist" : "sind";
 
   return (
     <div className="min-h-screen bg-white text-evergreen">
@@ -57,7 +60,7 @@ export default async function ActivityTeaserPage({
             href="/auth/login"
             className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
           >
-            Login
+            Anmelden
           </Link>
         </div>
       </header>
@@ -67,8 +70,8 @@ export default async function ActivityTeaserPage({
           <div className="mx-auto w-full max-w-md">
             <div className="min-h-[420px] rounded-[32px] bg-white px-6 py-10 shadow-lg sm:px-10 sm:py-12">
               <p className="text-center text-lg">
-                <span className="font-bold">{count}</span>{" "}
-                {count === 1 ? "neighbor is" : "neighbors are"} active near you!
+                <span className="font-bold">{count}</span> {personLabel}{" "}
+                {verbLabel} gerade in deiner Nähe aktiv!
               </p>
 
               <div className="mt-12 flex justify-center">
@@ -76,9 +79,13 @@ export default async function ActivityTeaserPage({
                   href="/auth/register"
                   className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-limecream px-5 py-3 text-base font-semibold text-evergreen hover:bg-palm hover:text-limecream transition-colors"
                 >
-                  Get to know your neighborhood
+                  Lerne deine Nachbarschaft kennen
                 </Link>
               </div>
+
+              <p className="mt-6 text-center text-sm text-hunter/80">
+                Postleitzahl: <span className="font-medium">{postalCode}</span>
+              </p>
             </div>
           </div>
         </div>

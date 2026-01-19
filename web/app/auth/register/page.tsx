@@ -30,10 +30,10 @@ export default function RegisterPage() {
   const emailInvalid = email.length > 0 && !isValidEmail(email);
   const passwordInvalid = false;
 
-  const canSubmit =
-    isValidDisplayName(displayName) &&
-    isValidEmail(email) &&
-    password.length > 0;
+  const displayNameOk =
+    displayName.trim().length === 0 || isValidDisplayName(displayName);
+
+  const canSubmit = displayNameOk && isValidEmail(email) && password.length > 0;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,14 +47,18 @@ export default function RegisterPage() {
       const cleanEmail = email.trim().toLowerCase();
       const cleanDisplayName = displayName.trim();
 
-      const result = await registerUser(cleanEmail, password, cleanDisplayName);
+      const result = await registerUser(
+        cleanEmail,
+        password,
+        cleanDisplayName.length ? cleanDisplayName : undefined
+      );
 
       if (!result.ok) {
         setFormError(result.error);
         return;
       }
 
-      setFormSuccess("Registration successful. Redirecting to login...");
+      setFormSuccess("Registrierung erfolgreich. Weiterleitung zum Login...");
       setTimeout(() => router.push("/auth/login?registered=1"), 500);
     } finally {
       setSubmitting(false);
@@ -79,7 +83,7 @@ export default function RegisterPage() {
             href="/"
             className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
           >
-            Back
+            Zurück
           </Link>
         </div>
       </header>
@@ -88,7 +92,7 @@ export default function RegisterPage() {
         <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
           <div className="mx-auto w-full max-w-md">
             <h1 className="text-center text-2xl font-bold leading-tight text-evergreen sm:text-4xl">
-              Register
+              Registrieren
             </h1>
 
             <div className="mt-8 sm:mt-10">
@@ -102,16 +106,15 @@ export default function RegisterPage() {
                     htmlFor="displayName"
                     className="text-xs font-medium text-center block"
                   >
-                    Display name
+                    Anzeigename
                   </label>
 
                   <input
                     id="displayName"
                     name="displayName"
                     type="text"
-                    required
                     autoComplete="nickname"
-                    placeholder="e.g. Julia"
+                    placeholder="z.B. Julia"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     className={[
@@ -126,7 +129,7 @@ export default function RegisterPage() {
 
                   {displayNameInvalid && (
                     <p className="mt-1 text-xs text-red-600 text-center">
-                      Display name must be 2–50 characters.
+                      Der Anzeigename muss 2–50 Zeichen lang sein.
                     </p>
                   )}
                 </div>
@@ -137,7 +140,7 @@ export default function RegisterPage() {
                     htmlFor="email"
                     className="text-xs font-medium text-center block"
                   >
-                    Email
+                    E-Mail
                   </label>
 
                   <input
@@ -146,7 +149,7 @@ export default function RegisterPage() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="you@example.com"
+                    placeholder="du@beispiel.de"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={[
@@ -161,7 +164,7 @@ export default function RegisterPage() {
 
                   {emailInvalid && (
                     <p className="mt-1 text-xs text-red-600 text-center">
-                      Please enter a valid email address.
+                      Bitte gib eine gültige E-Mail-Adresse ein.
                     </p>
                   )}
                 </div>
@@ -172,7 +175,7 @@ export default function RegisterPage() {
                     htmlFor="password"
                     className="text-xs font-medium text-center block"
                   >
-                    Password
+                    Passwort
                   </label>
 
                   <input
@@ -181,7 +184,7 @@ export default function RegisterPage() {
                     type="password"
                     required
                     autoComplete="new-password"
-                    placeholder="Password"
+                    placeholder="Passwort"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={[
@@ -234,18 +237,18 @@ export default function RegisterPage() {
                     disabled:opacity-50
                   "
                 >
-                  {submitting ? "Creating account..." : "Create account"}
+                  {submitting ? "Konto wird erstellt..." : "Konto erstellen"}
                 </button>
 
                 <p className="mt-4 text-xs text-center">
-                  Already have an account?{" "}
+                  Du hast schon ein Konto?{" "}
                   <Link
                     href="/auth/login"
                     className="font-semibold underline hover:opacity-80"
                   >
-                    Log in here
+                    Hier anmelden
                   </Link>
-                  !
+                  .
                 </p>
               </form>
             </div>

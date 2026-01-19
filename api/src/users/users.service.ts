@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { UpdateMeDto } from './dto/update-me.dto';
 
 @Injectable()
@@ -7,7 +8,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async updateMe(userId: string, dto: UpdateMeDto) {
-    const data: Record<string, unknown> = {};
+    const data: Prisma.UserProfileUpdateInput = {};
 
     if (dto.plz != null) data.plz = dto.plz;
     if (dto.displayName != null) data.displayName = dto.displayName;
@@ -44,7 +45,9 @@ export class UsersService {
       },
     });
 
-    const profile = user?.profile ?? null;
+    if (!user) throw new NotFoundException('User not found');
+
+    const profile = user.profile ?? null;
 
     const missing: string[] = [];
 
@@ -60,8 +63,8 @@ export class UsersService {
     const percent = Math.round((done / total) * 100);
 
     return {
-      id: user?.id ?? userId,
-      email: user?.email ?? null,
+      id: user.id,
+      email: user.email,
       profile,
       profileCompletion: {
         isComplete: missing.length === 0,

@@ -10,6 +10,7 @@ import { PublicNeighborsModule } from './public/public-neighbors.module';
 import { NeighborsModule } from './neighbors/neighbors.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { RbacModule } from './rbac/rbac.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UploadsModule } from './uploads/uploads.module';
     NeighborsModule,
     ActivitiesModule,
     UploadsModule,
+    RbacModule,
   ],
   controllers: [AppController],
   providers: [AppService],

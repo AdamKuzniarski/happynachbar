@@ -9,7 +9,7 @@ import { RolesGuard } from 'src/auth/roles.guard';
 @ApiBearerAuth('brarer')
 @Controller('moderator')
 @UseGuards(JwtAuthGuard, RolesGuard)
-export class ModeratorConroller {
+export class ModeratorController {
   @Get('ping')
   @Roles(UserRole.MODERATOR)
   ping() {

@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id                String       @id @default(uuid()) @db.Uuid
   email             String       @unique
@@ -14,8 +20,11 @@ model User {
   profile           UserProfile?
   createdActivities Activity[]
 
+  role UserRole @default(USER)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
 }
 
 model UserProfile {

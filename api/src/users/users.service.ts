@@ -8,21 +8,34 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async updateMe(userId: string, dto: UpdateMeDto) {
-    const data: Prisma.UserProfileUpdateInput = {};
+    const updateData: Prisma.UserProfileUpdateInput = {};
+    const createData: Prisma.UserProfileUncheckedCreateInput = { userId };
 
-    if (dto.plz != null) data.plz = dto.plz;
-    if (dto.displayName != null) data.displayName = dto.displayName;
-    if (dto.avatarUrl != null) data.avatarUrl = dto.avatarUrl;
-    if (dto.bio != null) data.bio = dto.bio;
+    if (dto.plz != null) {
+      updateData.plz = dto.plz;
+      createData.plz = dto.plz;
+    }
+    if (dto.displayName != null) {
+      updateData.displayName = dto.displayName;
+      createData.displayName = dto.displayName;
+    }
+    if (dto.avatarUrl != null) {
+      updateData.avatarUrl = dto.avatarUrl;
+      createData.avatarUrl = dto.avatarUrl;
+    }
+    if (dto.bio != null) {
+      updateData.bio = dto.bio;
+      createData.bio = dto.bio;
+    }
 
-    if (Object.keys(data).length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return { ok: true };
     }
 
     await this.prisma.userProfile.upsert({
       where: { userId },
-      update: data,
-      create: { userId, ...data },
+      update: updateData,
+      create: createData,
     });
 
     return { ok: true };

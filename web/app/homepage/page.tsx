@@ -130,7 +130,12 @@ export default function HomepagePage() {
       );
       setNextCursor(payload.nextCursor ?? null);
     } catch (e) {
-      if ((e as any)?.name === "AbortError") return;
+      if (
+        (e instanceof DOMException && e.name === "AbortError") ||
+        (e instanceof Error && e.name === "AbortError")
+      ) {
+        return;
+      }
 
       setError(e instanceof Error ? e.message : "Unknown error");
 

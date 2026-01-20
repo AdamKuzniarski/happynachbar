@@ -7,6 +7,6 @@ export function isValidPostalCode(v: string) {
   return /^\d{5}$/.test(x);
 }
 
-export function isValideEmail(v: string) {
+export function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }

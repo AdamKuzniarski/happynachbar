@@ -1,0 +1,51 @@
+import Link from "next/link";
+
+export type HeaderVariant = "public" | "auth" | "app" | "logout";
+
+export function AppHeader({ variant }: { variant: HeaderVariant }) {
+  const btn =
+    "rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4";
+
+  const brand = (
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div
+        className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
+        aria-hidden="true"
+      />
+      <span className="text-sm font-semibold sm:text-lg text-evergreen">
+        happynachbar
+      </span>
+    </div>
+  );
+
+  const brandHref =
+    variant === "app"
+      ? "/homepage"
+      : variant === "auth"
+        ? "/"
+        : variant === "logout"
+          ? "/homepage"
+          : undefined;
+
+  return (
+    <header className="border-b-2 border-fern">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+        {brandHref ? <Link href={brandHref}>{brand}</Link> : brand}
+
+        {variant === "app" ? (
+          <a href="/auth/logout" className={btn}>
+            Logout
+          </a>
+        ) : variant === "auth" ? (
+          <Link href="/" className={btn}>
+            Back
+          </Link>
+        ) : (
+          <Link href="/auth/login" className={btn}>
+            Login
+          </Link>
+        )}
+      </div>
+    </header>
+  );
+}

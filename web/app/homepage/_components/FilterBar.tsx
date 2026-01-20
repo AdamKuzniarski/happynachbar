@@ -36,18 +36,20 @@ export function FiltersBar(props: filterBarProps) {
       <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center">
           <div className="flex items-center w-full sm:w-[260px] shrink-0 min-w-0">
-            <div className="pl-3 text-hunter/70 aria-hidden='true'">🔎 </div>
+            <div className="pl-3 text-hunter/70" aria-hidden="true">
+              🔎
+            </div>
             <input
               value={query}
-              onChange={(e) => setCategory(e.target.value)}
-              className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+              onChange={(e) => setQuery(e.target.value)}
+              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen placeholder:text-hunter/60 outline-none"
             />
             <div className="flex items-center w-full sm:min-w-[180px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20"></div>
             <select
               value={category}
               id="category"
               onChange={(e) => setCategory(e.target.value)}
-              className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen outline-none"
             >
               <option value="">Alle Kategorien</option>
               {ACTIVITY_CATEGORIES.map((c) => (
@@ -63,7 +65,7 @@ export function FiltersBar(props: filterBarProps) {
               value={plz}
               onChange={(e) => setPlz(e.target.value)}
               placeholder="PLZ"
-              className="h-11 w-full bg-transparent px-3 text-sm outline-none"
+              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen placeholder:text-hunter/60 outline-none"
             />
           </div>
 

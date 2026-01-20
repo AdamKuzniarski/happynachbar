@@ -15,3 +15,23 @@ export type ListActivitiesResponse = {
   items: Activity[];
   nextCursor: string | null;
 };
+export type ActivityImage = {
+  url: string;
+  sortOrder: number;
+  alt?: string;
+};
+
+export type UserSummary = {
+  id: string;
+  displayName?: string;
+};
+
+export type ActivityDetail = Activity & {
+  description?: string;
+  status?: string;
+  scheduledAt?: string;
+  createdById?: string;
+  createdBy?: UserSummary;
+  createdAt?: string;
+  images?: ActivityImage[];
+};

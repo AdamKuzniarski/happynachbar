@@ -6,5 +6,5 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppShell variant="logout">{children}</AppShell>;
+  return <AppShell variant="auth">{children}</AppShell>;
 }

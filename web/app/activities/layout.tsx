@@ -6,5 +6,5 @@ export default function ActivityLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppShell variant="auth">{children}</AppShell>;
+  return <AppShell variant="app">{children}</AppShell>;
 }

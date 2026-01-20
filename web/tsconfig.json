@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "app/activitiy/[id]"
+    "app/activities/[id]"
   ],
   "exclude": ["node_modules"]
 }

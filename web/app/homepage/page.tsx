@@ -1,6 +1,5 @@
 "use client";
 
-import { AppHeader } from "@/components/layout/AppHeader";
 import Link from "next/link";
 import * as React from "react";
 
@@ -176,30 +175,7 @@ export default function HomepagePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-evergreen">
-      <header className="border-b-2 border-fern">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
-          <Link href="/homepage" className="flex items-center gap-2 sm:gap-3">
-            <div
-              className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
-              aria-hidden="true"
-            />
-            <AppHeader variant="app" />
-            <span className="text-sm font-semibold sm:text-lg text-evergreen">
-              happynachbar
-            </span>
-          </Link>
-
-          <a
-            href="/auth/logout"
-            className="rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4"
-          >
-            Logout
-          </a>
-        </div>
-      </header>
-
-      <main className="px-4">
+    <main className="px-4">
         <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl lg:max-w-5xl sm:pt-10">
           <section className="mx-auto w-full max-w-none">
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
@@ -379,6 +355,5 @@ export default function HomepagePage() {
           </section>
         </div>
       </main>
-    </div>
   );
 }

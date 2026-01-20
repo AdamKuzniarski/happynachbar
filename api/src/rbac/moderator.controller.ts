@@ -6,7 +6,7 @@ import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('moderator')
-@ApiBearerAuth('brarer')
+@ApiBearerAuth('bearer')
 @Controller('moderator')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ModeratorController {

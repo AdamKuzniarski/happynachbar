@@ -9,7 +9,7 @@ type ParamsActivities = {
   category?: string;
 };
 
-export function ListActivities(params: ParamsActivities) {
+export function listActivities(params: ParamsActivities) {
   const take = params.take ?? 10;
 
   const sp = new URLSearchParams();

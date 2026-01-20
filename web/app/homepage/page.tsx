@@ -1,5 +1,6 @@
 "use client";
 
+import { AppHeader } from "@/components/layout/AppHeader";
 import Link from "next/link";
 import * as React from "react";
 
@@ -86,7 +87,7 @@ export default function HomepagePage() {
 
   async function requestActivities(
     cursor: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ) {
     const qs = buildQuery({
       take: TAKE,
@@ -125,7 +126,7 @@ export default function HomepagePage() {
       const payload = await requestActivities(cursor, signal);
 
       setActivities((prev) =>
-        append ? [...prev, ...(payload.items ?? [])] : payload.items ?? []
+        append ? [...prev, ...(payload.items ?? [])] : (payload.items ?? []),
       );
       setNextCursor(payload.nextCursor ?? null);
     } catch (e) {
@@ -178,6 +179,7 @@ export default function HomepagePage() {
               className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
               aria-hidden="true"
             />
+            <AppHeader variant="app" />
             <span className="text-sm font-semibold sm:text-lg text-evergreen">
               happynachbar
             </span>
@@ -365,8 +367,8 @@ export default function HomepagePage() {
                 {loadingMore
                   ? "Lade mehr…"
                   : nextCursor
-                  ? "Mehr laden"
-                  : "Keine weiteren"}
+                    ? "Mehr laden"
+                    : "Keine weiteren"}
               </button>
             </div>
           </section>

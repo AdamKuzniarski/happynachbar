@@ -3,6 +3,10 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
+import { Label } from "@/components/ui/Label";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -69,21 +73,21 @@ export function CreateActivityForm() {
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div>
-          <label className="block text-sm font-medium">Titel </label>
-          <input
+          <Label htmlFor="title">Title </Label>
+          <Input
+            id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 h-11 w-full rounded-md border-2 border-fern bg-white px-3 text-sm outline-none"
             placeholder="z.B. Spaziergang im Park"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Kategorie</label>
-          <select
+          <Label htmlFor="category"> Kategorie</Label>
+          <Select
+            id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 h-11 w-full rounded-md border-2 border-fern bg-white px-3 text-sm outline-none"
           >
             <option value="">Bitte wählen</option>
             {ACTIVITY_CATEGORIES.map((c) => (
@@ -91,19 +95,18 @@ export function CreateActivityForm() {
                 {c}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium">PLZ </label>
-          <input
+          <Label htmlFor="plz">PLZ</Label>
+          <Input
             value={plz}
             onChange={(e) =>
               setPlz(e.target.value.replace(/\D/g, "").slice(0, 5))
             }
             inputMode="numeric"
             maxLength={5}
-            className="mt-1 h-11 w-full rounded-md border-2 border-fern bg-white px-3 text-sm outline-none"
             placeholder="10115"
           />
         </div>
@@ -115,6 +118,16 @@ export function CreateActivityForm() {
             onChange={(e) => setDescription(e.target.value)}
             className="mt-1 w-full rounded-md border-2 border-fern bg-white px-3 py-2 text-sm outline-none min-h-[100px]"
             placeholder="Optional…"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="desc">Beschreibung</Label>
+          <Textarea
+            id="desc"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="sada"
           />
         </div>
 

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 type filterBarProps = {
   query: string;
@@ -20,36 +22,31 @@ export function FiltersBar(props: filterBarProps) {
     props.onSearch();
   }
 
-  const {
-    query,
-    setQuery,
-    category,
-    setCategory,
-    plz,
-    setPlz,
-    loading,
-    onSearch,
-  } = props;
+  const { query, setQuery, category, setCategory, plz, setPlz, loading } =
+    props;
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center">
-          <div className="flex items-center w-full sm:w-[260px] shrink-0 min-w-0">
+          <div className="flex items-center w-full sm:w-65 shrink-0 min-w-0">
             <div className="pl-3 text-hunter/70" aria-hidden="true">
               🔎
             </div>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen placeholder:text-hunter/60 outline-none"
+              placeholder="Suche…"
+              className="border-0 rounded-none bg-transparent px-2 focus:ring-0"
             />
-            <div className="flex items-center w-full sm:min-w-[180px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20"></div>
+          </div>
+
+          <div className="flex items-center w-full sm:min-w-45 border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
             <select
               value={category}
               id="category"
               onChange={(e) => setCategory(e.target.value)}
-              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen outline-none"
+              className=" rounded-none bg-transparent focus:ring-0"
             >
               <option value="">Alle Kategorien</option>
               {ACTIVITY_CATEGORIES.map((c) => (
@@ -60,12 +57,13 @@ export function FiltersBar(props: filterBarProps) {
             </select>
           </div>
 
-          <div className="flex items-center w-full sm:min-w-[160px] border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
+          <div className="flex items-center w-full sm:min-w-40 border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
             <input
               value={plz}
               onChange={(e) => setPlz(e.target.value)}
               placeholder="PLZ"
-              className="h-11 w-full bg-transparent px-3 text-sm text-evergreen placeholder:text-hunter/60 outline-none"
+              inputMode="numeric"
+              className="border-0 rounded-none bg-transparent focus:ring-0"
             />
           </div>
 

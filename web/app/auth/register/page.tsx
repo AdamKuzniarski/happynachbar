@@ -1,9 +1,12 @@
 "use client";
 
+import { Input } from "@/components/ui/Input";
 import { registerUser } from "./actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { FormError } from "@/components/ui/FormError";
+import { Button } from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -49,34 +52,27 @@ export default function RegisterPage() {
           onSubmit={onSubmit}
           className="mx-auto mt-8 flex max-w-sm flex-col gap-3"
         >
-          <input
+          <Input
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="h-11 rounded-md border-2 border-fern px-3 text-sm"
             placeholder="Anzeigename (optional)"
           />
-          <input
+          <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-11 rounded-md border-2 border-fern px-3 text-sm"
             placeholder="E-Mail"
           />
-          <input
+          <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-11 rounded-md border-2 border-fern px-3 text-sm"
             placeholder="Passwort"
             type="password"
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <button
-            disabled={loading}
-            className="h-11 rounded-md bg-palm text-sm font-medium text-white hover:bg-hunter disabled:opacity-60"
-          >
+          <FormError message={error} />
+          <Button disabled={loading}>
             {loading ? "…" : "Konto erstellen"}
-          </button>
+          </Button>
 
           <p className="text-center text-xs">
             Schon dabei?{" "}

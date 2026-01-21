@@ -11,9 +11,9 @@ type SP = { postalCode?: string | string[] };
 export default async function TeaserPage({
   searchParams,
 }: {
-  searchParams: SP;
+  searchParams: Promise<SP>;
 }) {
-  const raw = searchParams.postalCode;
+  const raw = (await searchParams).postalCode;
   const postalCode = Array.isArray(raw) ? raw[0] : raw;
 
   if (!postalCode || !/^\d{5}$/.test(postalCode)) redirect("/");
@@ -29,7 +29,7 @@ export default async function TeaserPage({
   return (
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
-        <div className="min-h-[420px] rounded-[32px] bg-white px-6 py-10 shadow-lg sm:px-10 sm:py-12">
+        <div className="min-h-105 rounded-4xl bg-white px-6 py-10 shadow-lg sm:px-10 sm:py-12">
           <p className="text-center text-lg">
             <span className="font-bold">{count}</span> Personen sind gerade in
             deiner Nähe aktiv!

@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { Button } from "@/components/ui/Button";
+import { FormError } from "@/components/ui/FormError";
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -112,35 +114,20 @@ export function CreateActivityForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Beschreibung </label>
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full rounded-md border-2 border-fern bg-white px-3 py-2 text-sm outline-none min-h-[100px]"
-            placeholder="Optional…"
-          />
-        </div>
-
-        <div>
           <Label htmlFor="desc">Beschreibung</Label>
           <Textarea
             id="desc"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="sada"
+            placeholder="Optional…"
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-red-600 whitespace-pre-line">{error}</p>
-        )}
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-md bg-palm px-4 py-2 text-sm font-medium text-white hover:bg-hunter disabled:opacity-60"
-        >
+        <FormError message={error} />
+
+        <Button type="submit" disabled={saving}>
           {saving ? "Speichern…" : "Erstellen"}
-        </button>
+        </Button>
       </form>
     </section>
   );

@@ -12,7 +12,7 @@ export default function LogoutPage() {
   return (
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
-        <h1 className="text-xl font-semibold sm:text-2xl">Ausgeloggt ✅</h1>
+        <h1 className="text-xl font-semibold sm:text-2xl">Ausgeloggt </h1>
 
         <div className="mt-6 flex flex-col gap-3">
           <Link

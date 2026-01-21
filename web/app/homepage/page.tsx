@@ -6,7 +6,7 @@ import { FiltersBar } from "./_components/FilterBar";
 import { ActivitiesSection } from "./_components/ActivitiesSection";
 import { useActivities } from "./_hooks/useActivities";
 
-const CREATE_ACTIVITY_ROUTE = "/create-activity";
+const CREATE_ACTIVITY_ROUTE = "/activities/new";
 
 export default function HomepagePage() {
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function HomepagePage() {
   } = useActivities({ query, plz, category });
 
   React.useEffect(() => {
-    // initialer load – klassisch: einmal beim ersten Render
     loadFirstPage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

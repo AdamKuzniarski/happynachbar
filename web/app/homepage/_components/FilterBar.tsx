@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
 
 type filterBarProps = {
   query: string;

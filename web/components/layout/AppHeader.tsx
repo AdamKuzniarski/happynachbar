@@ -36,7 +36,7 @@ export function AppHeader({
 
   return (
     <header className="border-b-2 border-fern">
-      <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
         {brandHref ? <Link href={brandHref}>{brand}</Link> : brand}
 
         <div className="flex items-center gap-2">

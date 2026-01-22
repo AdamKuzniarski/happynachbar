@@ -26,6 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("happynachbar-theme");if(t==="light"||t==="dark"||t==="system"){document.documentElement.setAttribute("data-theme",t);}else{document.documentElement.setAttribute("data-theme","system");}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
         className={`min-h-screen bg-background text-foreground ${poppins.variable} ${geistMono.variable} antialiased`}
       >

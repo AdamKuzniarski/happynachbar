@@ -149,6 +149,9 @@ export function CreateActivityForm() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z.B. Spaziergang im Park"
           />
+          <div className="mt-1 text-xs text-hunter">
+            {title.length}/120
+          </div>
         </div>
 
         <div>
@@ -188,6 +191,9 @@ export function CreateActivityForm() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional…"
           />
+          <div className="mt-1 text-xs text-hunter">
+            {description.length}/2000
+          </div>
         </div>
 
         <div>

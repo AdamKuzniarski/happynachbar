@@ -6,7 +6,7 @@ export function Input({
   ...props
 }: React.ComponentPropsWithoutRef<"input">) {
   const base =
-    "h-11 w-full rounded-md border-2 border-fern bg-white px-3 text-sm outline-none focus:ring-palm/40";
+    "h-11 w-full rounded-md border-2 border-fern bg-surface px-3 text-sm text-foreground placeholder:text-foreground/60 outline-none focus:ring-palm/40";
 
   return <input className={cn(base, className)} {...props} />;
 }

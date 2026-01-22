@@ -5,7 +5,7 @@ import { formatDate } from "@/lib/format";
 export function ActivityCard({ activity }: { activity: Activity }) {
   return (
     <Link href={`/activities/${activity.id}`}>
-      <div className="rounded-md bg-limecream overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+      <div className="rounded-md bg-surface overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
         <div className="relative">
           {activity.thumbnailUrl ? (
             <img
@@ -15,10 +15,10 @@ export function ActivityCard({ activity }: { activity: Activity }) {
               loading="lazy"
             />
           ) : (
-            <div className="h-36 w-full bg-white" />
+            <div className="h-36 w-full bg-surface" />
           )}
 
-          <span className="absolute right-2 top-2 rounded border border-fern bg-white/90 px-2 py-1 text-[11px]">
+          <span className="absolute right-2 top-2 rounded border border-fern bg-surface/90 px-2 py-1 text-[11px]">
             {activity.category ?? "—"}
           </span>
         </div>

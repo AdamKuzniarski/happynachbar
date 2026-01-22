@@ -6,7 +6,7 @@ export function Select({
   ...props
 }: React.ComponentPropsWithoutRef<"select">) {
   const base =
-    "h-11 w-full rounded-md border-2 border-fern bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-palm/40";
+    "h-11 w-full rounded-md border-2 border-fern bg-surface px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-palm/40";
 
   return <select className={cn(base, className)} {...props} />;
 }

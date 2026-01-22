@@ -265,15 +265,16 @@ export function CreateActivityForm() {
               {manualUrls.map((url, idx) => (
                 <div key={`${url}-${idx}`} className="flex items-center gap-2">
                   <span className="truncate">{url}</span>
-                  <button
+                  <Button
                     type="button"
-                    className="text-xs underline"
+                    variant="ghost"
+                    className="text-xs underline px-0 py-0"
                     onClick={() =>
                       setManualUrls((prev) => prev.filter((_, i) => i !== idx))
                     }
                   >
                     Entfernen
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>

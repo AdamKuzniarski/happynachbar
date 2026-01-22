@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { ActivityImage } from "@/lib/api/types";
+import { Button } from "@/components/ui/Button";
 
 type GalleryImage = {
   url: string;
@@ -81,9 +82,10 @@ export function ActivityImageGallery({
 
   return (
     <>
-      <button
+      <Button
         type="button"
-        className="mt-3 block w-full"
+        variant="ghost"
+        className="mt-3 block w-full p-0 no-underline"
         onClick={() => {
           setActiveIndex(0);
           setOpen(true);
@@ -96,14 +98,16 @@ export function ActivityImageGallery({
           className="h-56 w-full rounded-md border-2 border-fern bg-surface object-cover"
           loading="lazy"
         />
-      </button>
+      </Button>
 
       {rest.length ? (
         <div className="mt-3 grid grid-cols-3 gap-2">
           {rest.map((img, idx) => (
-            <button
+            <Button
               key={img.url}
               type="button"
+              variant="ghost"
+              className="p-0 no-underline"
               onClick={() => {
                 setActiveIndex(idx + 1);
                 setOpen(true);
@@ -116,7 +120,7 @@ export function ActivityImageGallery({
                 className="h-20 w-full rounded-md border-2 border-fern bg-surface object-cover"
                 loading="lazy"
               />
-            </button>
+            </Button>
           ))}
         </div>
       ) : null}
@@ -132,33 +136,36 @@ export function ActivityImageGallery({
             className="relative w-full max-w-4xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
+            <Button
               type="button"
-              className="absolute -top-10 right-0 rounded-full bg-foreground/90 px-3 py-1 text-sm font-medium text-background"
+              variant="ghost"
+              className="absolute -top-10 right-0 rounded-full bg-foreground/90 px-3 py-1 text-sm font-medium text-background no-underline"
               onClick={() => setOpen(false)}
             >
               Schliessen
-            </button>
+            </Button>
             {hasMultiple ? (
               <>
-                <button
+                <Button
                   type="button"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed"
+                  variant="ghost"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed no-underline"
                   onClick={goPrev}
                   disabled={isFirst}
                   aria-label="Vorheriges Bild"
                 >
                   ←
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed"
+                  variant="ghost"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed no-underline"
                   onClick={goNext}
                   disabled={isLast}
                   aria-label="Naechstes Bild"
                 >
                   →
-                </button>
+                </Button>
               </>
             ) : null}
             <img

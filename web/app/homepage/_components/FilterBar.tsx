@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
+import { Button } from "@/components/ui/Button";
 
 type filterBarProps = {
   query: string;
@@ -69,13 +70,13 @@ export function FiltersBar(props: filterBarProps) {
           </div>
 
           <div className="flex items-center w-full sm:w-auto border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20 p-1 sm:p-0">
-            <button
+            <Button
               type="submit"
               disabled={loading}
               className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1"
             >
               {loading ? "…" : "Finden"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

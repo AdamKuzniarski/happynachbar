@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 function normalizePostalCode(value: string) {
   return value.replace(/\D/g, "").slice(0, 5);
@@ -58,7 +59,7 @@ export function PostalCodeForm() {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={!isValid}
         className="
@@ -79,7 +80,7 @@ export function PostalCodeForm() {
         "
       >
         Weiter
-      </button>
+      </Button>
     </form>
   );
 }

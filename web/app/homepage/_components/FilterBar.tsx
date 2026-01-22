@@ -58,9 +58,12 @@ export function FiltersBar(props: filterBarProps) {
           <div className="flex items-center w-full sm:min-w-40 border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
             <input
               value={plz}
-              onChange={(e) => setPlz(e.target.value)}
+              onChange={(e) =>
+                setPlz(e.target.value.replace(/\D/g, "").slice(0, 5))
+              }
               placeholder="PLZ"
               inputMode="numeric"
+              maxLength={5}
               className="border-0 rounded-none bg-transparent focus:ring-0"
             />
           </div>

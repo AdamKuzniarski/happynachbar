@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
+import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -20,6 +20,7 @@ export function CreateActivityForm() {
   const [category, setCategory] = React.useState("");
   const [plz, setPlz] = React.useState("");
   const [description, setDescription] = React.useState("");
+  const [startAt, setStartAt] = React.useState("");
   const [files, setFiles] = React.useState<File[]>([]);
   const [manualUrls, setManualUrls] = React.useState<string[]>([]);
   const [urlInput, setUrlInput] = React.useState("");
@@ -98,6 +99,7 @@ export function CreateActivityForm() {
     try {
       const imageUrls = await uploadImages(files);
       const allUrls = [...manualUrls, ...imageUrls];
+      const startAtIso = startAt ? new Date(startAt).toISOString() : undefined;
       const res = await fetch(`${apiBase}/activities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,6 +109,7 @@ export function CreateActivityForm() {
           category,
           plz: plz.trim(),
           description: description.trim() || undefined,
+          startAt: startAtIso,
           imageUrls: allUrls.length ? allUrls : undefined,
         }),
       });
@@ -158,7 +161,7 @@ export function CreateActivityForm() {
             <option value="">Bitte wählen</option>
             {ACTIVITY_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {formatActivityCategory(c)}
               </option>
             ))}
           </Select>
@@ -184,6 +187,16 @@ export function CreateActivityForm() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional…"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="startAt">Startzeit (optional)</Label>
+          <Input
+            id="startAt"
+            type="datetime-local"
+            value={startAt}
+            onChange={(e) => setStartAt(e.target.value)}
           />
         </div>
 

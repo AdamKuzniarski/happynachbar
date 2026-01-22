@@ -84,8 +84,8 @@ export function ActivityImageGallery({
     <>
       <Button
         type="button"
-        variant="ghost"
-        className="mt-3 block w-full p-0 no-underline"
+        variant="secondary"
+        className="mt-3 block w-full border-0 bg-transparent p-0 hover:bg-transparent"
         onClick={() => {
           setActiveIndex(0);
           setOpen(true);
@@ -106,13 +106,13 @@ export function ActivityImageGallery({
             <Button
               key={img.url}
               type="button"
-              variant="ghost"
-              className="p-0 no-underline"
+              variant="secondary"
+              className="border-0 bg-transparent p-0 hover:bg-transparent"
               onClick={() => {
                 setActiveIndex(idx + 1);
                 setOpen(true);
               }}
-              aria-label="Bild vergroessern"
+              aria-label="Bild vergrössern"
             >
               <img
                 src={img.url}
@@ -138,8 +138,8 @@ export function ActivityImageGallery({
           >
             <Button
               type="button"
-              variant="ghost"
-              className="absolute -top-10 right-0 rounded-full bg-foreground/90 px-3 py-1 text-sm font-medium text-background no-underline"
+              variant="secondary"
+              className="absolute -top-10 right-0 rounded-full border-0 bg-foreground/90 px-3 py-1 text-sm font-medium text-background hover:bg-foreground"
               onClick={() => setOpen(false)}
             >
               Schliessen
@@ -148,8 +148,8 @@ export function ActivityImageGallery({
               <>
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed no-underline"
+                  variant="secondary"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={goPrev}
                   disabled={isFirst}
                   aria-label="Vorheriges Bild"
@@ -158,8 +158,8 @@ export function ActivityImageGallery({
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-foreground/90 px-3 py-2 text-sm font-medium text-background disabled:opacity-40 disabled:cursor-not-allowed no-underline"
+                  variant="secondary"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={goNext}
                   disabled={isLast}
                   aria-label="Naechstes Bild"

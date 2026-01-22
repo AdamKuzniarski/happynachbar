@@ -39,8 +39,6 @@ export function ActivityImageGallery({
   const [open, setOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
 
-  if (normalizedImages.length === 0) return null;
-
   const hero = normalizedImages[0];
   const rest = normalizedImages.slice(1, 7);
   const active = normalizedImages[activeIndex] ?? hero;
@@ -58,7 +56,7 @@ export function ActivityImageGallery({
   }
 
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || normalizedImages.length === 0) return;
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -78,7 +76,9 @@ export function ActivityImageGallery({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, maxIndex]);
+  }, [open, maxIndex, isFirst, isLast, normalizedImages.length]);
+
+  if (normalizedImages.length === 0) return null;
 
   return (
     <>

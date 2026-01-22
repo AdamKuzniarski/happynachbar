@@ -14,8 +14,8 @@ export function CreateActivityCard({
       type="button"
       onClick={onCreate}
       disabled={creating}
-      variant="ghost"
-      className="min-h-[96px] w-full rounded-md bg-surface p-3 shadow-sm hover:shadow-md hover:bg-surface-strong transition-all no-underline"
+      variant="secondary"
+      className="min-h-[96px] w-full rounded-md border-0 bg-surface p-3 shadow-sm hover:shadow-md hover:bg-surface-strong transition-all no-underline"
       aria-label="Neue Aktivität erstellen"
     >
       <div className="flex h-full flex-col items-center justify-center">

@@ -51,7 +51,7 @@ export default function LoginPage() {
           placeholder="Passwort"
           type="password"
         />
-        <FormError message={error} />`
+        <FormError message={error} />
         <Button disabled={loading}>{loading ? "…" : "Anmelden"}</Button>
         <p className="text-center text-xs">
           Kein Konto?{" "}

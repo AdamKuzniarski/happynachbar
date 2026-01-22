@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
+import { formatActivityCategory } from "@/lib/api/enums";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -44,7 +45,7 @@ export default async function ActivityDetailPage({
 
           <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm space-y-1">
             <div>
-              <b>Kategorie:</b> {a?.category ?? "—"}
+              <b>Kategorie:</b> {formatActivityCategory(a?.category)}
             </div>
             <div>
               <b>PLZ:</b> {a?.plz ?? "—"}

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
+import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
 
 type filterBarProps = {
   query: string;
@@ -49,7 +49,7 @@ export function FiltersBar(props: filterBarProps) {
               <option value="">Alle Kategorien</option>
               {ACTIVITY_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {formatActivityCategory(c)}
                 </option>
               ))}
             </select>

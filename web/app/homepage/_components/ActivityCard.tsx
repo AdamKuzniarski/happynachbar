@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Activity } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
+import { formatActivityCategory } from "@/lib/api/enums";
 
 export function ActivityCard({ activity }: { activity: Activity }) {
   return (
@@ -19,7 +20,7 @@ export function ActivityCard({ activity }: { activity: Activity }) {
           )}
 
           <span className="absolute right-2 top-2 rounded border border-fern bg-surface/90 px-2 py-1 text-[11px]">
-            {activity.category ?? "—"}
+            {formatActivityCategory(activity.category)}
           </span>
         </div>
 

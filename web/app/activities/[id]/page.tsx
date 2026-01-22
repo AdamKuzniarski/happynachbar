@@ -51,6 +51,10 @@ export default async function ActivityDetailPage({
               <b>PLZ:</b> {a?.plz ?? "—"}
             </div>
             <div>
+              <b>Erstellt von:</b>{" "}
+              {a?.createdBy?.displayName?.trim() || "Neighbor"}
+            </div>
+            <div>
               <b>Start:</b> {formatDate(a?.startAt ?? a?.scheduledAt)}
             </div>
             <div>

@@ -240,7 +240,7 @@ export function CreateActivityForm() {
                 const value = urlInput.trim();
                 if (!value) return;
                 if (!isHttpUrl(value)) {
-                  setError("Bitte eine gueltige http(s) URL eingeben.");
+                  setError("Bitte eine gültige http(s) URL eingeben.");
                   return;
                 }
                 if (files.length + manualUrls.length >= 5) {
@@ -251,7 +251,7 @@ export function CreateActivityForm() {
                 setUrlInput("");
               }}
             >
-              Hinzufuegen
+              Hinzufügen
             </Button>
           </div>
           {manualUrls.length ? (
@@ -263,9 +263,7 @@ export function CreateActivityForm() {
                     type="button"
                     className="text-xs underline"
                     onClick={() =>
-                      setManualUrls((prev) =>
-                        prev.filter((_, i) => i !== idx),
-                      )
+                      setManualUrls((prev) => prev.filter((_, i) => i !== idx))
                     }
                   >
                     Entfernen

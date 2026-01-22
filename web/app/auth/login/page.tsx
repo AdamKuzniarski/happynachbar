@@ -36,9 +36,16 @@ export default function LoginPage() {
 
   return (
     <main className="px-4">
+      <div className="mx-auto mt-8 max-w-sm">
+        <h1 className="text-center text-2xl font-bold sm:text-3xl">Log in</h1>
+        <p className="mt-2 text-center text-sm text-hunter">
+          Melde dich an, um deine Nachbarschaft zu entdecken.
+        </p>
+      </div>
+
       <form
         onSubmit={onSubmit}
-        className="mx-auto mt-8 flex max-w-sm flex-col gap-3"
+        className="mx-auto mt-6 flex max-w-sm flex-col gap-3"
       >
         <Input
           value={email}
@@ -54,10 +61,11 @@ export default function LoginPage() {
         <FormError message={error} />
         <Button disabled={loading}>{loading ? "…" : "Anmelden"}</Button>
         <p className="text-center text-xs">
-          Kein Konto?{" "}
+          Du hast noch kein Konto? Dann hier entlang zum{" "}
           <Link href="/auth/register" className="underline font-semibold">
             Registrieren
           </Link>
+          .
         </p>
       </form>
     </main>

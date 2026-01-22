@@ -3,7 +3,13 @@ import { ThemeToggle } from "../theme/ThemeToggle";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
 
-export function AppHeader({ variant }: { variant: HeaderVariant }) {
+export function AppHeader({
+  variant,
+  showBackOnAuth = false,
+}: {
+  variant: HeaderVariant;
+  showBackOnAuth?: boolean;
+}) {
   const btn =
     "rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4";
 
@@ -40,9 +46,11 @@ export function AppHeader({ variant }: { variant: HeaderVariant }) {
               Logout
             </a>
           ) : variant === "auth" ? (
-            <Link href="/" className={btn}>
-              Back
-            </Link>
+            showBackOnAuth ? (
+              <Link href="/" className={btn}>
+                Back
+              </Link>
+            ) : null
           ) : (
             <Link href="/auth/login" className={btn}>
               Login

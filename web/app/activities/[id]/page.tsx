@@ -33,14 +33,14 @@ export default async function ActivityDetailPage({
           ← Zurück
         </Link>
 
-        <section className="mt-4 rounded-md border-2 border-fern bg-limecream p-4 shadow-sm sm:p-6">
+        <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
           <h1 className="text-lg font-semibold">{a?.title ?? "Aktivität"}</h1>
 
           {heroUrl ? (
             <img
               src={heroUrl}
               alt={images?.[0]?.alt ?? a?.title ?? "Aktivität"}
-              className="mt-3 h-56 w-full rounded-md border-2 border-fern bg-white object-cover"
+              className="mt-3 h-56 w-full rounded-md border-2 border-fern bg-surface object-cover"
               loading="lazy"
             />
           ) : null}
@@ -52,14 +52,14 @@ export default async function ActivityDetailPage({
                   key={img?.url ?? idx}
                   src={img?.url}
                   alt={img?.alt ?? a?.title ?? "Aktivität"}
-                  className="h-20 w-full rounded-md border-2 border-fern bg-white object-cover"
+                  className="h-20 w-full rounded-md border-2 border-fern bg-surface object-cover"
                   loading="lazy"
                 />
               ))}
             </div>
           ) : null}
 
-          <div className="mt-3 rounded-md border-2 border-fern bg-white p-3 text-sm space-y-1">
+          <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm space-y-1">
             <div>
               <b>Kategorie:</b> {a?.category ?? "—"}
             </div>
@@ -77,7 +77,7 @@ export default async function ActivityDetailPage({
           {a?.description && (
             <div className="mt-4">
               <div className="text-sm font-medium mb-1">Beschreibung</div>
-              <div className="rounded-md border-2 border-fern bg-white p-3 text-sm">
+              <div className="rounded-md border-2 border-fern bg-surface p-3 text-sm">
                 {a.description}
               </div>
             </div>

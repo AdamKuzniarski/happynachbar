@@ -17,13 +17,13 @@ export default function LogoutPage() {
         <div className="mt-6 flex flex-col gap-3">
           <Link
             href="/"
-            className="rounded-md border-2 border-fern bg-limecream px-4 py-2 text-center text-sm font-medium hover:bg-palm hover:text-limecream"
+            className="rounded-md border-2 border-fern bg-limecream px-4 py-2 text-center text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream"
           >
             Zur Landingpage
           </Link>
           <Link
             href="/auth/login"
-            className="rounded-md border-2 border-fern bg-white px-4 py-2 text-center text-sm font-medium hover:bg-limecream"
+            className="rounded-md border-2 border-fern bg-surface px-4 py-2 text-center text-sm font-medium hover:bg-surface-strong"
           >
             Zum Login
           </Link>

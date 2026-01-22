@@ -25,7 +25,7 @@ export function FiltersBar(props: filterBarProps) {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-white shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
+      <div className="mx-auto w-full md:w-fit rounded-2xl sm:rounded-full bg-surface shadow-sm ring-1 ring-fern/40 focus-within:ring-2 focus-within:ring-palm/40 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center">
           <div className="flex items-center w-full sm:w-65 shrink-0 min-w-0">
             <div className="pl-3 text-hunter/70" aria-hidden="true">

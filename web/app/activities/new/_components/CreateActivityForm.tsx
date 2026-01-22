@@ -67,7 +67,7 @@ export function CreateActivityForm() {
   }
 
   return (
-    <section className="rounded-md border-2 border-fern bg-limecream p-4 shadow-sm sm:p-6">
+    <section className="rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
       <h1 className="text-lg font-semibold">Neue Aktivität</h1>
       <p className="mt-1 text-sm text-hunter">
         Titel, Kategorie, PLZ, Optional Beschreibung.

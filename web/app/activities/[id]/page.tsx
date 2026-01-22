@@ -65,7 +65,7 @@ export default async function ActivityDetailPage({
           {a?.description && (
             <div className="mt-4">
               <div className="text-sm font-medium mb-1">Beschreibung</div>
-              <div className="rounded-md border-2 border-fern bg-surface p-3 text-sm">
+              <div className="rounded-md border-2 border-fern bg-surface p-3 text-sm break-words">
                 {a.description}
               </div>
             </div>

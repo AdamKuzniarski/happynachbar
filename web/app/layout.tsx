@@ -25,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`min-h-screen bg-white text-evergreen ${poppins.variable} ${geistMono.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

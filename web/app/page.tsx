@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { PostalCodeForm } from "./postal-code-form";
+import { PostalCodeForm } from "../components/postal-code-form";
 
 export default function LandingPage() {
   return (

@@ -9,9 +9,9 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white text-evergreen">
+    <>
       <AppHeader variant={variant} />
       {children}
-    </div>
+    </>
   );
 }

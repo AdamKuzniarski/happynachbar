@@ -1,10 +1,10 @@
 import * as React from "react";
 import { AppShell } from "@/components/layout/AppShell";
 
-export default function AuthLayout({
+export default function LoginLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <AppShell variant="auth">{children}</AppShell>;
 }

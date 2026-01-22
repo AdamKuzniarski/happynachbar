@@ -47,7 +47,7 @@ export default async function ActivityDetailPage({
 
           {images.length > 1 ? (
             <div className="mt-3 grid grid-cols-3 gap-2">
-              {images.slice(0, 6).map((img, idx: number) => (
+              {images.slice(1, 7).map((img, idx: number) => (
                 <img
                   key={img?.url ?? idx}
                   src={img?.url}

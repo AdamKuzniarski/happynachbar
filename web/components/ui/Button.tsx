@@ -13,8 +13,8 @@ export function Button({
 
   const styles: Record<Variant, string> = {
     primary: "bg-palm text-white hover:bg-hunter",
-    secondary: "border-2 border-fern bg-white text-evergreen",
-    ghost: "text-evergreen underline hover:opacity-80",
+    secondary: "border-2 border-fern bg-surface text-foreground",
+    ghost: "text-foreground underline hover:opacity-80",
   };
   return <button className={cn(base, styles[variant], className)} {...props} />;
 }

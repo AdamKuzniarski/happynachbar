@@ -6,7 +6,7 @@ export function Textarea({
   ...props
 }: React.ComponentPropsWithoutRef<"textarea">) {
   const base =
-    "w-full rounded-md border-2 border-fern bg-white px-3 py-2 text-sm outline-none focus:ring-palm/40 min-h-25";
+    "w-full rounded-md border-2 border-fern bg-surface px-3 py-2 text-sm text-foreground placeholder:text-foreground/60 outline-none focus:ring-palm/40 min-h-25";
 
   return <textarea className={cn(base, className)} {...props} />;
 }

@@ -135,27 +135,26 @@ export function CreateActivityForm() {
 
   return (
     <section className="rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
-      <h1 className="text-lg font-semibold">Neue Aktivität</h1>
-      <p className="mt-1 text-sm text-hunter">
-        Titel, Kategorie, PLZ, Optional Beschreibung.
-      </p>
+      <h1 className="text-lg font-semibold text-center">
+        Erstelle eine neue Aktivität
+      </h1>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div>
-          <Label htmlFor="title">Title </Label>
+          <Label htmlFor="title">Title *</Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z.B. Spaziergang im Park"
           />
-          <div className="mt-1 text-xs text-hunter">
+          <div className="mt-1 text-right text-xs text-hunter">
             {title.length}/120
           </div>
         </div>
 
         <div>
-          <Label htmlFor="category"> Kategorie</Label>
+          <Label htmlFor="category">Kategorie *</Label>
           <Select
             id="category"
             value={category}
@@ -171,7 +170,7 @@ export function CreateActivityForm() {
         </div>
 
         <div>
-          <Label htmlFor="plz">PLZ</Label>
+          <Label htmlFor="plz">PLZ *</Label>
           <Input
             value={plz}
             onChange={(e) =>
@@ -191,7 +190,7 @@ export function CreateActivityForm() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional…"
           />
-          <div className="mt-1 text-xs text-hunter">
+          <div className="mt-1 text-right text-xs text-hunter">
             {description.length}/2000
           </div>
         </div>

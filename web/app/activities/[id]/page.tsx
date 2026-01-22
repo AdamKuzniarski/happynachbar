@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
-import type { ActivityDetail, ActivityImage } from "@/lib/api/types";
+import type { ActivityDetail } from "@/lib/api/types";
+import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -20,8 +21,7 @@ export default async function ActivityDetailPage({
 
   if (!res.ok) notFound();
   const a = (await res.json()) as ActivityDetail;
-  const images: ActivityImage[] = Array.isArray(a?.images) ? a.images : [];
-  const heroUrl = a?.thumbnailUrl ?? images[0]?.url;
+  const images = Array.isArray(a?.images) ? a.images : [];
 
   return (
     <main className="px-4">
@@ -36,28 +36,11 @@ export default async function ActivityDetailPage({
         <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
           <h1 className="text-lg font-semibold">{a?.title ?? "Aktivität"}</h1>
 
-          {heroUrl ? (
-            <img
-              src={heroUrl}
-              alt={images?.[0]?.alt ?? a?.title ?? "Aktivität"}
-              className="mt-3 h-56 w-full rounded-md border-2 border-fern bg-surface object-cover"
-              loading="lazy"
-            />
-          ) : null}
-
-          {images.length > 1 ? (
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {images.slice(1, 7).map((img, idx: number) => (
-                <img
-                  key={img?.url ?? idx}
-                  src={img?.url}
-                  alt={img?.alt ?? a?.title ?? "Aktivität"}
-                  className="h-20 w-full rounded-md border-2 border-fern bg-surface object-cover"
-                  loading="lazy"
-                />
-              ))}
-            </div>
-          ) : null}
+          <ActivityImageGallery
+            title={a?.title ?? "Aktivität"}
+            thumbnailUrl={a?.thumbnailUrl}
+            images={images}
+          />
 
           <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm space-y-1">
             <div>

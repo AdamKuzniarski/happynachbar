@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "../theme/ThemeToggle";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
 
@@ -12,7 +13,7 @@ export function AppHeader({ variant }: { variant: HeaderVariant }) {
         className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
         aria-hidden="true"
       />
-      <span className="text-sm font-semibold sm:text-lg text-evergreen">
+      <span className="text-sm font-semibold sm:text-lg text-foreground">
         happynachbar
       </span>
     </div>
@@ -32,19 +33,22 @@ export function AppHeader({ variant }: { variant: HeaderVariant }) {
       <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
         {brandHref ? <Link href={brandHref}>{brand}</Link> : brand}
 
-        {variant === "app" ? (
-          <a href="/auth/logout" className={btn}>
-            Logout
-          </a>
-        ) : variant === "auth" ? (
-          <Link href="/" className={btn}>
-            Back
-          </Link>
-        ) : (
-          <Link href="/auth/login" className={btn}>
-            Login
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {variant === "app" ? (
+            <a href="/auth/logout" className={btn}>
+              Logout
+            </a>
+          ) : variant === "auth" ? (
+            <Link href="/" className={btn}>
+              Back
+            </Link>
+          ) : (
+            <Link href="/auth/login" className={btn}>
+              Login
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

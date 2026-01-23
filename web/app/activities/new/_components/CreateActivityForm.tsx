@@ -14,9 +14,9 @@ import {
   isValidPostalCode,
   normalizePostalCode,
   getManualUrlAddResult,
-  type ManualUrlAddStatus,
   MANUAL_URL_STATUS_MESSAGES,
 } from "@/lib/validators";
+import type { ManualUrlAddStatus } from "@/lib/api/types";
 
 export function CreateActivityForm() {
   const router = useRouter();

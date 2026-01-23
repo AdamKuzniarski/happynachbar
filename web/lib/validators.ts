@@ -1,3 +1,4 @@
+export type { AddUrlResult, ManualUrlAddStatus } from "./api/types";
 import type { AddUrlResult, ManualUrlAddStatus } from "./api/types";
 
 export function normalizePostalCode(v: string) {
@@ -61,7 +62,12 @@ export function getManualUrlAddResult(
   maxTotalImages: number,
   currentFilesCount: number,
 ): { status: ManualUrlAddStatus; value?: string } {
-  const res = tryAddManualUrl(value, existing, maxTotalImages, currentFilesCount);
+  const res = tryAddManualUrl(
+    value,
+    existing,
+    maxTotalImages,
+    currentFilesCount,
+  );
   if (!value.trim()) return { status: "empty" };
   if (!res.ok) return { status: res.reason };
   if (!res.value) return { status: "empty" };

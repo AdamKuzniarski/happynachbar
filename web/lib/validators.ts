@@ -1,3 +1,5 @@
+import type { AddUrlResult, ManualUrlAddStatus } from "./api/types";
+
 export function normalizePostalCode(v: string) {
   return v.replace(/\s+/g, "").trim();
 }
@@ -23,4 +25,45 @@ export function isHttpUrl(value: string) {
   } catch {
     return false;
   }
+}
+
+export function tryAddManualUrl(
+  value: string,
+  existing: string[],
+  maxTotalImages: number,
+  currentFilesCount: number,
+): AddUrlResult {
+  const normalized = value.trim();
+  if (!normalized) return { ok: true, value: "" };
+  if (!isHttpUrl(normalized)) {
+    return { ok: false, reason: "invalid" };
+  }
+  if (currentFilesCount + existing.length >= maxTotalImages) {
+    return { ok: false, reason: "limit" };
+  }
+  if (existing.includes(normalized)) {
+    return { ok: false, reason: "duplicate" };
+  }
+  return { ok: true, value: normalized };
+}
+
+export const MANUAL_URL_STATUS_MESSAGES: Record<ManualUrlAddStatus, string> = {
+  empty: "",
+  invalid: "Bitte eine gültige http(s) URL eingeben.",
+  limit: "Maximal 5 Bilder insgesamt erlaubt.",
+  duplicate: "Wurde nicht hinzugefügt, es handelt sich um ein Duplikat.",
+  added: "URL hinzugefügt.",
+};
+
+export function getManualUrlAddResult(
+  value: string,
+  existing: string[],
+  maxTotalImages: number,
+  currentFilesCount: number,
+): { status: ManualUrlAddStatus; value?: string } {
+  const res = tryAddManualUrl(value, existing, maxTotalImages, currentFilesCount);
+  if (!value.trim()) return { status: "empty" };
+  if (!res.ok) return { status: res.reason };
+  if (!res.value) return { status: "empty" };
+  return { status: "added", value: res.value };
 }

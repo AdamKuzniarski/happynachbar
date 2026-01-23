@@ -3,15 +3,20 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
+import { createActivity, uploadActivityImages } from "@/lib/api/activities";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { isHttpUrl } from "@/lib/validators";
-
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import {
+  isValidPostalCode,
+  normalizePostalCode,
+  getManualUrlAddResult,
+  type ManualUrlAddStatus,
+  MANUAL_URL_STATUS_MESSAGES,
+} from "@/lib/validators";
 
 export function CreateActivityForm() {
   const router = useRouter();
@@ -24,73 +29,35 @@ export function CreateActivityForm() {
   const [files, setFiles] = React.useState<File[]>([]);
   const [manualUrls, setManualUrls] = React.useState<string[]>([]);
   const [urlInput, setUrlInput] = React.useState("");
-  const [urlAdded, setUrlAdded] = React.useState(false);
-  const [urlDuplicate, setUrlDuplicate] = React.useState(false);
+  const [urlStatus, setUrlStatus] = React.useState<"added" | "duplicate" | null>(
+    null,
+  );
 
-  React.useEffect(() => {
-    if (!urlAdded) return;
-    const t = setTimeout(() => setUrlAdded(false), 2000);
-    return () => clearTimeout(t);
-  }, [urlAdded]);
-
-  React.useEffect(() => {
-    if (!urlDuplicate) return;
-    const t = setTimeout(() => setUrlDuplicate(false), 2000);
-    return () => clearTimeout(t);
-  }, [urlDuplicate]);
+  function applyManualUrlResult(status: ManualUrlAddStatus, value?: string) {
+    if (status === "invalid" || status === "limit") {
+      setError(MANUAL_URL_STATUS_MESSAGES[status]);
+      return false;
+    }
+    if (status === "duplicate") {
+      setUrlStatus("duplicate");
+      return false;
+    }
+    if (status === "added" && value) {
+      setManualUrls((prev) => [...prev, value]);
+      setUrlInput("");
+      setUrlStatus("added");
+    }
+    return true;
+  }
 
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  async function uploadImages(selected: File[]) {
-    if (!selected.length) return [];
-
-    const urls: string[] = [];
-    for (const file of selected) {
-      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-        throw new Error("Nur JPG, PNG oder WebP Bilder sind erlaubt.");
-      }
-      if (file.size > 10_000_000) {
-        throw new Error("Bild ist zu groß (max. 10MB).");
-      }
-
-      const presignRes = await fetch(`${apiBase}/uploads/presign`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          kind: "activity",
-          contentType: file.type,
-        }),
-      });
-      const presign = await presignRes.json().catch(() => null);
-      if (!presignRes.ok || !presign?.uploadUrl || !presign?.uploadFiles) {
-        const msg =
-          (Array.isArray(presign?.message)
-            ? presign.message.join(", ")
-            : presign?.message) || "Upload vorbereiten fehlgeschlagen.";
-        throw new Error(msg);
-      }
-
-      const fd = new FormData();
-      for (const [k, v] of Object.entries(presign.uploadFiles)) {
-        fd.append(k, String(v));
-      }
-      fd.append("file", file);
-
-      const uploadRes = await fetch(presign.uploadUrl, {
-        method: "POST",
-        body: fd,
-      });
-      if (!uploadRes.ok) {
-        throw new Error("Bild-Upload fehlgeschlagen.");
-      }
-
-      if (presign.assetUrl) urls.push(String(presign.assetUrl));
-    }
-
-    return urls;
-  }
+  React.useEffect(() => {
+    if (!urlStatus) return;
+    const t = setTimeout(() => setUrlStatus(null), 2000);
+    return () => clearTimeout(t);
+  }, [urlStatus]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,26 +69,17 @@ export function CreateActivityForm() {
     if (title.trim().length < 3)
       return setError("Titel muss mindestens 3 Zeichen haben.");
     if (!category) return setError("Bitte Kategorie auswählen.");
-    if (!/^\d{5}$/.test(plz.trim()))
+    if (!isValidPostalCode(plz))
       return setError("PLZ muss genau 5 Ziffern sein.");
 
-    if (urlInput.trim()) {
-      const value = urlInput.trim();
-      if (!isHttpUrl(value)) {
-        return setError("Bitte eine gültige http(s) URL eingeben.");
-      }
-      if (files.length + manualUrls.length >= 5) {
-        return setError("Maximal 5 Bilder insgesamt erlaubt.");
-      }
-      setManualUrls((prev) => {
-        if (prev.includes(value)) {
-          setUrlDuplicate(true);
-          return prev;
-        }
-        setUrlAdded(true);
-        return [...prev, value];
-      });
-      setUrlInput("");
+    {
+      const { status, value } = getManualUrlAddResult(
+        urlInput,
+        manualUrls,
+        5,
+        files.length,
+      );
+      if (!applyManualUrlResult(status, value)) return;
     }
 
     if (files.length + manualUrls.length > 5) {
@@ -130,29 +88,21 @@ export function CreateActivityForm() {
 
     setSaving(true);
     try {
-      const imageUrls = await uploadImages(files);
+      const imageUrls = await uploadActivityImages(files);
       const allUrls = [...manualUrls, ...imageUrls];
       const startAtIso = startAt ? new Date(startAt).toISOString() : undefined;
-      const res = await fetch(`${apiBase}/activities`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: title.trim(),
-          category,
-          plz: plz.trim(),
-          description: description.trim() || undefined,
-          startAt: startAtIso,
-          imageUrls: allUrls.length ? allUrls : undefined,
-        }),
+      const result = await createActivity({
+        title: title.trim(),
+        category,
+        plz: plz.trim(),
+        description: description.trim() || undefined,
+        startAt: startAtIso,
+        imageUrls: allUrls.length ? allUrls : undefined,
       });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        const msg =
-          (Array.isArray(data?.message)
-            ? data.message.join(", ")
-            : data?.message) || `HTTP ${res.status}`;
+      if (!result.ok) {
+        const msg = Array.isArray(result.message)
+          ? result.message.join(", ")
+          : result.message ?? "Fehler beim Erstellen.";
         setError(msg);
         return;
       }
@@ -206,9 +156,7 @@ export function CreateActivityForm() {
           <Label htmlFor="plz">PLZ *</Label>
           <Input
             value={plz}
-            onChange={(e) =>
-              setPlz(e.target.value.replace(/\D/g, "").slice(0, 5))
-            }
+            onChange={(e) => setPlz(normalizePostalCode(e.target.value))}
             inputMode="numeric"
             maxLength={5}
             placeholder="10115"
@@ -274,47 +222,23 @@ export function CreateActivityForm() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  const value = urlInput.trim();
-                  if (!value) return;
-                  if (!isHttpUrl(value)) {
-                    setError("Bitte eine gültige http(s) URL eingeben.");
-                    return;
-                  }
-                  if (files.length + manualUrls.length >= 5) {
-                    setError("Maximal 5 Bilder insgesamt erlaubt.");
-                    return;
-                  }
-                  setManualUrls((prev) => {
-                    if (prev.includes(value)) {
-                      setUrlDuplicate(true);
-                      return prev;
-                    }
-                    setUrlAdded(true);
-                    return [...prev, value];
-                  });
-                  setUrlInput("");
+                  const { status, value } = getManualUrlAddResult(
+                    urlInput,
+                    manualUrls,
+                    5,
+                    files.length,
+                  );
+                  applyManualUrlResult(status, value);
                 }
               }}
               onBlur={() => {
-                const value = urlInput.trim();
-                if (!value) return;
-                if (!isHttpUrl(value)) {
-                  setError("Bitte eine gültige http(s) URL eingeben.");
-                  return;
-                }
-                if (files.length + manualUrls.length >= 5) {
-                  setError("Maximal 5 Bilder insgesamt erlaubt.");
-                  return;
-                }
-                setManualUrls((prev) => {
-                  if (prev.includes(value)) {
-                    setUrlDuplicate(true);
-                    return prev;
-                  }
-                  setUrlAdded(true);
-                  return [...prev, value];
-                });
-                setUrlInput("");
+                const { status, value } = getManualUrlAddResult(
+                  urlInput,
+                  manualUrls,
+                  5,
+                  files.length,
+                );
+                applyManualUrlResult(status, value);
               }}
             />
             <Button
@@ -322,36 +246,26 @@ export function CreateActivityForm() {
               variant="ghost"
               className="text-xs px-2 py-1"
               onClick={() => {
-                const value = urlInput.trim();
-                if (!value) return;
-                if (!isHttpUrl(value)) {
-                  setError("Bitte eine gültige http(s) URL eingeben.");
-                  return;
-                }
-                if (files.length + manualUrls.length >= 5) {
-                  setError("Maximal 5 Bilder insgesamt erlaubt.");
-                  return;
-                }
-                setManualUrls((prev) => {
-                  if (prev.includes(value)) {
-                    setUrlDuplicate(true);
-                    return prev;
-                  }
-                  setUrlAdded(true);
-                  return [...prev, value];
-                });
-                setUrlInput("");
+                const { status, value } = getManualUrlAddResult(
+                  urlInput,
+                  manualUrls,
+                  5,
+                  files.length,
+                );
+                applyManualUrlResult(status, value);
               }}
             >
               + weiteres Bild
             </Button>
           </div>
-          {urlAdded ? (
-            <p className="text-xs text-hunter">URL hinzugefügt.</p>
+          {urlStatus === "added" ? (
+            <p className="text-xs text-hunter">
+              {MANUAL_URL_STATUS_MESSAGES.added}
+            </p>
           ) : null}
-          {urlDuplicate ? (
+          {urlStatus === "duplicate" ? (
             <p className="text-xs text-red-600">
-              Wurde nicht hinzugefügt, es handelt sich um ein Duplikat.
+              {MANUAL_URL_STATUS_MESSAGES.duplicate}
             </p>
           ) : null}
           {manualUrls.length ? (

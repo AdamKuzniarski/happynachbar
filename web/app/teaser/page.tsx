@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { isValidPostalCode } from "@/lib/validators";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -16,7 +17,7 @@ export default async function TeaserPage({
   const raw = (await searchParams).postalCode;
   const postalCode = Array.isArray(raw) ? raw[0] : raw;
 
-  if (!postalCode || !/^\d{5}$/.test(postalCode)) redirect("/");
+  if (!postalCode || !isValidPostalCode(postalCode)) redirect("/");
 
   const res = await fetch(
     `${apiBase}/activities?plz=${encodeURIComponent(postalCode)}&status=ACTIVE`,

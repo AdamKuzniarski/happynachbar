@@ -24,6 +24,20 @@ export function CreateActivityForm() {
   const [files, setFiles] = React.useState<File[]>([]);
   const [manualUrls, setManualUrls] = React.useState<string[]>([]);
   const [urlInput, setUrlInput] = React.useState("");
+  const [urlAdded, setUrlAdded] = React.useState(false);
+  const [urlDuplicate, setUrlDuplicate] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!urlAdded) return;
+    const t = setTimeout(() => setUrlAdded(false), 2000);
+    return () => clearTimeout(t);
+  }, [urlAdded]);
+
+  React.useEffect(() => {
+    if (!urlDuplicate) return;
+    const t = setTimeout(() => setUrlDuplicate(false), 2000);
+    return () => clearTimeout(t);
+  }, [urlDuplicate]);
 
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -90,6 +104,25 @@ export function CreateActivityForm() {
     if (!category) return setError("Bitte Kategorie auswählen.");
     if (!/^\d{5}$/.test(plz.trim()))
       return setError("PLZ muss genau 5 Ziffern sein.");
+
+    if (urlInput.trim()) {
+      const value = urlInput.trim();
+      if (!isHttpUrl(value)) {
+        return setError("Bitte eine gültige http(s) URL eingeben.");
+      }
+      if (files.length + manualUrls.length >= 5) {
+        return setError("Maximal 5 Bilder insgesamt erlaubt.");
+      }
+      setManualUrls((prev) => {
+        if (prev.includes(value)) {
+          setUrlDuplicate(true);
+          return prev;
+        }
+        setUrlAdded(true);
+        return [...prev, value];
+      });
+      setUrlInput("");
+    }
 
     if (files.length + manualUrls.length > 5) {
       return setError("Maximal 5 Bilder insgesamt erlaubt.");
@@ -238,9 +271,56 @@ export function CreateActivityForm() {
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const value = urlInput.trim();
+                  if (!value) return;
+                  if (!isHttpUrl(value)) {
+                    setError("Bitte eine gültige http(s) URL eingeben.");
+                    return;
+                  }
+                  if (files.length + manualUrls.length >= 5) {
+                    setError("Maximal 5 Bilder insgesamt erlaubt.");
+                    return;
+                  }
+                  setManualUrls((prev) => {
+                    if (prev.includes(value)) {
+                      setUrlDuplicate(true);
+                      return prev;
+                    }
+                    setUrlAdded(true);
+                    return [...prev, value];
+                  });
+                  setUrlInput("");
+                }
+              }}
+              onBlur={() => {
+                const value = urlInput.trim();
+                if (!value) return;
+                if (!isHttpUrl(value)) {
+                  setError("Bitte eine gültige http(s) URL eingeben.");
+                  return;
+                }
+                if (files.length + manualUrls.length >= 5) {
+                  setError("Maximal 5 Bilder insgesamt erlaubt.");
+                  return;
+                }
+                setManualUrls((prev) => {
+                  if (prev.includes(value)) {
+                    setUrlDuplicate(true);
+                    return prev;
+                  }
+                  setUrlAdded(true);
+                  return [...prev, value];
+                });
+                setUrlInput("");
+              }}
             />
             <Button
               type="button"
+              variant="ghost"
+              className="text-xs px-2 py-1"
               onClick={() => {
                 const value = urlInput.trim();
                 if (!value) return;
@@ -252,13 +332,28 @@ export function CreateActivityForm() {
                   setError("Maximal 5 Bilder insgesamt erlaubt.");
                   return;
                 }
-                setManualUrls((prev) => [...prev, value]);
+                setManualUrls((prev) => {
+                  if (prev.includes(value)) {
+                    setUrlDuplicate(true);
+                    return prev;
+                  }
+                  setUrlAdded(true);
+                  return [...prev, value];
+                });
                 setUrlInput("");
               }}
             >
-              Hinzufügen
+              + weiteres Bild
             </Button>
           </div>
+          {urlAdded ? (
+            <p className="text-xs text-hunter">URL hinzugefügt.</p>
+          ) : null}
+          {urlDuplicate ? (
+            <p className="text-xs text-red-600">
+              Wurde nicht hinzugefügt, es handelt sich um ein Duplikat.
+            </p>
+          ) : null}
           {manualUrls.length ? (
             <div className="mt-2 space-y-1 text-xs text-hunter">
               {manualUrls.map((url, idx) => (

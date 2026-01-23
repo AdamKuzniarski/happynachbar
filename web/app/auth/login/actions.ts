@@ -16,7 +16,7 @@ async function readJsonSafe(res: Response) {
 
 export async function loginAndSetCookie(
   email: string,
-  password: string
+  password: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const response = await fetch(`${getApiUrl()}/auth/login`, {
     method: "POST",
@@ -48,6 +48,8 @@ export async function loginAndSetCookie(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    domain:
+      process.env.NODE_ENV === "production" ? ".adamkuzniarski.dev" : undefined,
     path: "/",
   });
 
@@ -57,5 +59,10 @@ export async function loginAndSetCookie(
 // Clears auth token cookie; moves web app into unauthenticated state
 export async function logout() {
   const cookieStore = await cookies();
-  cookieStore.delete("happynachbar_token");
+  cookieStore.delete({
+    name: "happynachbar_token",
+    domain:
+      process.env.NODE_ENV === "production" ? ".adamkuzniarski.dev" : undefined,
+    path: "/",
+  });
 }

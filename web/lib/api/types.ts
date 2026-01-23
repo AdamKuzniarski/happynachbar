@@ -21,6 +21,17 @@ export type ActivityImage = {
   alt?: string;
 };
 
+export type ManualUrlAddStatus =
+  | "empty"
+  | "invalid"
+  | "limit"
+  | "duplicate"
+  | "added";
+
+export type AddUrlResult =
+  | { ok: true; value: string }
+  | { ok: false; reason: "invalid" | "limit" | "duplicate" };
+
 export type UserSummary = {
   id: string;
   displayName?: string;

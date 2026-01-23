@@ -2,6 +2,12 @@ import { apiFetch } from "./client";
 import { buildQuery } from "@/lib/query";
 import type { ActivityDetail, ListActivitiesResponse } from "./types";
 
+type PresignResponse = {
+  uploadUrl: string;
+  uploadFiles: Record<string, string>;
+  assetUrl?: string;
+};
+
 export type ListActivitiesParams = {
   take?: number;
   cursor?: string | null;
@@ -62,4 +68,48 @@ export async function createActivity(
       message: e instanceof Error ? e.message : "Unknown error",
     };
   }
+}
+
+export async function uploadActivityImages(files: File[]) {
+  if (!files.length) return [];
+
+  const urls: string[] = [];
+  for (const file of files) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      throw new Error("Nur JPG, PNG oder WebP Bilder sind erlaubt.");
+    }
+    if (file.size > 10_000_000) {
+      throw new Error("Bild ist zu groß (max. 10MB).");
+    }
+
+    const presign = await apiFetch<PresignResponse>("/uploads/presign", {
+      method: "POST",
+      body: JSON.stringify({
+        kind: "activity",
+        contentType: file.type,
+      }),
+    });
+
+    if (!presign?.uploadUrl || !presign?.uploadFiles) {
+      throw new Error("Upload vorbereiten fehlgeschlagen.");
+    }
+
+    const fd = new FormData();
+    for (const [k, v] of Object.entries(presign.uploadFiles)) {
+      fd.append(k, String(v));
+    }
+    fd.append("file", file);
+
+    const uploadRes = await fetch(presign.uploadUrl, {
+      method: "POST",
+      body: fd,
+    });
+    if (!uploadRes.ok) {
+      throw new Error("Bild-Upload fehlgeschlagen.");
+    }
+
+    if (presign.assetUrl) urls.push(String(presign.assetUrl));
+  }
+
+  return urls;
 }

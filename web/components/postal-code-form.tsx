@@ -2,20 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-function normalizePostalCode(value: string) {
-  return value.replace(/\D/g, "").slice(0, 5);
-}
-
-function isValidGermanPostalCode(value: string) {
-  return /^\d{5}$/.test(value);
-}
+import { Button } from "@/components/ui/Button";
+import { isValidPostalCode, normalizePostalCode } from "@/lib/validators";
 
 export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
   const router = useRouter();
 
-  const isValid = isValidGermanPostalCode(postalCode);
+  const isValid = isValidPostalCode(postalCode);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,7 +52,7 @@ export function PostalCodeForm() {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={!isValid}
         className="
@@ -79,7 +73,7 @@ export function PostalCodeForm() {
         "
       >
         Weiter
-      </button>
+      </Button>
     </form>
   );
 }

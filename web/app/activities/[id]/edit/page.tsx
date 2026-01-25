@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ActivityDetail } from "@/lib/api/types";
-import { EditActivityForm } from "./_components/EditActivityForm";
+import { CreateActivityForm } from "../../new/_components/CreateActivityForm";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -32,7 +32,7 @@ export default async function EditActivityPage({
         </Link>
 
         <div className="mt-4">
-          <EditActivityForm activity={activity} />
+          <CreateActivityForm mode="edit" activity={activity} />
         </div>
       </div>
     </main>

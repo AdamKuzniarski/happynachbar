@@ -2,7 +2,11 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { createActivity, uploadActivityImages } from "@/lib/api/activities";
+import {
+  createActivity,
+  updateActivity,
+  uploadActivityImages,
+} from "@/lib/api/activities";
 import { ActivityFormFields } from "@/app/activities/_components/ActivityFormFields";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
@@ -13,22 +17,36 @@ import {
   getManualUrlAddResult,
   MANUAL_URL_STATUS_MESSAGES,
 } from "@/lib/validators";
-import type { ManualUrlAddStatus } from "@/lib/api/types";
+import type { ActivityDetail, ManualUrlAddStatus } from "@/lib/api/types";
+import { toDateTimeLocal } from "@/lib/format";
 
-export function CreateActivityForm() {
+type CreateActivityFormProps =
+  | { mode?: "create"; activity?: undefined }
+  | { mode: "edit"; activity: ActivityDetail };
+
+export function CreateActivityForm(props: CreateActivityFormProps) {
+  const mode = props.mode ?? "create";
+  const activity = props.mode === "edit" ? props.activity : undefined;
   const router = useRouter();
 
-  const [title, setTitle] = React.useState("");
-  const [category, setCategory] = React.useState("");
-  const [plz, setPlz] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [startAt, setStartAt] = React.useState("");
+  const [title, setTitle] = React.useState(activity?.title ?? "");
+  const [category, setCategory] = React.useState(activity?.category ?? "");
+  const [plz, setPlz] = React.useState(activity?.plz ?? "");
+  const [description, setDescription] = React.useState(
+    activity?.description ?? "",
+  );
+  const [startAt, setStartAt] = React.useState(
+    toDateTimeLocal(activity?.startAt ?? activity?.scheduledAt),
+  );
   const [files, setFiles] = React.useState<File[]>([]);
-  const [manualUrls, setManualUrls] = React.useState<string[]>([]);
+  const [imageUrls, setImageUrls] = React.useState<string[]>(
+    Array.isArray(activity?.images) ? activity.images.map((i) => i.url) : [],
+  );
   const [urlInput, setUrlInput] = React.useState("");
   const [urlStatus, setUrlStatus] = React.useState<"added" | "duplicate" | null>(
     null,
   );
+  const [dragIndex, setDragIndex] = React.useState<number | null>(null);
 
   function applyManualUrlResult(status: ManualUrlAddStatus, value?: string) {
     if (status === "invalid" || status === "limit") {
@@ -40,7 +58,7 @@ export function CreateActivityForm() {
       return false;
     }
     if (status === "added" && value) {
-      setManualUrls((prev) => [...prev, value]);
+      setImageUrls((prev) => [...prev, value]);
       setUrlInput("");
       setUrlStatus("added");
     }
@@ -72,30 +90,40 @@ export function CreateActivityForm() {
     {
       const { status, value } = getManualUrlAddResult(
         urlInput,
-        manualUrls,
+        imageUrls,
         5,
         files.length,
       );
       if (!applyManualUrlResult(status, value)) return;
     }
 
-    if (files.length + manualUrls.length > 5) {
+    if (files.length + imageUrls.length > 5) {
       return setError("Maximal 5 Bilder insgesamt erlaubt.");
     }
 
     setSaving(true);
     try {
-      const imageUrls = await uploadActivityImages(files);
-      const allUrls = [...manualUrls, ...imageUrls];
+      const uploadedUrls = await uploadActivityImages(files);
+      const allUrls = [...imageUrls, ...uploadedUrls].filter(Boolean);
       const startAtIso = startAt ? new Date(startAt).toISOString() : undefined;
-      const result = await createActivity({
-        title: title.trim(),
-        category,
-        plz: plz.trim(),
-        description: description.trim() || undefined,
-        startAt: startAtIso,
-        imageUrls: allUrls.length ? allUrls : undefined,
-      });
+      const result =
+        mode === "edit" && activity
+          ? await updateActivity(activity.id, {
+              title: title.trim(),
+              category,
+              plz: plz.trim(),
+              description: description.trim() || undefined,
+              startAt: startAtIso,
+              imageUrls: allUrls.length ? allUrls : undefined,
+            })
+          : await createActivity({
+              title: title.trim(),
+              category,
+              plz: plz.trim(),
+              description: description.trim() || undefined,
+              startAt: startAtIso,
+              imageUrls: allUrls.length ? allUrls : undefined,
+            });
       if (!result.ok) {
         const msg = Array.isArray(result.message)
           ? result.message.join(", ")
@@ -103,7 +131,11 @@ export function CreateActivityForm() {
         setError(msg);
         return;
       }
-      router.push("/homepage");
+      if (mode === "edit" && activity) {
+        router.push(`/activities/${encodeURIComponent(activity.id)}`);
+      } else {
+        router.push("/homepage");
+      }
       router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
@@ -116,7 +148,7 @@ export function CreateActivityForm() {
   return (
     <section className="rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
       <h1 className="text-lg font-semibold text-center">
-        Erstelle eine neue Aktivität
+        {mode === "edit" ? "Aktivität bearbeiten" : "Erstelle eine neue Aktivität"}
       </h1>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
@@ -142,7 +174,7 @@ export function CreateActivityForm() {
             multiple
             onChange={(e) => {
               const list = Array.from(e.target.files ?? []);
-              const maxFiles = Math.max(0, 5 - manualUrls.length);
+              const maxFiles = Math.max(0, 5 - imageUrls.length);
               if (list.length > maxFiles) {
                 setError("Maximal 5 Bilder insgesamt erlaubt.");
                 setFiles(list.slice(0, maxFiles));
@@ -155,6 +187,46 @@ export function CreateActivityForm() {
             <p className="mt-1 text-xs text-hunter">
               {files.length} Bild{files.length === 1 ? "" : "er"} ausgewählt
             </p>
+          ) : null}
+          {mode === "edit" && imageUrls.length ? (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {imageUrls.map((url, idx) => (
+                <div
+                  key={`${url}-${idx}`}
+                  className="relative rounded-md border-2 border-fern bg-surface"
+                  draggable={mode === "edit"}
+                  onDragStart={() => mode === "edit" && setDragIndex(idx)}
+                  onDragOver={(e) => mode === "edit" && e.preventDefault()}
+                  onDrop={() => {
+                    if (mode !== "edit") return;
+                    if (dragIndex == null || dragIndex === idx) return;
+                    setImageUrls((prev) => {
+                      const next = [...prev];
+                      const [moved] = next.splice(dragIndex, 1);
+                      next.splice(idx, 0, moved);
+                      return next;
+                    });
+                    setDragIndex(null);
+                  }}
+                >
+                  <img
+                    src={url}
+                    alt="Aktivitaetsbild"
+                    className="h-20 w-full rounded-md object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="absolute right-1 top-1 px-2 py-1 text-[10px] leading-none"
+                    onClick={() =>
+                      setImageUrls((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                  >
+                    Entfernen
+                  </Button>
+                </div>
+              ))}
+            </div>
           ) : null}
         </div>
 
@@ -171,7 +243,7 @@ export function CreateActivityForm() {
                   e.preventDefault();
                   const { status, value } = getManualUrlAddResult(
                     urlInput,
-                    manualUrls,
+                    imageUrls,
                     5,
                     files.length,
                   );
@@ -181,7 +253,7 @@ export function CreateActivityForm() {
               onBlur={() => {
                 const { status, value } = getManualUrlAddResult(
                   urlInput,
-                  manualUrls,
+                  imageUrls,
                   5,
                   files.length,
                 );
@@ -195,7 +267,7 @@ export function CreateActivityForm() {
               onClick={() => {
                 const { status, value } = getManualUrlAddResult(
                   urlInput,
-                  manualUrls,
+                  imageUrls,
                   5,
                   files.length,
                 );
@@ -215,9 +287,9 @@ export function CreateActivityForm() {
               {MANUAL_URL_STATUS_MESSAGES.duplicate}
             </p>
           ) : null}
-          {manualUrls.length ? (
+          {mode === "create" && imageUrls.length ? (
             <div className="mt-2 space-y-1 text-xs text-hunter">
-              {manualUrls.map((url, idx) => (
+              {imageUrls.map((url, idx) => (
                 <div key={`${url}-${idx}`} className="flex items-center gap-2">
                   <span className="truncate">{url}</span>
                   <Button
@@ -225,7 +297,7 @@ export function CreateActivityForm() {
                     variant="ghost"
                     className="text-xs underline px-0 py-0"
                     onClick={() =>
-                      setManualUrls((prev) => prev.filter((_, i) => i !== idx))
+                      setImageUrls((prev) => prev.filter((_, i) => i !== idx))
                     }
                   >
                     Entfernen
@@ -234,12 +306,17 @@ export function CreateActivityForm() {
               ))}
             </div>
           ) : null}
+          {mode === "edit" && imageUrls.length ? (
+            <p className="mt-2 text-xs text-hunter">
+              Bilder kannst du per Drag & Drop neu anordnen.
+            </p>
+          ) : null}
         </div>
 
         <FormError message={error} />
 
         <Button type="submit" disabled={saving}>
-          {saving ? "Speichern…" : "Erstellen"}
+          {saving ? "Speichern…" : mode === "edit" ? "Speichern" : "Erstellen"}
         </Button>
       </form>
     </section>

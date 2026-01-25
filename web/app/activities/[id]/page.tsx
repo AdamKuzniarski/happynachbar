@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
+import { ActivityActions } from "./_components/ActivityActions";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -70,6 +71,8 @@ export default async function ActivityDetailPage({
               </div>
             </div>
           )}
+
+          <ActivityActions id={a.id} />
         </section>
       </div>
     </main>

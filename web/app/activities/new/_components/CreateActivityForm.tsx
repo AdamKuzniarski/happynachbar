@@ -315,9 +315,22 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
 
         <FormError message={error} />
 
-        <Button type="submit" disabled={saving}>
-          {saving ? "Speichern…" : mode === "edit" ? "Speichern" : "Erstellen"}
-        </Button>
+        <div className="flex justify-center gap-2">
+          <Button type="submit" disabled={saving}>
+            {saving ? "Speichern…" : mode === "edit" ? "Speichern" : "Erstellen"}
+          </Button>
+          {mode === "edit" && activity ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                router.push(`/activities/${encodeURIComponent(activity.id)}`)
+              }
+            >
+              Abbrechen
+            </Button>
+          ) : null}
+        </div>
       </form>
     </section>
   );

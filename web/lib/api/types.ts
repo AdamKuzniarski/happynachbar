@@ -32,6 +32,19 @@ export type AddUrlResult =
   | { ok: true; value: string }
   | { ok: false; reason: "invalid" | "limit" | "duplicate" };
 
+export type ActivityFormFieldsProps = {
+  title: string;
+  setTitle: (v: string) => void;
+  category: string;
+  setCategory: (v: string) => void;
+  plz: string;
+  setPlz: (v: string) => void;
+  description: string;
+  setDescription: (v: string) => void;
+  startAt: string;
+  setStartAt: (v: string) => void;
+};
+
 export type UserSummary = {
   id: string;
   displayName?: string;

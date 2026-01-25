@@ -3,18 +3,22 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
+import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
 
 export function ActivityActions({ id }: { id: string }) {
   const router = useRouter();
   const [deleting, setDeleting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   function onEdit() {
+    if (deleting) return;
     router.push(`/activities/${encodeURIComponent(id)}/edit`);
   }
 
   async function onDelete() {
     if (deleting) return;
+    setError(null);
     const ok = window.confirm("Aktivitaet wirklich löschen?");
     if (!ok) return;
     setDeleting(true);
@@ -24,7 +28,7 @@ export function ActivityActions({ id }: { id: string }) {
         const msg = Array.isArray(res.message)
           ? res.message.join(", ")
           : res.message ?? "Löschen fehlgeschlagen.";
-        alert(msg);
+        setError(msg);
         return;
       }
       router.push("/homepage");
@@ -35,24 +39,28 @@ export function ActivityActions({ id }: { id: string }) {
   }
 
   return (
-    <div className="mt-4 flex justify-center gap-2">
-      <Button
-        type="button"
-        variant="secondary"
-        className="hover:bg-blue-600 hover:text-white"
-        onClick={onEdit}
-      >
-        Edit
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        className="hover:bg-red-600 hover:text-white"
-        onClick={onDelete}
-        disabled={deleting}
-      >
-        {deleting ? "Loeschen…" : "Delete"}
-      </Button>
+    <div className="mt-4 flex flex-col items-center gap-2">
+      <div className="flex justify-center gap-2">
+        <Button
+          type="button"
+          variant="secondary"
+          className="hover:bg-blue-600 hover:text-white"
+          onClick={onEdit}
+          disabled={deleting}
+        >
+          Edit
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="hover:bg-red-600 hover:text-white"
+          onClick={onDelete}
+          disabled={deleting}
+        >
+          {deleting ? "Loeschen…" : "Delete"}
+        </Button>
+      </div>
+      <FormError message={error} />
     </div>
   );
 }

@@ -36,7 +36,9 @@ export default async function ActivityDetailPage({
         </Link>
 
         <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
-          <h1 className="text-lg font-semibold">{a?.title ?? "Aktivität"}</h1>
+          <h1 className="text-lg font-semibold text-center">
+            {a?.title ?? "Aktivität"}
+          </h1>
 
           <ActivityImageGallery
             title={a?.title ?? "Aktivität"}

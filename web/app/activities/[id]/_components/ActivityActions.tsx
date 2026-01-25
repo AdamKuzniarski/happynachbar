@@ -35,7 +35,7 @@ export function ActivityActions({ id }: { id: string }) {
   }
 
   return (
-    <div className="mt-4 flex gap-2">
+    <div className="mt-4 flex justify-center gap-2">
       <Button
         type="button"
         variant="secondary"

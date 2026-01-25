@@ -90,7 +90,7 @@ export function ActivityImageGallery({
           setActiveIndex(0);
           setOpen(true);
         }}
-        aria-label="Bild vergroessern"
+        aria-label="Bild vergrössern"
       >
         <img
           src={hero.url}

@@ -48,7 +48,7 @@ export function ActivityActions({ id }: { id: string }) {
           onClick={onEdit}
           disabled={deleting}
         >
-          Edit
+          Bearbeiten
         </Button>
         <Button
           type="button"
@@ -57,7 +57,7 @@ export function ActivityActions({ id }: { id: string }) {
           onClick={onDelete}
           disabled={deleting}
         >
-          {deleting ? "Loeschen…" : "Delete"}
+          {deleting ? "Löschen…" : "Löschen"}
         </Button>
       </div>
       <FormError message={error} />

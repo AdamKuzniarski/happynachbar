@@ -12,12 +12,19 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const port = configService.get<number>('API_PORT') ?? 4000;
 
+  app.use(cookieParser());
+
+  const origins = (
+    configService.get<string>('CORS_ORIGINS') ?? 'http://localhost:3000'
+  )
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: origins,
     credentials: true,
   });
-
-  app.use(cookieParser());
 
   // Swagger enable/disable via env
   const swaggerEnabled =

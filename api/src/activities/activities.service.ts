@@ -141,6 +141,7 @@ export class ActivitiesService {
       plz: a.plz,
       locationLabel: undefined,
       thumbnailUrl: a.images[0]?.url ?? null,
+      createdById: a.createdBy.id,
       createdBy: {
         id: a.createdBy.id,
         displayName: a.createdBy.profile?.displayName ?? 'Neighbor',

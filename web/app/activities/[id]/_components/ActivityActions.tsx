@@ -5,20 +5,43 @@ import * as React from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
-import { notifySuccess } from "@/lib/toast";
+import { notifyError, notifySuccess } from "@/lib/toast";
 
-export function ActivityActions({ id }: { id: string }) {
+export function ActivityActions({
+  id,
+  createdById,
+  currentUserId,
+}: {
+  id: string;
+  createdById?: string;
+  currentUserId?: string;
+}) {
   const router = useRouter();
   const [deleting, setDeleting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   function onEdit() {
     if (deleting) return;
+    if (createdById && currentUserId && createdById !== currentUserId) {
+      setError("Not owner");
+      notifyError(
+        "Du kannst nur Aktivitäten bearbeiten, die du auch erstellt hast",
+      );
+      return;
+    }
+    setError(null);
     router.push(`/activities/${encodeURIComponent(id)}/edit`);
   }
 
   async function onDelete() {
     if (deleting) return;
+    if (createdById && currentUserId && createdById !== currentUserId) {
+      setError("Not owner");
+      notifyError(
+        "Du kannst nur Aktivitäten löschen, die du auch erstellt hast",
+      );
+      return;
+    }
     setError(null);
     const ok = window.confirm("Aktivitaet wirklich löschen?");
     if (!ok) return;

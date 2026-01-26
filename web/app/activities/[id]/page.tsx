@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
@@ -24,6 +25,23 @@ export default async function ActivityDetailPage({
   if (!res.ok) notFound();
   const a = (await res.json()) as ActivityDetail;
   const images = Array.isArray(a?.images) ? a.images : [];
+  const cookieStore = await cookies();
+  const token = cookieStore.get("happynachbar_token")?.value;
+  let currentUserId: string | undefined;
+  if (token) {
+    try {
+      const meRes = await fetch(`${apiBase}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      if (meRes.ok) {
+        const me = (await meRes.json()) as { id?: string };
+        currentUserId = me?.id;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   return (
     <main className="px-4">
@@ -74,7 +92,11 @@ export default async function ActivityDetailPage({
             </div>
           )}
 
-          <ActivityActions id={a.id} />
+          <ActivityActions
+            id={a.id}
+            createdById={a.createdById}
+            currentUserId={currentUserId}
+          />
         </section>
       </div>
     </main>

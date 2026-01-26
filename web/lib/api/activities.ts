@@ -70,6 +70,46 @@ export async function createActivity(
   }
 }
 
+export async function updateActivity(
+  id: string,
+  payload: Partial<CreateActivityPayload>,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
+export async function deleteActivity(
+  id: string,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function uploadActivityImages(files: File[]) {
   if (!files.length) return [];
 

@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
+import { ActivityActions } from "./_components/ActivityActions";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -35,7 +36,9 @@ export default async function ActivityDetailPage({
         </Link>
 
         <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
-          <h1 className="text-lg font-semibold">{a?.title ?? "Aktivität"}</h1>
+          <h1 className="text-lg font-semibold text-center">
+            {a?.title ?? "Aktivität"}
+          </h1>
 
           <ActivityImageGallery
             title={a?.title ?? "Aktivität"}
@@ -70,6 +73,8 @@ export default async function ActivityDetailPage({
               </div>
             </div>
           )}
+
+          <ActivityActions id={a.id} />
         </section>
       </div>
     </main>

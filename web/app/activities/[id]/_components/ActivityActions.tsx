@@ -5,6 +5,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
+import { notifySuccess } from "@/lib/toast";
 
 export function ActivityActions({ id }: { id: string }) {
   const router = useRouter();
@@ -31,6 +32,7 @@ export function ActivityActions({ id }: { id: string }) {
         setError(msg);
         return;
       }
+      notifySuccess("Aktivität gelöscht.");
       router.push("/homepage");
       router.refresh();
     } finally {

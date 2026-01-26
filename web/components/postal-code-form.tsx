@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { isValidPostalCode, normalizePostalCode } from "@/lib/validators";
+import { toast } from "react-toastify";
 
 export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
@@ -16,6 +17,7 @@ export function PostalCodeForm() {
     if (!isValid) return;
 
     localStorage.setItem("postalCode", postalCode);
+    toast.success("Postleitzahl erfolgreich gesendet!");
     router.push(`/teaser?postalCode=${encodeURIComponent(postalCode)}`);
   }
 
@@ -29,10 +31,14 @@ export function PostalCodeForm() {
         id="postalCode"
         name="postalCode"
         inputMode="numeric"
+        maxLength={5}
         autoComplete="postal-code"
         placeholder="z.B. 10115"
         value={postalCode}
-        onChange={(e) => setPostalCode(normalizePostalCode(e.target.value))}
+        onChange={(e) => {
+          const digitsOnly = e.target.value.replace(/\D+/g, "");
+          setPostalCode(normalizePostalCode(digitsOnly).slice(0, 5));
+        }}
         className="
           h-8
           w-32

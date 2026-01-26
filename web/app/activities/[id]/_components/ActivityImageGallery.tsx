@@ -63,15 +63,15 @@ export function ActivityImageGallery({
         setOpen(false);
         return;
       }
-              if (e.key === "ArrowRight") {
-                if (isLast) return;
-                goNext();
-                return;
-              }
-              if (e.key === "ArrowLeft") {
-                if (isFirst) return;
-                goPrev();
-              }
+      if (e.key === "ArrowRight") {
+        if (isLast) return;
+        setActiveIndex((idx) => Math.min(idx + 1, maxIndex));
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        if (isFirst) return;
+        setActiveIndex((idx) => Math.max(idx - 1, 0));
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);

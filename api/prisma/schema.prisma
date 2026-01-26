@@ -20,10 +20,19 @@ model User {
   profile           UserProfile?
   createdActivities Activity[]
 
+
   role UserRole @default(USER)
+
+  isBanned Boolean @default(false)
+  bannedAt DateTime?
+  banReason String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  warningsReceived UserWarning[] @relation("WarningsReceived")
+  warningsCreated UserWarning[] @relation("WarningsCreatedBy")
+  auditLogs AuditLog[] @relation("AuditLogsByActor")
 
 }
 
@@ -100,4 +109,63 @@ model ActivityImage {
 
   @@unique([activityId, sortOrder]) // Innerhalb einer Activity darf keinen zweiten Datensatz mit selben sortOrder geben 
   @@index([activityId])
+}
+
+enum WarningSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model UserWarning {
+
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user User @relation("WarningsReceived", fields: [userId], references: [id], onDelete: Cascade)
+
+  message String
+  severity WarningSeverity @default(LOW)
+  expiresAt DateTime?
+
+  createdByAdminId String @db.Uuid
+  createdByAdmin User @relation("WarningsCreatedBy", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdByAdminId, createdAt])
+}
+enum AuditEntityType {
+  USER
+  ACTIVITY
+  USER_WARNING
+}
+
+enum AuditAction {
+  USER_ROLE_CHANGED
+  USER_BANNED
+  USER_UNBANNED
+  USER_WARNING_CREATED
+
+  ACTIVITY_ARCHIVED
+  ACTIVITY_RESTORED
+
+  ACTIVITIES_BULK_STATUS_CHANGED
+}
+
+model AuditLog {
+  id String @id @default(uuid()) @db.Uuid
+
+  actorUserId String? @db.Uuid
+  actorUser User? @relation("AuditLogsByActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  action AuditAction 
+  entityType AuditEntityType
+  entityId String
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorUserId, createdAt])
 }

@@ -1,7 +1,17 @@
 import 'dotenv/config';
 import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
-const prisma = new PrismaClient();
+const url = process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
+if (!url) {
+  console.error('Missing DATABASE_URL (or DIRECT_DATABASE_URL).');
+  process.exit(1);
+}
+
+const pool = new Pool({ connectionString: url });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 function parseEmails(raw?: string): string[] {
   if (!raw) return [];
@@ -50,4 +60,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

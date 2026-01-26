@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { isValidPostalCode, normalizePostalCode } from "@/lib/validators";
-import { notifySuccess } from "@/lib/toast";
 
 export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
@@ -17,7 +16,6 @@ export function PostalCodeForm() {
     if (!isValid) return;
 
     localStorage.setItem("postalCode", postalCode);
-    notifySuccess("Postleitzahl erfolgreich gesendet!");
     router.push(`/teaser?postalCode=${encodeURIComponent(postalCode)}`);
   }
 

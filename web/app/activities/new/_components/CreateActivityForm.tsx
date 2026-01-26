@@ -88,6 +88,8 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
     if (!isValidPostalCode(plz))
       return setError("PLZ muss genau 5 Ziffern sein.");
 
+    let nextImageUrls = imageUrls;
+    const normalizedUrlInput = urlInput.trim();
     {
       const { status, value } = getManualUrlAddResult(
         urlInput,
@@ -95,17 +97,35 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
         5,
         files.length,
       );
-      if (!applyManualUrlResult(status, value)) return;
+      if (status === "invalid" || status === "limit") {
+        setError(MANUAL_URL_STATUS_MESSAGES[status]);
+        return;
+      }
+      if (status === "duplicate") {
+        if (normalizedUrlInput && imageUrls.includes(normalizedUrlInput)) {
+          setUrlInput("");
+          setUrlStatus(null);
+        } else {
+          setUrlStatus("duplicate");
+          return;
+        }
+      }
+      if (status === "added" && value) {
+        nextImageUrls = [...imageUrls, value];
+        setImageUrls(nextImageUrls);
+        setUrlInput("");
+        setUrlStatus("added");
+      }
     }
 
-    if (files.length + imageUrls.length > 5) {
+    if (files.length + nextImageUrls.length > 5) {
       return setError("Maximal 5 Bilder insgesamt erlaubt.");
     }
 
     setSaving(true);
     try {
       const uploadedUrls = await uploadActivityImages(files);
-      const allUrls = [...imageUrls, ...uploadedUrls].filter(Boolean);
+      const allUrls = [...nextImageUrls, ...uploadedUrls].filter(Boolean);
       const startAtIso = startAt ? new Date(startAt).toISOString() : undefined;
       const result =
         mode === "edit" && activity
@@ -115,7 +135,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
               plz: plz.trim(),
               description: description.trim() || undefined,
               startAt: startAtIso,
-              imageUrls: allUrls.length ? allUrls : undefined,
+              imageUrls: allUrls,
             })
           : await createActivity({
               title: title.trim(),

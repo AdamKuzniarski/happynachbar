@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
+import { ToastProvider } from "../components/toast/ToastProvider";
 
 const poppins = Poppins({
   variable: "--font-geist-sans",
@@ -36,7 +37,10 @@ export default function RootLayout({
       <body
         className={`min-h-screen bg-background text-foreground ${poppins.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <ToastProvider />
+        </ThemeProvider>
       </body>
     </html>
   );

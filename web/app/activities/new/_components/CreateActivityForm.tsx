@@ -19,6 +19,7 @@ import {
 } from "@/lib/validators";
 import type { ActivityDetail, ManualUrlAddStatus } from "@/lib/api/types";
 import { toDateTimeLocal } from "@/lib/format";
+import { notifySuccess } from "@/lib/toast";
 
 type CreateActivityFormProps =
   | { mode?: "create"; activity?: undefined }
@@ -132,8 +133,10 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
         return;
       }
       if (mode === "edit" && activity) {
+        notifySuccess("Aktivität gespeichert.");
         router.push(`/activities/${encodeURIComponent(activity.id)}`);
       } else {
+        notifySuccess("Aktivität erstellt.");
         router.push("/homepage");
       }
       router.refresh();

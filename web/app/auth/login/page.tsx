@@ -7,6 +7,7 @@ import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
+import { notifySuccess } from "@/lib/toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function LoginPage() {
         setError(result.error);
         return;
       }
+      notifySuccess("Willkommen zurück!");
       router.push("/homepage");
       router.refresh();
     } finally {

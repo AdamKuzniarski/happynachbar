@@ -7,7 +7,7 @@ import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
-import { notifySuccess } from "@/lib/toast";
+import { notifyError, notifySuccess } from "@/lib/toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,6 +26,9 @@ export default function LoginPage() {
       const result = await loginAndSetCookie(email.trim(), password);
       if (!result.ok) {
         setError(result.error);
+        if (result.error.toLowerCase().includes("invalid credentials")) {
+          notifyError("Login fehlgeschlagen. Bitte prüfe deine Daten.");
+        }
         return;
       }
       notifySuccess("Willkommen zurück!");

@@ -35,6 +35,10 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      const { notifyError } = await import("@/lib/toast");
+      notifyError("Bitte neu einloggen.");
+    }
     const messageFromJson = (() => {
       if (typeof data !== "object" || data === null) return null;
       if (!("message" in data)) return null;

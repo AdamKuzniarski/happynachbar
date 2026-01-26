@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
-import { notifySuccess } from "@/lib/toast";
+import { notifyError, notifySuccess } from "@/lib/toast";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,6 +35,9 @@ export default function RegisterPage() {
 
       if (!result.ok) {
         setError(result.error);
+        if (result.error.toLowerCase().includes("email already in use")) {
+          notifyError("Diese E-Mail ist bereits registriert.");
+        }
         return;
       }
 

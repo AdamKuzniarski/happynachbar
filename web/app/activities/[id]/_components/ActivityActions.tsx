@@ -20,6 +20,8 @@ export function ActivityActions({
   const router = useRouter();
   const [deleting, setDeleting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const canManage =
+    !createdById || !currentUserId ? true : createdById === currentUserId;
 
   function onEdit() {
     if (deleting) return;
@@ -62,26 +64,28 @@ export function ActivityActions({
 
   return (
     <div className="mt-4 flex flex-col items-center gap-2">
-      <div className="flex justify-center gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          className="hover:bg-blue-600 hover:text-white"
-          onClick={onEdit}
-          disabled={deleting}
-        >
-          Bearbeiten
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="hover:bg-red-600 hover:text-white"
-          onClick={onDelete}
-          disabled={deleting}
-        >
-          {deleting ? "Löschen…" : "Löschen"}
-        </Button>
-      </div>
+      {canManage ? (
+        <div className="flex justify-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            className="hover:bg-blue-600 hover:text-white"
+            onClick={onEdit}
+            disabled={deleting}
+          >
+            Bearbeiten
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="hover:bg-red-600 hover:text-white"
+            onClick={onDelete}
+            disabled={deleting}
+          >
+            {deleting ? "Löschen…" : "Löschen"}
+          </Button>
+        </div>
+      ) : null}
       <FormError message={error} />
     </div>
   );

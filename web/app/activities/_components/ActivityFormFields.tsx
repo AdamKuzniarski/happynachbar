@@ -2,7 +2,7 @@
 
 import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
 import type { ActivityFormFieldsProps } from "@/lib/api/types";
-import { normalizePostalCode } from "@/lib/validators";
+import { normalizePostalCodeInput } from "@/lib/validators";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -57,7 +57,7 @@ export function ActivityFormFields(props: ActivityFormFieldsProps) {
         <Label htmlFor="plz">PLZ *</Label>
         <Input
           value={plz}
-          onChange={(e) => setPlz(normalizePostalCode(e.target.value))}
+        onChange={(e) => setPlz(normalizePostalCodeInput(e.target.value))}
           inputMode="numeric"
           maxLength={5}
           placeholder="10115"

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { isValidPostalCode, normalizePostalCode } from "@/lib/validators";
+import { isValidPostalCode, normalizePostalCodeInput } from "@/lib/validators";
 
 export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
@@ -34,8 +34,7 @@ export function PostalCodeForm() {
         placeholder="z.B. 10115"
         value={postalCode}
         onChange={(e) => {
-          const digitsOnly = e.target.value.replace(/\D+/g, "");
-          setPostalCode(normalizePostalCode(digitsOnly).slice(0, 5));
+          setPostalCode(normalizePostalCodeInput(e.target.value));
         }}
         className="
           h-8

@@ -5,6 +5,10 @@ export function normalizePostalCode(v: string) {
   return v.replace(/\s+/g, "").trim();
 }
 
+export function normalizePostalCodeInput(v: string) {
+  return v.replace(/\D+/g, "").slice(0, 5);
+}
+
 export function isValidPostalCode(v: string) {
   const x = normalizePostalCode(v);
   return /^\d{5}$/.test(x);

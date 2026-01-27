@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
 import { notifyError, notifySuccess } from "@/lib/toast";
+import { TOAST_MESSAGES } from "@/lib/toast-messages";
 
 export function ActivityActions({
   id,
@@ -24,9 +25,7 @@ export function ActivityActions({
     if (deleting) return;
     if (createdById && currentUserId && createdById !== currentUserId) {
       setError("Not owner");
-      notifyError(
-        "Du kannst nur Aktivitäten bearbeiten, die du auch erstellt hast",
-      );
+      notifyError(TOAST_MESSAGES.activity.notOwner);
       return;
     }
     setError(null);
@@ -37,9 +36,7 @@ export function ActivityActions({
     if (deleting) return;
     if (createdById && currentUserId && createdById !== currentUserId) {
       setError("Not owner");
-      notifyError(
-        "Du kannst nur Aktivitäten löschen, die du auch erstellt hast",
-      );
+      notifyError(TOAST_MESSAGES.activity.notOwner);
       return;
     }
     setError(null);
@@ -55,7 +52,7 @@ export function ActivityActions({
         setError(msg);
         return;
       }
-      notifySuccess("Aktivität gelöscht.");
+      notifySuccess(TOAST_MESSAGES.activity.deleted);
       router.push("/homepage");
       router.refresh();
     } finally {

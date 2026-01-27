@@ -9,7 +9,7 @@ const STYLES: Record<BadgeVariant, string> = {
   danger: "bg-evergreen text-limecream",
 };
 
-export default function Badge({
+export function Badge({
   variant = "neutral",
   className,
   children,

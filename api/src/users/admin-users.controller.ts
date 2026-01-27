@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
@@ -41,7 +42,7 @@ export class AdminUsersController {
 
   @Patch(':id/role')
   setRole(
-    @Req() req: any,
+    @Req() req: Request & { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminSetUserRoleDto,
   ) {
@@ -50,7 +51,7 @@ export class AdminUsersController {
 
   @Patch(':id/ban')
   setBan(
-    @Req() req: any,
+    @Req() req: Request & { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminSetUserBanDto,
   ) {
@@ -67,7 +68,7 @@ export class AdminUsersController {
 
   @Post(':id/warnings')
   createWarning(
-    @Req() req: any,
+    @Req() req: Request & { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminCreateWarningDto,
   ) {

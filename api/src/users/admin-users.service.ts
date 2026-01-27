@@ -131,7 +131,7 @@ export class AdminUsersService {
   }
 
   async listWarnings(userId: string, q: AdminListWarningsQueryDto) {
-    const take = clamp(Number(q.take) || 20, 1, 50);
+    const take = clamp(q.take ?? 20, 1, 50);
 
     const exists = await this.prisma.user.findUnique({
       where: { id: userId },

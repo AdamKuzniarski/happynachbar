@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
@@ -36,7 +37,10 @@ export class AdminActivitiesController {
   }
 
   @Patch('bulk/status')
-  bulkStatus(@Req() req: any, @Body() dto: AdminBulkActivityStatusDto) {
+  bulkStatus(
+    @Req() req: Request & { user: { userId: string } },
+    @Body() dto: AdminBulkActivityStatusDto,
+  ) {
     return this.adminActivities.bulkStatus(req.user.userId, dto);
   }
 
@@ -47,7 +51,7 @@ export class AdminActivitiesController {
 
   @Patch(':id')
   update(
-    @Req() req: any,
+    @Req() req: Request & { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminUpdateActivityDto,
   ) {
@@ -56,7 +60,7 @@ export class AdminActivitiesController {
 
   @Patch(':id/status')
   setStatus(
-    @Req() req: any,
+    @Req() req: Request & { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminSetActivityStatusDto,
   ) {

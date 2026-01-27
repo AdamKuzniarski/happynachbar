@@ -28,7 +28,7 @@ export class AdminListUsersQueryDto {
   @Transform(({ value }: { value: unknown }) => {
     if (value === true || value === false) return value;
     if (typeof value !== 'string') return undefined;
-    const v = value.trim().toLocaleLowerCase();
+    const v = value.trim().toLowerCase();
     if (v === 'true') return true;
     if (v === 'false') return false;
     return undefined;
@@ -56,9 +56,15 @@ export class AdminSetUserRoleDto {
 }
 
 export class AdminSetUserBanDto {
-  @Transform(({ value }) =>
-    value === 'true' ? true : value === 'false' ? false : value,
-  )
+  @Transform(({ value }: { value: unknown }) => {
+    if (value === true || value === false) return value;
+    if (typeof value === 'string') {
+      const v = value.trim().toLowerCase();
+      if (v === 'true') return true;
+      if (v === 'false') return false;
+    }
+    return value;
+  })
   @IsBoolean()
   isBanned!: boolean;
 

@@ -154,6 +154,8 @@ export class AdminActivitiesService {
       entityId: id,
       metadata: { from: existing.status, to: updated.status },
     });
+
+    return updated;
   }
 
   async bulkStatus(actorId: string, dto: AdminBulkActivityStatusDto) {
@@ -174,6 +176,8 @@ export class AdminActivitiesService {
         ids: dto.ids,
       },
     });
+
+    return { ok: true, updatedCount: result.count };
   }
 
   async update(actorId: string, id: string, dto: AdminUpdateActivityDto) {
@@ -191,8 +195,14 @@ export class AdminActivitiesService {
     if (!existing) throw new NotFoundException('Activity not found');
 
     const data: Prisma.ActivityUpdateInput = {};
-    if (dto.title !== undefined) data.title = dto.title.trim();
-    if (dto.description !== undefined) data.description = dto.description;
+    if (dto.title !== undefined) {
+      const title = dto.title.trim();
+      if (!title) {
+        throw new BadRequestException('Title cannot be empty');
+      }
+      data.title = title;
+    }
+    if (dto.description !== undefined) data.description = dto.description?.trim();
     if (dto.category !== undefined) data.category = dto.category as any;
     if (dto.plz !== undefined) data.plz = dto.plz;
     if (dto.scheduledAt !== undefined)
@@ -218,8 +228,8 @@ export class AdminActivitiesService {
 
     await this.audit.log({
       actorUserId: actorId,
-      action: 'ACTIVITY_EDITED' as any, // if enum: add AuditAction.ACTIVITY_EDITED
-      entityType: 'ACTIVITY' as any, // if enum: AuditEntityType.ACTIVITY
+      action: AuditAction.ACTIVITY_EDITED,
+      entityType: AuditEntityType.ACTIVITY,
       entityId: id,
       metadata: {
         from: {

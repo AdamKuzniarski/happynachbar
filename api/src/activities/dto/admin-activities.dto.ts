@@ -12,6 +12,9 @@ import {
   Max,
   Min,
   Matches,
+  IsISO8601,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { ActivityStatus } from '@prisma/client';
 import { ActivityCategory } from './activity-category.enum';
@@ -73,4 +76,29 @@ export class AdminBulkActivityStatusDto {
 
   @IsEnum(ActivityStatus)
   status!: ActivityStatus;
+}
+export class AdminUpdateActivityDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(ActivityCategory)
+  category?: ActivityCategory;
+
+  @IsOptional()
+  @Matches(/^\d{5}$/)
+  plz?: string;
+
+  // Optional: allow rescheduling
+  @IsOptional()
+  @IsISO8601()
+  scheduledAt?: string;
 }

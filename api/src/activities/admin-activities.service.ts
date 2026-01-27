@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ActivityStatus,
   AuditAction,
@@ -11,6 +15,7 @@ import {
   AdminBulkActivityStatusDto,
   AdminListActivitiesQueryDto,
   AdminSetActivityStatusDto,
+  AdminUpdateActivityDto,
 } from './dto/admin-activities.dto';
 
 function clamp(n: number, min: number, max: number) {
@@ -169,7 +174,71 @@ export class AdminActivitiesService {
         ids: dto.ids,
       },
     });
+  }
 
-    return { ok: true, updatedCount: result.count };
+  async update(actorId: string, id: string, dto: AdminUpdateActivityDto) {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        plz: true,
+        scheduledAt: true,
+      },
+    });
+    if (!existing) throw new NotFoundException('Activity not found');
+
+    const data: Prisma.ActivityUpdateInput = {};
+    if (dto.title !== undefined) data.title = dto.title.trim();
+    if (dto.description !== undefined) data.description = dto.description;
+    if (dto.category !== undefined) data.category = dto.category as any;
+    if (dto.plz !== undefined) data.plz = dto.plz;
+    if (dto.scheduledAt !== undefined)
+      data.scheduledAt = new Date(dto.scheduledAt);
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('No fields to update');
+    }
+
+    const updated = await this.prisma.activity.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        category: true,
+        plz: true,
+        scheduledAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await this.audit.log({
+      actorUserId: actorId,
+      action: 'ACTIVITY_EDITED' as any, // if enum: add AuditAction.ACTIVITY_EDITED
+      entityType: 'ACTIVITY' as any, // if enum: AuditEntityType.ACTIVITY
+      entityId: id,
+      metadata: {
+        from: {
+          title: existing.title,
+          description: existing.description,
+          category: existing.category,
+          plz: existing.plz,
+          scheduledAt: existing.scheduledAt,
+        },
+        to: {
+          title: updated.title,
+          description: updated.description,
+          category: updated.category,
+          plz: updated.plz,
+          scheduledAt: updated.scheduledAt,
+        },
+      },
+    });
+
+    return updated;
   }
 }

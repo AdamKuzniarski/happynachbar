@@ -19,6 +19,7 @@ import {
   AdminBulkActivityStatusDto,
   AdminListActivitiesQueryDto,
   AdminSetActivityStatusDto,
+  AdminUpdateActivityDto,
 } from './dto/admin-activities.dto';
 
 @ApiTags('admin')
@@ -42,6 +43,15 @@ export class AdminActivitiesController {
   @Get(':id')
   getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.adminActivities.getById(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: AdminUpdateActivityDto,
+  ) {
+    return this.adminActivities.update(req.user.userId, id, dto);
   }
 
   @Patch(':id/status')

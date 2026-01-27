@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
-import { normalizePostalCode } from "@/lib/validators";
+import { normalizePostalCodeInput } from "@/lib/validators";
 import { Button } from "@/components/ui/Button";
 
 type filterBarProps = {
@@ -60,7 +60,7 @@ export function FiltersBar(props: filterBarProps) {
           <div className="flex items-center w-full sm:min-w-40 border-t border-fern/20 sm:border-t-0 sm:border-l sm:border-fern/20">
             <input
               value={plz}
-              onChange={(e) => setPlz(normalizePostalCode(e.target.value))}
+              onChange={(e) => setPlz(normalizePostalCodeInput(e.target.value))}
               placeholder="PLZ"
               inputMode="numeric"
               maxLength={5}

@@ -7,6 +7,8 @@ import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
+import { notifyError, notifySuccess } from "@/lib/toast";
+import { TOAST_MESSAGES } from "@/lib/toast-messages";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,8 +27,12 @@ export default function LoginPage() {
       const result = await loginAndSetCookie(email.trim(), password);
       if (!result.ok) {
         setError(result.error);
+        if (result.error.toLowerCase().includes("invalid credentials")) {
+          notifyError(TOAST_MESSAGES.auth.loginFailed);
+        }
         return;
       }
+      notifySuccess(TOAST_MESSAGES.auth.loginSuccess);
       router.push("/homepage");
       router.refresh();
     } finally {

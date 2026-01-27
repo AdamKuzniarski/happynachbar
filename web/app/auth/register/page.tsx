@@ -34,6 +34,8 @@ export default function RegisterPage() {
 
       if (!result.ok) {
         setError(result.error);
+        if (result.error.toLowerCase().includes("email already in use")) {
+        }
         return;
       }
 

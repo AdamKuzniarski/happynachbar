@@ -83,6 +83,8 @@ export class ActivityCardDto {
 }
 
 export class ActivityDetailDto extends ActivityCardDto {
+  createdById?: string;
+
   @ApiPropertyOptional({ example: 'We walk together and talk, talk, talk!' })
   description?: string;
 

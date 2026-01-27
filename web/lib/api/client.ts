@@ -35,6 +35,16 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
+    if (typeof window !== "undefined") {
+      const { notifyError } = await import("@/lib/toast");
+      const { TOAST_MESSAGES } = await import("@/lib/toast-messages");
+      if (res.status === 401) {
+        notifyError(TOAST_MESSAGES.auth.reloginRequired);
+      }
+      if (res.status === 403) {
+        notifyError(TOAST_MESSAGES.activity.notOwner);
+      }
+    }
     const messageFromJson = (() => {
       if (typeof data !== "object" || data === null) return null;
       if (!("message" in data)) return null;

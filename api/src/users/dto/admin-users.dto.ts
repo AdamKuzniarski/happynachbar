@@ -56,7 +56,9 @@ export class AdminSetUserRoleDto {
 }
 
 export class AdminSetUserBanDto {
-  @Type(() => Boolean)
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
   @IsBoolean()
   isBanned!: boolean;
 

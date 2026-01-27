@@ -39,9 +39,9 @@ export class AdminUsersController {
     return this.adminUsers.listUsers(q);
   }
 
-  @Patch('id/role')
+  @Patch(':id/role')
   setRole(
-    @Req() req: unknown,
+    @Req() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminSetUserRoleDto,
   ) {
@@ -50,7 +50,7 @@ export class AdminUsersController {
 
   @Patch(':id/ban')
   setBan(
-    @Req() req: unknown,
+    @Req() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminSetUserBanDto,
   ) {
@@ -67,7 +67,7 @@ export class AdminUsersController {
 
   @Post(':id/warnings')
   createWarning(
-    @Req() req: unknown,
+    @Req() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AdminCreateWarningDto,
   ) {

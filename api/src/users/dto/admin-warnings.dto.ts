@@ -21,7 +21,7 @@ export class AdminListWarningsQueryDto {
   @IsInt()
   @Min(1)
   @Max(50)
-  take?: string;
+  take?: number;
 
   @ApiPropertyOptional({
     format: 'uuid',

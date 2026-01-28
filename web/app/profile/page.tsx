@@ -107,29 +107,33 @@ export default async function ProfilePage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-md border-2 border-fern bg-surface p-4">
-                <div className="text-sm font-semibold">Profilstatus</div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-strong">
+              <div className="rounded-md border-2 border-fern bg-surface p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide">
+                  Profilstatus
+                </div>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-strong">
                   <div
                     className="h-full bg-fern"
                     style={{ width: `${completionPercent}%` }}
                   />
                 </div>
-                <div className="mt-2 text-xs text-hunter">
+                <div className="mt-1.5 text-[11px] text-hunter">
                   {completion?.isComplete
                     ? "Profil vollständig"
                     : `Profil zu ${completionPercent}% vollständig`}
                 </div>
                 {completion?.missing?.length ? (
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                    {completion.missing.map((field) => (
-                      <span
-                        key={field}
-                        className="rounded-full border border-fern px-2 py-0.5"
-                      >
-                        {field}
-                      </span>
-                    ))}
+                  <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px]">
+                    {completion.missing
+                      .filter((field) => field !== "avatarUrl")
+                      .map((field) => (
+                        <span
+                          key={field}
+                          className="rounded-full border border-fern px-1.5 py-0.5"
+                        >
+                          {field}
+                        </span>
+                      ))}
                   </div>
                 ) : null}
               </div>

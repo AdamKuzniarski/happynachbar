@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
@@ -12,6 +13,8 @@ export function AppHeader({
 }) {
   const btn =
     "rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4";
+  const iconBtn =
+    "inline-flex h-9 w-9 items-center justify-center rounded-md border-2 border-fern bg-surface text-foreground hover:bg-palm hover:text-limecream transition-colors sm:h-10 sm:w-10";
 
   const brand = (
     <div className="flex items-center gap-2 sm:gap-3">
@@ -42,9 +45,14 @@ export function AppHeader({
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {variant === "app" ? (
-            <a href="/auth/logout" className={btn}>
-              Logout
-            </a>
+            <>
+              <Link href="/profile" className={iconBtn} aria-label="Profil">
+                <User className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <a href="/auth/logout" className={btn}>
+                Logout
+              </a>
+            </>
           ) : variant === "auth" ? (
             showBackOnAuth ? (
               <Link href="/" className={btn}>

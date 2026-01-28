@@ -52,13 +52,21 @@ export function useAdminActivities() {
   }
 
   async function archiveOn(id: string) {
-    await adminSetActivityStatus(id, "ARCHIVED");
-    patchRow({ id, status: "ARCHIVED" });
+    try {
+      await adminSetActivityStatus(id, "ARCHIVED");
+      patchRow({ id, status: "ARCHIVED" });
+    } catch (e) {
+      setError(errMsg(e));
+    }
   }
 
   async function restoreOne(id: string) {
-    await adminSetActivityStatus(id, "ACTIVE");
-    patchRow({ id, status: "ACTIVE" });
+    try {
+      await adminSetActivityStatus(id, "ACTIVE");
+      patchRow({ id, status: "ACTIVE" });
+    } catch (e) {
+      setError(errMsg(e));
+    }
   }
   return {
     q,

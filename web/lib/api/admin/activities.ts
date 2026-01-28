@@ -3,8 +3,10 @@ import { buildQuery } from "@/lib/query";
 import type {
   AdminActivityDetail,
   AdminActivityRow,
+  AdminActivityStatus,
   ListResponse,
 } from "./types";
+import type { ActivityCategory } from "../enums";
 
 export function adminListActivities(params: { take?: number; q?: string }) {
   const qs = buildQuery({
@@ -25,7 +27,7 @@ export function adminUpdateActivity(
   payload: {
     title?: string;
     description?: string;
-    category?: string;
+    category?: ActivityCategory;
     plz?: string;
     scheduledAt?: string;
   },
@@ -38,7 +40,7 @@ export function adminUpdateActivity(
 
 export function adminSetActivityStatus(
   id: string,
-  status: "ACTIVE" | "ARCHIVED",
+  status: AdminActivityStatus,
 ) {
   return apiFetch<{ id: string; status: string }>(
     `/admin/activities/${encodeURIComponent(id)}/status`,

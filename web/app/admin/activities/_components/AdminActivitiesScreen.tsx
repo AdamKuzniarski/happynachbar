@@ -7,14 +7,16 @@ import { useAdminActivities } from "../_hooks/useAdminActivities";
 import { ActivitiesTable } from "./ActivitiesTable";
 import { EditActivityModal } from "./EditActivityModal";
 
-export function AdminActivitiesMvpScreen() {
+export function AdminActivitiesScreen() {
   const s = useAdminActivities();
 
   return (
     <div className="space-y-4">
       <Card>
         <h1 className="text-lg font-semibold">Admin · Activities</h1>
-        <p className="mt-1 text-sm opacity-80">Suche Aktivitäten um die zu verwalten </p>
+        <p className="mt-1 text-sm opacity-80">
+          Suche Aktivitäten um die zu verwalten{" "}
+        </p>
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Input

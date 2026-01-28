@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { FormError } from "@/components/ui/FormError";
-import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
+import {
+  ACTIVITY_CATEGORIES,
+  ActivityCategory,
+  formatActivityCategory,
+} from "@/lib/api/enums";
 import {
   adminGetActivity,
   adminUpdateActivity,
@@ -27,7 +31,7 @@ export function EditActivityModal({
     title?: string;
     description?: string;
     plz?: string;
-    category?: string;
+    category?: ActivityCategory;
   }) => void;
 }) {
   const [loading, setLoading] = React.useState(false);
@@ -36,7 +40,9 @@ export function EditActivityModal({
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [plz, setPlz] = React.useState("");
-  const [category, setCategory] = React.useState(ACTIVITY_CATEGORIES[0]);
+  const [category, setCategory] = React.useState<ActivityCategory>(
+    ACTIVITY_CATEGORIES[0],
+  );
 
   React.useEffect(() => {
     if (!open || !activityId) return;
@@ -50,7 +56,7 @@ export function EditActivityModal({
         setTitle(a?.title ?? "");
         setDescription(a?.description ?? "");
         setPlz(a?.plz ?? "");
-        setCategory((a?.category as any) ?? ACTIVITY_CATEGORIES[0]);
+        setCategory(a?.category ?? ACTIVITY_CATEGORIES[0]);
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Unknown error");
       } finally {
@@ -127,7 +133,9 @@ export function EditActivityModal({
             <label className="block text-sm font-medium">Category</label>
             <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value as any)}
+              onChange={(e) =>
+                setCategory(e.target.value as ActivityCategory)
+              }
             >
               {ACTIVITY_CATEGORIES.map((c) => (
                 <option key={c} value={c}>

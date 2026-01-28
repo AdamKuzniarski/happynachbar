@@ -1,7 +1,11 @@
+import type { ActivityCategory } from "@/lib/api/enums";
+
 export type ListResponse<T> = {
   items: T[];
   nextCursor: string | null;
 };
+
+export type AdminActivityStatus = "ACTIVE" | "ARCHIVED";
 
 export type AdminCreatedBy = {
   id: string;
@@ -12,8 +16,8 @@ export type AdminCreatedBy = {
 export type AdminActivityBase = {
   id: string;
   title: string;
-  category: string;
-  status: "ACTIVE" | "ARCHIVED" | string;
+  category: ActivityCategory;
+  status: AdminActivityStatus;
   plz: string;
   startAt: string;
   createdAt: string;

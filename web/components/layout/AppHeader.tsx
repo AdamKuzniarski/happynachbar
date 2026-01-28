@@ -34,6 +34,10 @@ export function AppHeader({
           ? "/homepage"
           : undefined;
 
+  // MVP toggle: show link only when explicitly enabled
+  const showAdminLink =
+    variant === "app" && process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === "true";
+
   return (
     <header className="border-b-2 border-fern">
       <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
@@ -41,10 +45,19 @@ export function AppHeader({
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+
           {variant === "app" ? (
-            <a href="/auth/logout" className={btn}>
-              Logout
-            </a>
+            <>
+              {showAdminLink ? (
+                <Link href="/admin/activities" className={btn}>
+                  Admin
+                </Link>
+              ) : null}
+
+              <a href="/auth/logout" className={btn}>
+                Logout
+              </a>
+            </>
           ) : variant === "auth" ? (
             showBackOnAuth ? (
               <Link href="/" className={btn}>

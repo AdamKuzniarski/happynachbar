@@ -2,6 +2,7 @@ import * as React from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "./_components/AdminShell";
 
 const COOKIE_NAME = "happynachbar_token";
 
@@ -41,9 +42,7 @@ export default async function AdminLayout({
 
   return (
     <AppShell variant="app">
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-        {children}
-      </div>
+      <AdminShell>{children}</AdminShell>
     </AppShell>
   );
 }

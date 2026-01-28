@@ -18,16 +18,22 @@ export function AdminActivitiesScreen() {
           Suche Aktivitäten um die zu verwalten{" "}
         </p>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <form
+          className="mt-4 flex flex-col gap-2 sm:flex-row"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void s.load();
+          }}
+        >
           <Input
             placeholder="Search title/description…"
             value={s.q}
             onChange={(e) => s.setQ(e.target.value)}
           />
-          <Button onClick={() => void s.load()} disabled={s.loading}>
+          <Button type="submit" disabled={s.loading}>
             Search
           </Button>
-        </div>
+        </form>
 
         {s.error ? (
           <p className="mt-3 text-sm text-evergreen">{s.error}</p>

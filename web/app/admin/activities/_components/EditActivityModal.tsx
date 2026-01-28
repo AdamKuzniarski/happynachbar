@@ -45,7 +45,15 @@ export function EditActivityModal({
   );
 
   React.useEffect(() => {
-    if (!open || !activityId) return;
+    if (!open || !activityId) {
+      // reset state when modal closes or id changes away
+      setTitle("");
+      setDescription("");
+      setPlz("");
+      setCategory(ACTIVITY_CATEGORIES[0]);
+      setError(null);
+      return;
+    }
 
     setLoading(true);
     setError(null);

@@ -21,7 +21,7 @@ export function ActivitiesTable({
     <Card className="p-0">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b2 border-fern bg-surface-strong">
+          <thead className="border-b-2 border-fern bg-surface-strong">
             <tr>
               <th className="px-3 py-3">Title</th>
               <th className="px-3 py-3">Status</th>

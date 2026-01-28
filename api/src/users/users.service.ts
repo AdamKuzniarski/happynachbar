@@ -47,6 +47,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        createdAt: true,
         profile: {
           select: {
             displayName: true,
@@ -78,6 +79,7 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
+      createdAt: user.createdAt,
       profile,
       profileCompletion: {
         isComplete: missing.length === 0,

@@ -14,9 +14,7 @@ export function AdminActivitiesMvpScreen() {
     <div className="space-y-4">
       <Card>
         <h1 className="text-lg font-semibold">Admin · Activities</h1>
-        <p className="mt-1 text-sm opacity-80">
-          MVP: list activities and edit other users’ posts.
-        </p>
+        <p className="mt-1 text-sm opacity-80">Suche Aktivitäten um die zu verwalten </p>
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Input
@@ -41,7 +39,12 @@ export function AdminActivitiesMvpScreen() {
       ) : null}
 
       {s.items.length > 0 ? (
-        <ActivitiesTable items={s.items} onEdit={s.openEdit} />
+        <ActivitiesTable
+          items={s.items}
+          onEdit={s.openEdit}
+          onArchive={(id) => void s.archiveOn(id)}
+          onRestore={(id) => void s.restoreOne(id)}
+        />
       ) : null}
 
       <EditActivityModal

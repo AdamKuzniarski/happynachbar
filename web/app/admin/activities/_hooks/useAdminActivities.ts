@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import type { AdminActivityRow } from "@/lib/api/admin/types";
-import { adminListActivities } from "@/lib/api/admin/activities";
+import {
+  adminListActivities,
+  adminSetActivityStatus,
+} from "@/lib/api/admin/activities";
 
 function errMsg(e: unknown) {
   return e instanceof Error ? e.message : "Unknown error";
@@ -47,6 +50,16 @@ export function useAdminActivities() {
       prev.map((a) => (a.id === patch.id ? { ...a, ...patch } : a)),
     );
   }
+
+  async function archiveOn(id: string) {
+    await adminSetActivityStatus(id, "ARCHIVED");
+    patchRow({ id, status: "ARCHIVED" });
+  }
+
+  async function restoreOne(id: string) {
+    await adminSetActivityStatus(id, "ACTIVE");
+    patchRow({ id, status: "ACTIVE" });
+  }
   return {
     q,
     setQ,
@@ -58,5 +71,7 @@ export function useAdminActivities() {
     openEdit,
     closeEdit,
     patchRow,
+    archiveOn,
+    restoreOne,
   };
 }

@@ -9,9 +9,13 @@ import type { AdminActivityRow } from "@/lib/api/admin/types";
 export function ActivitiesTable({
   items,
   onEdit,
+  onArchive,
+  onRestore,
 }: {
   items: AdminActivityRow[];
   onEdit: (id: string) => void;
+  onArchive: (id: string) => void;
+  onRestore: (id: string) => void;
 }) {
   return (
     <Card className="p-0">
@@ -46,9 +50,32 @@ export function ActivitiesTable({
                   <div className="text-xs opacity-70">{a.createdBy.email}</div>
                 </td>
                 <td className="px-3 py-3">
-                  <Button variant="secondary" onClick={() => onEdit(a.id)}>
-                    Edit
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="secondary" onClick={() => onEdit(a.id)}>
+                      Edit
+                    </Button>
+
+                    {a.status === "ACTIVE" ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          const ok = confirm(
+                            "Archive this activity? (soft delete)",
+                          );
+                          if (ok) onArchive(a.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        onClick={() => onRestore(a.id)}
+                      >
+                        Restore
+                      </Button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

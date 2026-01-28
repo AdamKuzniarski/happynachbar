@@ -35,3 +35,13 @@ export function adminUpdateActivity(
     body: JSON.stringify(payload),
   });
 }
+
+export function adminSetActivityStatus(
+  id: string,
+  status: "ACTIVE" | "ARCHIVED",
+) {
+  return apiFetch<{ id: string; status: string }>(
+    `/admin/activities/${encodeURIComponent(id)}/status`,
+    { method: "PATCH", body: JSON.stringify({ status }) },
+  );
+}

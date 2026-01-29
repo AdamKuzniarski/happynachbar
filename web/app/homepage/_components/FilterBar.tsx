@@ -3,7 +3,6 @@
 import * as React from "react";
 import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
 import { normalizePostalCodeInput } from "@/lib/validators";
-import { Button } from "@/components/ui/Button";
 
 type filterBarProps = {
   query: string;

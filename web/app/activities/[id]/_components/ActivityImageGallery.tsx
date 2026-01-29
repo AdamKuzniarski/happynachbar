@@ -95,7 +95,7 @@ export function ActivityImageGallery({
         <img
           src={hero.url}
           alt={hero.alt ?? title}
-          className="h-56 w-full rounded-md border-2 border-fern bg-surface object-cover"
+          className="h-56 w-full rounded-md bg-surface object-center m-5 overflow-hidden"
           loading="lazy"
         />
       </Button>
@@ -117,7 +117,7 @@ export function ActivityImageGallery({
               <img
                 src={img.url}
                 alt={img.alt ?? title}
-                className="h-20 w-full rounded-md border-2 border-fern bg-surface object-cover"
+                className="h-20 w-full rounded-md  bg-surface object-center overflow-hidden"
                 loading="lazy"
               />
             </Button>
@@ -171,7 +171,7 @@ export function ActivityImageGallery({
             <img
               src={active.url}
               alt={active.alt ?? title}
-              className="max-h-[80vh] w-full rounded-md border-2 border-fern bg-surface object-contain"
+              className="max-h-[80vh] w-full rounded-md  bg-surface object-contain overflow-hidden"
             />
           </div>
         </div>

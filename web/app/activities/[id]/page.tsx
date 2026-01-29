@@ -53,50 +53,75 @@ export default async function ActivityDetailPage({
           ← Zurück
         </Link>
 
-        <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
-          <h1 className="text-lg font-semibold text-center">
-            {a?.title ?? "Aktivität"}
-          </h1>
+        <section className="mt-4 overflow-hidden rounded-2xl bg-surface/60 shadow-sm ring-1 ring-fern/25">
+          <header className="px-5 pt-5 pb-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="truncate text-xl font-semibold tracking-tight text-center sm:text-left">
+                  {a?.title ?? "Aktivität"}
+                </h1>
 
-          <ActivityImageGallery
-            title={a?.title ?? "Aktivität"}
-            thumbnailUrl={a?.thumbnailUrl}
-            images={images}
-          />
+                <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+                  <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
+                    {formatActivityCategory(a?.category)}
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
+                    PLZ {a?.plz ?? "—"}
+                  </span>
+                </div>
+              </div>
 
-          <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm space-y-1">
-            <div>
-              <b>Kategorie:</b> {formatActivityCategory(a?.category)}
             </div>
-            <div>
-              <b>PLZ:</b> {a?.plz ?? "—"}
-            </div>
-            <div>
-              <b>Erstellt von:</b>{" "}
-              {a?.createdBy?.displayName?.trim() || "Neighbor"}
-            </div>
-            <div>
-              <b>Start:</b> {formatDate(a?.startAt ?? a?.scheduledAt)}
-            </div>
-            <div>
-              <b>Updated:</b> {formatDate(a?.updatedAt)}
-            </div>
+          </header>
+
+          <div className="px-0">
+            <ActivityImageGallery
+              title={a?.title ?? "Aktivität"}
+              thumbnailUrl={a?.thumbnailUrl}
+              images={images}
+            />
           </div>
 
-          {a?.description && (
-            <div className="mt-4">
-              <div className="text-sm font-medium mb-1">Beschreibung</div>
-              <div className="rounded-md border-2 border-fern bg-surface p-3 text-sm break-words">
-                {a.description}
-              </div>
-            </div>
-          )}
+          <div className="px-5 py-5">
+            <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="opacity-80">Erstellt von</dt>
 
-          <ActivityActions
-            id={a.id}
-            createdById={a.createdById}
-            currentUserId={currentUserId}
-          />
+                <dd className="mt-1 font-medium">
+                  {a?.createdBy?.displayName?.trim() || "Neighbor"}
+                </dd>
+              </div>
+              <div>
+                <dt className="opacity-80">Start</dt>
+                <dd className="mt-1 font-medium">
+                  {formatDate(a?.startAt ?? a?.scheduledAt)}
+                </dd>
+              </div>
+              <div>
+                <dt className="opacity-80">Aktualisiert</dt>
+
+                <dd className="mt-1 font-medium">{formatDate(a?.updatedAt)}</dd>
+              </div>
+            </dl>
+
+            {a?.description ? (
+              <div className="mt-5">
+                <div className="text-sm font-semibold">Beschreibung</div>
+                <p className="mt-2 rounded-xl bg-fern/10 p-4 text-sm ring-1 ring-fern/20 break-words">
+                  {a.description}
+                </p>
+              </div>
+            ) : null}
+
+            {/* Actions unten geht auch, aber bitte nicht “zentriert wie Submit” */}
+            <div className="mt-6">
+              <ActivityActions
+                id={a.id}
+                createdById={a.createdById}
+                currentUserId={currentUserId}
+              />
+            </div>
+          </div>
         </section>
       </div>
     </main>

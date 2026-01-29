@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { ActivityImage } from "@/lib/api/types";
 import { Button } from "@/components/ui/Button";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type GalleryImage = {
   url: string;
@@ -26,6 +27,13 @@ function uniqueByUrl(images: GalleryImage[]) {
   return out;
 }
 
+function isPortrait(img: HTMLImageElement) {
+  const w = img.naturalWidth || 0;
+  const h = img.naturalHeight || 0;
+  if (!w || !h) return false;
+  return w / h < 1;
+}
+
 export function ActivityImageGallery({
   title,
   thumbnailUrl,
@@ -38,10 +46,12 @@ export function ActivityImageGallery({
 
   const [open, setOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [heroPortrait, setHeroPortrait] = React.useState<boolean | null>(null);
 
   const hero = normalizedImages[0];
   const rest = normalizedImages.slice(1, 7);
   const active = normalizedImages[activeIndex] ?? hero;
+
   const maxIndex = normalizedImages.length - 1;
   const hasMultiple = normalizedImages.length > 1;
   const isFirst = activeIndex <= 0;
@@ -80,8 +90,12 @@ export function ActivityImageGallery({
 
   if (normalizedImages.length === 0) return null;
 
+  const heroMaxW = heroPortrait ? "420px" : "920px";
+  const heroAspect = heroPortrait ? "3 / 4" : "16 / 9";
+
   return (
     <>
+      {/* HERO */}
       <Button
         type="button"
         variant="secondary"
@@ -92,14 +106,33 @@ export function ActivityImageGallery({
         }}
         aria-label="Bild vergrössern"
       >
-        <img
-          src={hero.url}
-          alt={hero.alt ?? title}
-          className="h-56 w-full rounded-md bg-surface object-center m-5 overflow-hidden"
-          loading="lazy"
-        />
+        <div className="mx-auto w-full" style={{ maxWidth: heroMaxW }}>
+          <div
+            className="relative w-full rounded-md bg-surface overflow-hidden"
+            style={{ aspectRatio: heroAspect }}
+          >
+            {/* blur background fills the frame */}
+            <SafeImage
+              src={hero.url}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 100vw, 768px"
+              className="object-cover object-center scale-110 blur-xl opacity-30"
+            />
+            <SafeImage
+              src={hero.url}
+              alt={hero.alt ?? title}
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 768px"
+              className="object-contain object-center"
+              onLoadingComplete={(img) => setHeroPortrait(isPortrait(img))}
+            />
+          </div>
+        </div>
       </Button>
 
+      {/* THUMBNAILS */}
       {rest.length ? (
         <div className="mt-3 grid grid-cols-3 gap-2">
           {rest.map((img, idx) => (
@@ -114,17 +147,21 @@ export function ActivityImageGallery({
               }}
               aria-label="Bild vergrössern"
             >
-              <img
-                src={img.url}
-                alt={img.alt ?? title}
-                className="h-20 w-full rounded-md  bg-surface object-center overflow-hidden"
-                loading="lazy"
-              />
+              <div className="relative h-20 w-full rounded-md bg-surface overflow-hidden">
+                <SafeImage
+                  src={img.url}
+                  alt={img.alt ?? title}
+                  fill
+                  sizes="(max-width: 640px) 33vw, 200px"
+                  className="object-cover object-center"
+                />
+              </div>
             </Button>
           ))}
         </div>
       ) : null}
 
+      {/* MODAL */}
       {open ? (
         <div
           role="dialog"
@@ -144,6 +181,7 @@ export function ActivityImageGallery({
             >
               Schliessen
             </Button>
+
             {hasMultiple ? (
               <>
                 <Button
@@ -168,11 +206,23 @@ export function ActivityImageGallery({
                 </Button>
               </>
             ) : null}
-            <img
-              src={active.url}
-              alt={active.alt ?? title}
-              className="max-h-[80vh] w-full rounded-md  bg-surface object-contain overflow-hidden"
-            />
+
+            <div className="relative h-[80vh] w-full rounded-md bg-surface overflow-hidden">
+              <SafeImage
+                src={active.url}
+                alt=""
+                fill
+                sizes="100vw"
+                className="object-cover object-center scale-110 blur-xl opacity-30"
+              />
+              <SafeImage
+                src={active.url}
+                alt={active.alt ?? title}
+                fill
+                sizes="100vw"
+                className="object-contain object-center"
+              />
+            </div>
           </div>
         </div>
       ) : null}

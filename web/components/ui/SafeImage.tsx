@@ -18,14 +18,72 @@ type SafeImageProps = Omit<ImageProps, "src"> & {
   src: string;
 };
 
-export function SafeImage({ src, alt, ...props }: SafeImageProps) {
-  const host = hostOf(src);
-  const isCdn = !!CDN_HOST && host === CDN_HOST;
+export function SafeImage(props: SafeImageProps) {
+  const {
+    src,
+    alt,
+    className,
+    fill,
+    width,
+    height,
+    sizes,
+    priority,
+    quality,
+    loader,
+    placeholder,
+    blurDataURL,
+    unoptimized,
+    onLoad,
+    onLoadingComplete,
+    ...rest
+  } = props;
+
+  const isCdn = !!CDN_HOST && hostOf(src) === CDN_HOST;
 
   if (isCdn) {
-    return <Image src={src} alt={alt} {...props} />;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        className={className}
+        fill={fill}
+        {...(!fill ? { width, height } : {})}
+        sizes={sizes}
+        priority={priority}
+        quality={quality}
+        loader={loader}
+        placeholder={placeholder}
+        blurDataURL={blurDataURL}
+        unoptimized={unoptimized}
+        onLoad={onLoad}
+        onLoadingComplete={onLoadingComplete}
+        {...rest}
+      />
+    );
   }
 
+  // Fallback <img> with "fill" behavior + callbacks
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={props.className} loading="lazy" />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      width={
+        !fill ? (typeof width === "number" ? width : undefined) : undefined
+      }
+      height={
+        !fill ? (typeof height === "number" ? height : undefined) : undefined
+      }
+      className={[fill ? "absolute inset-0 h-full w-full" : "", className ?? ""]
+        .join(" ")
+        .trim()}
+      onLoad={(e) => {
+        onLoad?.(e as any);
+        const img = e.currentTarget;
+        onLoadingComplete?.(img);
+      }}
+      {...(rest as any)}
+    />
+  );
 }

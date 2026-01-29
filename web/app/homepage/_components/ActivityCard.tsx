@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Activity } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
 import { formatActivityCategory } from "@/lib/api/enums";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export function ActivityCard({ activity }: { activity: Activity }) {
   return (
@@ -9,12 +10,15 @@ export function ActivityCard({ activity }: { activity: Activity }) {
       <div className="rounded-md bg-surface overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
         <div className="relative">
           {activity.thumbnailUrl ? (
-            <img
-              src={activity.thumbnailUrl}
-              alt={activity.title}
-              className="h-36 w-full object-cover"
-              loading="lazy"
-            />
+            <div className="relative h-36 w-full">
+              <SafeImage
+                src={activity.thumbnailUrl}
+                alt={activity.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="h-36 w-full bg-surface" />
           )}

@@ -39,7 +39,6 @@ export default async function ActivityDetailPage({
         currentUserId = me?.id;
       }
     } catch {
-      // ignore
     }
   }
 
@@ -113,7 +112,6 @@ export default async function ActivityDetailPage({
               </div>
             ) : null}
 
-            {/* Actions unten geht auch, aber bitte nicht “zentriert wie Submit” */}
             <div className="mt-6">
               <ActivityActions
                 id={a.id}

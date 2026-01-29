@@ -73,7 +73,15 @@ export default async function ProfilePage() {
   return (
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl sm:pt-10">
-        <h1 className="text-xl font-semibold sm:text-2xl">Dein Profil</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold sm:text-2xl">Dein Profil</h1>
+          <Link
+            href="/profile/edit"
+            className="inline-flex items-center rounded-md border-2 border-fern bg-surface px-3 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-strong"
+          >
+            Profil bearbeiten
+          </Link>
+        </div>
 
         {error ? (
           <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 text-sm">

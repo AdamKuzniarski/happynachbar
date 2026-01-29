@@ -22,7 +22,8 @@ function buildRedirect(req: NextRequest, pathname: string) {
   return NextResponse.redirect(url);
 }
 
-export function middleware(req: NextRequest) {
+// middleware() -> proxy()
+export function proxy(req: NextRequest) {
   const pathname = normalizePath(req.nextUrl.pathname);
   const isLoggedIn = !!req.cookies.get(COOKIE_NAME)?.value;
 
@@ -55,15 +56,8 @@ export function middleware(req: NextRequest) {
 }
 
 /**
- * Run middleware for "all pages" but skip Next internals + static files.
- * This is the important part to avoid middleware running for assets.
+ * Run proxy for "all pages" but skip Next internals + static files.
  */
 export const config = {
-  matcher: [
-    // Run on all routes except:
-    // - /api
-    // - Next internals
-    // - any file with an extension (e.g. .png, .svg, .css, .js, .ico, .txt, ...)
-    "/((?!api|_next|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };

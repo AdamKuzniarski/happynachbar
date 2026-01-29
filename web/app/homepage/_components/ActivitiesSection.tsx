@@ -29,7 +29,7 @@ export function ActivitiesSection(props: ActivitySectionProps) {
     <section className="mx-auto mt-6 w-full max-w-md sm:max-w-2xl">
       <div className="flex items-baseline justify-between">
         <h2 className="text-sm font-semibold text-foreground">Aktivitäten</h2>
-        <span className="text-xs text-hunter">
+        <span className="text-xs ">
           {loading ? "Lade…" : `${activities.length} Vorschläge`}
         </span>
       </div>

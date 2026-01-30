@@ -6,6 +6,7 @@ import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
 import { ActivityActions } from "./_components/ActivityActions";
+import { Mail, User } from "lucide-react";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -41,6 +42,11 @@ export default async function ActivityDetailPage({
     } catch {
     }
   }
+  const isOwner = !!(currentUserId && a?.createdById && currentUserId === a.createdById);
+  const creatorHref =
+    currentUserId && a?.createdById && currentUserId === a.createdById
+      ? "/profile"
+      : `/activities/${encodeURIComponent(a.id)}/creator`;
 
   return (
     <main className="px-4">
@@ -85,9 +91,30 @@ export default async function ActivityDetailPage({
             <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="opacity-80">Erstellt von</dt>
-
-                <dd className="mt-1 font-medium">
-                  {a?.createdBy?.displayName?.trim() || "Neighbor"}
+                <dd className="mt-1 flex items-center gap-2 font-medium">
+                  <span>
+                    {a?.createdBy?.displayName?.trim() || "Neighbor"}
+                  </span>
+                  {!isOwner ? (
+                    <>
+                      <Link
+                        href={creatorHref}
+                        aria-label="Zum Profil"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/80 hover:bg-fern/10 hover:text-foreground"
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                      <button
+                        type="button"
+                        disabled
+                        aria-label="Kontaktieren (demnächst)"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/50"
+                        title="Demnächst verfügbar"
+                      >
+                        <Mail className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </>
+                  ) : null}
                 </dd>
               </div>
               <div>

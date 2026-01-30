@@ -98,8 +98,8 @@ export function ActivityImageGallery({
       {/* HERO */}
       <Button
         type="button"
-        variant="secondary"
-        className="mt-3 block w-full border-0 bg-transparent p-0 hover:bg-transparent"
+        variant="ghost"
+        className="mt-3 block w-full p-0 no-underline hover:opacity-100"
         onClick={() => {
           setActiveIndex(0);
           setOpen(true);
@@ -108,7 +108,7 @@ export function ActivityImageGallery({
       >
         <div className="mx-auto w-full" style={{ maxWidth: heroMaxW }}>
           <div
-            className="relative w-full rounded-md bg-surface overflow-hidden"
+            className="relative w-full rounded-md overflow-hidden"
             style={{ aspectRatio: heroAspect }}
           >
             {/* blur background fills the frame */}
@@ -139,15 +139,15 @@ export function ActivityImageGallery({
             <Button
               key={img.url}
               type="button"
-              variant="secondary"
-              className="border-0 bg-transparent p-0 hover:bg-transparent"
+              variant="ghost"
+              className="p-0 no-underline hover:opacity-100"
               onClick={() => {
                 setActiveIndex(idx + 1);
                 setOpen(true);
               }}
               aria-label="Bild vergrössern"
             >
-              <div className="relative h-20 w-full rounded-md bg-surface overflow-hidden">
+              <div className="relative h-20 w-full rounded-md overflow-hidden">
                 <SafeImage
                   src={img.url}
                   alt={img.alt ?? title}
@@ -182,7 +182,7 @@ export function ActivityImageGallery({
               Schliessen
             </Button>
 
-            <div className="relative h-[80vh] w-full rounded-md bg-surface overflow-hidden">
+            <div className="relative h-[80vh] w-full rounded-md overflow-hidden">
               {hasMultiple ? (
                 <>
                   <Button

@@ -49,7 +49,7 @@ export default function RegisterPage() {
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
         <h1 className="text-center text-2xl font-bold sm:text-4xl">
-          Registieren
+          Registrieren
         </h1>
 
         <form

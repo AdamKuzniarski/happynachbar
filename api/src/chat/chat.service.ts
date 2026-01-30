@@ -1,6 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChatMessagesQueryDto, ListMessagesResponseDto } from './dto/chat-messages.dto';
+import {
+  ChatMessagesQueryDto,
+  ListMessagesResponseDto,
+} from './dto/chat-messages.dto';
 
 function sortPair(a: string, b: string) {
   return a < b ? [a, b] : [b, a];
@@ -14,7 +21,10 @@ function clamp(n: number, min: number, max: number) {
 export class ChatService {
   constructor(private prisma: PrismaService) {}
 
-  private async assertConversationAccess(userId: string, conversationId: string) {
+  private async assertConversationAccess(
+    userId: string,
+    conversationId: string,
+  ) {
     const convo = await this.prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -86,7 +96,7 @@ export class ChatService {
       conversationId: m.conversationId,
       senderId: m.senderId,
       body: m.body,
-      createdAt: m.createdAt,
+      createdAt: m.createdAt.toISOString(),
     }));
 
     return { items, nextCursor };

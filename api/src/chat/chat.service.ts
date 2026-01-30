@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   ChatMessagesQueryDto,
   ListMessagesResponseDto,
+  MessageDto,
 } from './dto/chat-messages.dto';
 
 function sortPair(a: string, b: string) {
@@ -21,10 +22,7 @@ function clamp(n: number, min: number, max: number) {
 export class ChatService {
   constructor(private prisma: PrismaService) {}
 
-  private async assertConversationAccess(
-    userId: string,
-    conversationId: string,
-  ) {
+  async assertConversationAccess(userId: string, conversationId: string) {
     const convo = await this.prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -100,5 +98,31 @@ export class ChatService {
     }));
 
     return { items, nextCursor };
+  }
+
+  async createMessage(
+    userId: string,
+    conversationId: string,
+    body: string,
+  ): Promise<MessageDto> {
+    await this.assertConversationAccess(userId, conversationId);
+
+    const [message] = await this.prisma.$transaction([
+      this.prisma.message.create({
+        data: { conversationId, senderId: userId, body },
+      }),
+      this.prisma.conversation.update({
+        where: { id: conversationId },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+
+    return {
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      body: message.body,
+      createdAt: message.createdAt.toISOString(),
+    };
   }
 }

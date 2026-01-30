@@ -1,12 +1,14 @@
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Server, Socket } from 'socket.io';
+import { ChatService } from './chat.service';
 
 const COOKIE_NAME = 'happynachbar_token';
 
@@ -47,9 +49,7 @@ function parseOrigins(raw?: string) {
   namespace: '/chat',
   cors: { origin: true, credentials: true },
 })
-export class ChatGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
 
@@ -58,6 +58,7 @@ export class ChatGateway
   constructor(
     private config: ConfigService,
     private jwt: JwtService,
+    private chat: ChatService,
   ) {
     this.allowedOrigins = parseOrigins(this.config.get<string>('CORS_ORIGINS'));
   }
@@ -86,4 +87,41 @@ export class ChatGateway
   }
 
   handleDisconnect(_client: Socket) {}
+
+  @SubscribeMessage('chat:join')
+  async handleJoin(client: Socket, payload: { conversationId?: string }) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) {
+      client.disconnect(true);
+      return;
+    }
+
+    const conversationId = payload?.conversationId;
+    if (!conversationId) return;
+
+    await this.chat.assertConversationAccess(userId, conversationId);
+    client.join(`conversation:${conversationId}`);
+    client.emit('chat:joined', { conversationId });
+  }
+
+  @SubscribeMessage('message:send')
+  async handleSend(
+    client: Socket,
+    payload: { conversationId?: string; body?: string },
+  ) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) {
+      client.disconnect(true);
+      return;
+    }
+
+    const conversationId = payload?.conversationId;
+    const body = typeof payload?.body === 'string' ? payload.body.trim() : '';
+    if (!conversationId || !body) return;
+
+    const message = await this.chat.createMessage(userId, conversationId, body);
+    this.server
+      .to(`conversation:${conversationId}`)
+      .emit('message:new', message);
+  }
 }

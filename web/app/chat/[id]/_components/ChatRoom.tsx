@@ -25,6 +25,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [participantName, setParticipantName] = React.useState<string | null>(
     null,
   );
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const socketRef = React.useRef<Socket | null>(null);
 
   React.useEffect(() => {
@@ -69,6 +70,25 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       alive = false;
     };
   }, [conversationId]);
+
+  React.useEffect(() => {
+    let alive = true;
+    fetch(`${API_BASE_URL}/users/me`, { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!alive) return;
+        const id = typeof data?.id === "string" ? data.id : null;
+        setCurrentUserId(id);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCurrentUserId(null);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   React.useEffect(() => {
     const socket = io(`${API_BASE_URL}/chat`, {
@@ -118,17 +138,28 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           {messages.length === 0 ? (
             <p className="text-sm opacity-70">Noch keine Nachrichten.</p>
           ) : (
-            messages.map((m) => (
-              <div
-                key={m.id}
-                className="rounded-xl bg-surface px-3 py-2 text-sm"
-              >
-                <div className="opacity-80 text-[11px]">
-                  {new Date(m.createdAt).toLocaleString()}
+            messages.map((m) => {
+              const isMine = !!currentUserId && m.senderId === currentUserId;
+              const authorLabel = isMine
+                ? "Du"
+                : participantName?.trim() || "Ersteller";
+              return (
+                <div
+                  key={m.id}
+                  className={`rounded-xl px-3 py-2 text-sm ${
+                    isMine
+                      ? "bg-fern/15 text-foreground ml-auto"
+                      : "bg-surface"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] opacity-80">
+                    <span>{authorLabel}</span>
+                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  </div>
+                  <div className="mt-1 break-words">{m.body}</div>
                 </div>
-                <div className="mt-1 break-words">{m.body}</div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

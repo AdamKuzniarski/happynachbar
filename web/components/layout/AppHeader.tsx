@@ -74,6 +74,9 @@ export async function AppHeader({
       </div>
     </div>
   );
+  // MVP toggle: show link only when explicitly enabled
+  const showAdminLink =
+    variant === "app" && process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === "true";
 
   return (
     <header className="border-b-2 border-fern">
@@ -82,11 +85,18 @@ export async function AppHeader({
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+
           {variant === "app" ? (
             <>
               <Link href="/profile" className={iconBtn} aria-label="Profil">
                 <User className="h-4 w-4" aria-hidden="true" />
               </Link>
+              {showAdminLink ? (
+                <Link href="/admin/activities" className={btn}>
+                  Admin
+                </Link>
+              ) : null}
+
               <a href="/auth/logout" className={btn}>
                 Logout
               </a>

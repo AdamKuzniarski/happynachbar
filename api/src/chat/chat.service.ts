@@ -10,6 +10,7 @@ import {
   MessageDto,
 } from './dto/chat-messages.dto';
 import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
+import { UnreadCountDto } from './dto/chat-unread.dto';
 
 function sortPair(a: string, b: string) {
   return a < b ? [a, b] : [b, a];
@@ -170,5 +171,48 @@ export class ChatService {
     });
 
     return { items };
+  }
+
+  async markRead(userId: string, conversationId: string) {
+    await this.assertConversationAccess(userId, conversationId);
+    await this.prisma.conversationRead.upsert({
+      where: {
+        conversationId_userId: { conversationId, userId },
+      },
+      update: { lastReadAt: new Date() },
+      create: { conversationId, userId, lastReadAt: new Date() },
+    });
+    return { ok: true };
+  }
+
+  async getUnreadCount(userId: string): Promise<UnreadCountDto> {
+    const conversations = await this.prisma.conversation.findMany({
+      where: {
+        OR: [{ participantAId: userId }, { participantBId: userId }],
+      },
+      include: {
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: { createdAt: true, senderId: true },
+        },
+        reads: {
+          where: { userId },
+          take: 1,
+          select: { lastReadAt: true },
+        },
+      },
+    });
+
+    const count = conversations.filter((c) => {
+      const last = c.messages[0];
+      if (!last) return false;
+      if (last.senderId === userId) return false;
+      const lastReadAt = c.reads[0]?.lastReadAt;
+      if (!lastReadAt) return true;
+      return last.createdAt > lastReadAt;
+    }).length;
+
+    return { count };
   }
 }

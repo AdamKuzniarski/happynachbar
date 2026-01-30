@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { io, type Socket } from "socket.io-client";
-import { listConversations, listMessages, type Message } from "@/lib/api/chat";
+import {
+  listConversations,
+  listMessages,
+  markConversationRead,
+  type Message,
+} from "@/lib/api/chat";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -31,6 +36,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         const items = res?.items ?? [];
         setMessages(items.slice().reverse());
         setError(null);
+        markConversationRead(conversationId).catch(() => {});
       })
       .catch((e) => {
         if (!alive) return;
@@ -77,6 +83,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     socket.on("message:new", (msg: SocketMessage) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) => [...prev, msg]);
+      markConversationRead(conversationId).catch(() => {});
     });
 
     return () => {

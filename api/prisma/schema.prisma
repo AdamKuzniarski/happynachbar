@@ -22,6 +22,7 @@ model User {
   conversationsAsA  Conversation[] @relation("ConversationParticipantA")
   conversationsAsB  Conversation[] @relation("ConversationParticipantB")
   messages          Message[]
+  conversationReads ConversationRead[]
 
 
   role UserRole @default(USER)
@@ -124,6 +125,7 @@ model Conversation {
   activityId     String?  @db.Uuid
   activity       Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
   messages       Message[]
+  reads          ConversationRead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -144,6 +146,19 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@index([senderId, createdAt])
+}
+
+model ConversationRead {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String       @db.Uuid
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([conversationId, userId])
+  @@index([userId, updatedAt])
 }
 
 enum WarningSeverity {

@@ -27,3 +27,13 @@ export async function listMessages(conversationId: string) {
     `/chat/conversations/${encodeURIComponent(conversationId)}/messages`,
   );
 }
+
+export async function markConversationRead(conversationId: string) {
+  return apiFetch(`/chat/conversations/${encodeURIComponent(conversationId)}/read`, {
+    method: "POST",
+  });
+}
+
+export async function getUnreadCount() {
+  return apiFetch<{ count: number }>(`/chat/unread-count`);
+}

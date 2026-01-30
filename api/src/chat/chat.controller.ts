@@ -17,6 +17,7 @@ import {
   ListMessagesResponseDto,
 } from './dto/chat-messages.dto';
 import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
+import { UnreadCountDto } from './dto/chat-unread.dto';
 
 @ApiTags('chat')
 @ApiBearerAuth('bearer')
@@ -38,6 +39,17 @@ export class ChatController {
   @ApiOkResponse({ type: ListConversationsResponseDto })
   listConversations(@Req() req: any) {
     return this.chat.listConversations(req.user.userId);
+  }
+
+  @Post('conversations/:id/read')
+  markRead(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.chat.markRead(req.user.userId, id);
+  }
+
+  @Get('unread-count')
+  @ApiOkResponse({ type: UnreadCountDto })
+  getUnreadCount(@Req() req: any) {
+    return this.chat.getUnreadCount(req.user.userId);
   }
 
   @Get('conversations/:id/messages')

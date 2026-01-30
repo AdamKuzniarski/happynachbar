@@ -16,6 +16,7 @@ import {
   ChatMessagesQueryDto,
   ListMessagesResponseDto,
 } from './dto/chat-messages.dto';
+import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
 
 @ApiTags('chat')
 @ApiBearerAuth('bearer')
@@ -31,6 +32,12 @@ export class ChatController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     return this.chat.createOrGetByActivity(req.user.userId, id);
+  }
+
+  @Get('conversations')
+  @ApiOkResponse({ type: ListConversationsResponseDto })
+  listConversations(@Req() req: any) {
+    return this.chat.listConversations(req.user.userId);
   }
 
   @Get('conversations/:id/messages')

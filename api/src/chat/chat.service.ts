@@ -9,6 +9,7 @@ import {
   ListMessagesResponseDto,
   MessageDto,
 } from './dto/chat-messages.dto';
+import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
 
 function sortPair(a: string, b: string) {
   return a < b ? [a, b] : [b, a];
@@ -124,5 +125,50 @@ export class ChatService {
       body: message.body,
       createdAt: message.createdAt.toISOString(),
     };
+  }
+
+  async listConversations(userId: string): Promise<ListConversationsResponseDto> {
+    const conversations = await this.prisma.conversation.findMany({
+      where: {
+        OR: [{ participantAId: userId }, { participantBId: userId }],
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        participantA: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true, avatarUrl: true } },
+          },
+        },
+        participantB: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true, avatarUrl: true } },
+          },
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: { body: true, createdAt: true },
+        },
+      },
+    });
+
+    const items = conversations.map((c) => {
+      const other =
+        c.participantAId === userId ? c.participantB : c.participantA;
+      const last = c.messages[0];
+      return {
+        id: c.id,
+        participantId: other.id,
+        participantDisplayName: other.profile?.displayName ?? 'Neighbor',
+        participantAvatarUrl: other.profile?.avatarUrl ?? null,
+        activityId: c.activityId,
+        lastMessageBody: last?.body ?? null,
+        lastMessageAt: last?.createdAt ? last.createdAt.toISOString() : null,
+      };
+    });
+
+    return { items };
   }
 }

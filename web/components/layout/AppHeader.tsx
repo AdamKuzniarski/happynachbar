@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { User } from "lucide-react";
+import { MessageCircle, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
@@ -88,6 +88,9 @@ export async function AppHeader({
 
           {variant === "app" ? (
             <>
+              <Link href="/chat" className={iconBtn} aria-label="Nachrichten">
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              </Link>
               <Link href="/profile" className={iconBtn} aria-label="Profil">
                 <User className="h-4 w-4" aria-hidden="true" />
               </Link>

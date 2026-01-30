@@ -1,4 +1,10 @@
-import { Controller, Get, NotFoundException, Param, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('public/users')
@@ -12,7 +18,15 @@ export class PublicUsersController {
       select: {
         createdBy: {
           select: {
-            profile: { select: { displayName: true, avatarUrl: true, bio: true } },
+            createdAt: true,
+            profile: {
+              select: {
+                displayName: true,
+                avatarUrl: true,
+                bio: true,
+                plz: true,
+              },
+            },
           },
         },
       },
@@ -26,6 +40,8 @@ export class PublicUsersController {
       displayName: profile?.displayName ?? 'Neighbor',
       avatarUrl: profile?.avatarUrl ?? null,
       bio: profile?.bio ?? null,
+      plz: profile?.plz ?? null,
+      createdAt: activity.createdBy.createdAt,
     };
   }
 }

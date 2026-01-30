@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
+import { StartChatButton } from "./StartChatButton";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -94,14 +95,7 @@ export default async function ActivityCreatorPage({
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-2">
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-4 py-1.5 text-sm font-semibold text-foreground opacity-60"
-              title="Demnächst verfügbar"
-            >
-              Kontaktieren
-            </button>
+            <StartChatButton activityId={id} />
           </div>
         </section>
       </div>

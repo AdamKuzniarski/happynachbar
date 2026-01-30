@@ -9,7 +9,7 @@ export type NeighborsMetricsRes = {
   thresholdApplied: boolean;
 };
 
-export function getPublicNeigborsMetrics(params: {
+export function getPublicNeighborsMetrics(params: {
   plz: string;
   days?: number;
   minCount?: number;

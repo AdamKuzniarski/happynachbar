@@ -7,7 +7,8 @@ import {
 } from '@nestjs/websockets';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { Server, Socket } from 'socket.io';
+import type { DefaultEventsMap, Server, Socket } from 'socket.io';
+import type { MessageDto } from './dto/chat-messages.dto';
 import { ChatService } from './chat.service';
 
 const COOKIE_NAME = 'happynachbar_token';
@@ -19,6 +20,13 @@ type JwtPayload = {
   exp?: number;
   iat?: number;
 };
+
+type AuthedSocket = Socket<
+  DefaultEventsMap,
+  DefaultEventsMap,
+  DefaultEventsMap,
+  { userId?: string }
+>;
 
 function parseCookie(header?: string): Record<string, string> {
   if (!header) return {};
@@ -63,7 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.allowedOrigins = parseOrigins(this.config.get<string>('CORS_ORIGINS'));
   }
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: AuthedSocket) {
     const origin = client.handshake.headers.origin;
     if (origin && !this.allowedOrigins.has(origin)) {
       client.disconnect(true);
@@ -86,40 +94,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(_client: Socket) {}
+  handleDisconnect() {}
 
   @SubscribeMessage('chat:join')
-  async handleJoin(client: Socket, payload: { conversationId?: string }) {
-    const userId = client.data.userId as string | undefined;
+  async handleJoin(client: AuthedSocket, payload: { conversationId?: string }) {
+    const userId = client.data.userId;
     if (!userId) {
       client.disconnect(true);
       return;
     }
 
-    const conversationId = payload?.conversationId;
+    const conversationId =
+      typeof payload?.conversationId === 'string' ? payload.conversationId : '';
     if (!conversationId) return;
 
     await this.chat.assertConversationAccess(userId, conversationId);
-    client.join(`conversation:${conversationId}`);
+    await client.join(`conversation:${conversationId}`);
     client.emit('chat:joined', { conversationId });
   }
 
   @SubscribeMessage('message:send')
   async handleSend(
-    client: Socket,
+    client: AuthedSocket,
     payload: { conversationId?: string; body?: string },
   ) {
-    const userId = client.data.userId as string | undefined;
+    const userId = client.data.userId;
     if (!userId) {
       client.disconnect(true);
       return;
     }
 
-    const conversationId = payload?.conversationId;
+    const conversationId =
+      typeof payload?.conversationId === 'string' ? payload.conversationId : '';
     const body = typeof payload?.body === 'string' ? payload.body.trim() : '';
     if (!conversationId || !body) return;
 
-    const message = await this.chat.createMessage(userId, conversationId, body);
+    const message: MessageDto = await this.chat.createMessage(
+      userId,
+      conversationId,
+      body,
+    );
     this.server
       .to(`conversation:${conversationId}`)
       .emit('message:new', message);

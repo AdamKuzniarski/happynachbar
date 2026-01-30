@@ -16,7 +16,7 @@ export type AdminUserRow = {
   profile: { displayName: string | null; plz: string | null } | null;
 };
 
-type adminListUserParams = {
+type adminListUsersParams = {
   take?: number;
   cursor?: string | null;
   q?: string;
@@ -24,13 +24,13 @@ type adminListUserParams = {
   isBanned?: boolean;
 };
 
-export function adminListUser({
+export function adminListUsers({
   take,
   cursor,
   q,
   role,
   isBanned,
-}: adminListUserParams) {
+}: adminListUsersParams) {
   const qs = buildQuery({
     take: take ?? 20,
     cursor: cursor ?? undefined,

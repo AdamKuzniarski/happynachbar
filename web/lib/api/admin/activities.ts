@@ -8,10 +8,33 @@ import type {
 } from "./types";
 import type { ActivityCategory } from "../enums";
 
-export function adminListActivities(params: { take?: number; q?: string }) {
+type adminListActivitiesParams = {
+  take?: number;
+  cursor?: string | null;
+  q?: string;
+  status?: AdminActivityStatus;
+  plz?: string;
+  category?: ActivityCategory;
+  createdById?: string;
+};
+
+export function adminListActivities({
+  take,
+  cursor,
+  q,
+  status,
+  plz,
+  category,
+  createdById,
+}: adminListActivitiesParams) {
   const qs = buildQuery({
-    take: params.take ?? 20,
-    q: params.q,
+    take: take ?? 20,
+    cursor: cursor ?? undefined,
+    q: q,
+    status: status,
+    plz: plz,
+    category: category,
+    createdById: createdById,
   });
   return apiFetch<ListResponse<AdminActivityRow>>(`/admin/activities?${qs}`);
 }

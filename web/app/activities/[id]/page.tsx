@@ -42,6 +42,11 @@ export default async function ActivityDetailPage({
     } catch {
     }
   }
+  const isOwner = !!(currentUserId && a?.createdById && currentUserId === a.createdById);
+  const creatorHref =
+    currentUserId && a?.createdById && currentUserId === a.createdById
+      ? "/profile"
+      : `/activities/${encodeURIComponent(a.id)}/creator`;
 
   return (
     <main className="px-4">
@@ -90,22 +95,26 @@ export default async function ActivityDetailPage({
                   <span>
                     {a?.createdBy?.displayName?.trim() || "Neighbor"}
                   </span>
-                  <Link
-                    href={`/activities/${encodeURIComponent(a.id)}/creator`}
-                    aria-label="Zum Profil"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/80 hover:bg-fern/10 hover:text-foreground"
-                  >
-                    <User className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                  <button
-                    type="button"
-                    disabled
-                    aria-label="Kontaktieren (demnächst)"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/50"
-                    title="Demnächst verfügbar"
-                  >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                  {!isOwner ? (
+                    <>
+                      <Link
+                        href={creatorHref}
+                        aria-label="Zum Profil"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/80 hover:bg-fern/10 hover:text-foreground"
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                      <button
+                        type="button"
+                        disabled
+                        aria-label="Kontaktieren (demnächst)"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/50"
+                        title="Demnächst verfügbar"
+                      >
+                        <Mail className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </>
+                  ) : null}
                 </dd>
               </div>
               <div>

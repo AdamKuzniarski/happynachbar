@@ -68,7 +68,7 @@ export async function AppHeader({
         </span>
         {variant === "app" && userLabel ? (
           <span className="mt-1 text-xs text-foreground/80">
-            Angemeldet als {userLabel}
+            Hallo {userLabel}
           </span>
         ) : null}
       </div>

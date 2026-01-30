@@ -79,112 +79,100 @@ export default async function ProfilePage() {
           </h1>
         </div>
 
-        {error ? (
-          <section className="mt-4 rounded-md border-2 border-fern bg-surface p-4 text-sm">
-            <p>{error}</p>
-            <Link
-              href="/auth/login"
-              className="mt-3 inline-flex text-sm font-semibold underline"
-            >
-              Zum Login
-            </Link>
-          </section>
-        ) : (
-          <section className="mt-4 grid gap-4 sm:grid-cols-[200px,1fr]">
-            <div className="rounded-md border-2 border-fern bg-surface p-4 flex flex-col items-center text-center">
-              <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-fern bg-surface-strong text-3xl font-semibold text-foreground">
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatarUrl}
-                    alt={`${displayName} Avatar`}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    {getInitials(displayName)}
-                  </div>
-                )}
-              </div>
-              <div className="mt-3 text-base font-semibold">{displayName}</div>
-              <div className="text-xs text-hunter">{me?.email ?? ""}</div>
+        <section className="mt-4 overflow-hidden rounded-2xl bg-surface/60 shadow-sm ring-1 ring-fern/25">
+          {error ? (
+            <div className="px-5 py-5 text-sm">
+              <p>{error}</p>
+              <Link
+                href="/auth/login"
+                className="mt-3 inline-flex text-sm font-semibold underline"
+              >
+                Zum Login
+              </Link>
             </div>
+          ) : (
+            <div className="px-5 py-5">
+              <div className="grid gap-4 sm:grid-cols-[200px,1fr]">
+                <div className="rounded-xl bg-fern/10 p-4 ring-1 ring-fern/20 flex flex-col items-center text-center">
+                  <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-fern bg-surface-strong text-3xl font-semibold text-foreground">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatarUrl}
+                        alt={`${displayName} Avatar`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        {getInitials(displayName)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 text-base font-semibold">
+                    {displayName}
+                  </div>
+                  <div className="text-xs text-foreground/80">
+                    {me?.email ?? ""}
+                  </div>
+                </div>
 
-            <div className="space-y-4">
-              <div className="rounded-md border-2 border-fern bg-surface p-3">
-                <div className="text-[11px] font-semibold uppercase tracking-wide">
-                  Profilstatus
-                </div>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-strong">
-                  <div
-                    className="h-full bg-fern"
-                    style={{ width: `${completionPercent}%` }}
-                  />
-                </div>
-                <div className="mt-1.5 text-[11px] text-hunter">
-                  {completion?.isComplete
-                    ? "Profil vollständig"
-                    : `Profil zu ${completionPercent}% vollständig`}
-                </div>
-                {completion?.missing?.length ? (
-                  <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px]">
-                    {completion.missing
-                      .filter((field) => field !== "avatarUrl")
-                      .map((field) => (
-                        <span
-                          key={field}
-                          className="rounded-full border border-fern px-1.5 py-0.5"
-                        >
-                          {field}
-                        </span>
-                      ))}
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-fern/10 p-4 text-sm ring-1 ring-fern/20">
+                    <dl className="space-y-3">
+                      <div>
+                        <dt className="text-xs opacity-80">Displayname</dt>
+                        <dd className="text-sm font-medium text-foreground">
+                          {displayName}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs opacity-80">PLZ</dt>
+                        <dd className="text-sm font-medium text-foreground">
+                          {plz}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs opacity-80">Bio</dt>
+                        <dd className="text-sm font-medium text-foreground">
+                          {bio}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs opacity-80">Mitglied seit</dt>
+                        <dd className="text-sm font-medium text-foreground">
+                          {joinedAt}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
-                ) : null}
-              </div>
 
-              <div className="rounded-md border-2 border-fern bg-surface p-4 text-sm">
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-xs uppercase text-hunter">Displayname</dt>
-                    <dd className="text-sm font-medium text-foreground">
-                      {displayName}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase text-hunter">PLZ</dt>
-                    <dd className="text-sm font-medium text-foreground">
-                      {plz}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase text-hunter">Bio</dt>
-                    <dd className="text-sm text-foreground">{bio}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase text-hunter">
-                      Mitglied seit
-                    </dt>
-                    <dd className="text-sm text-foreground">{joinedAt}</dd>
-                  </div>
-                </dl>
+                  {!completion?.isComplete ? (
+                    <div className="rounded-xl bg-fern/10 p-3 ring-1 ring-fern/20">
+                      <div className="text-sm font-medium text-foreground">
+                        Profilstatus
+                      </div>
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-strong">
+                        <div
+                          className="h-full bg-fern"
+                          style={{ width: `${completionPercent}%` }}
+                        />
+                      </div>
+                      <div className="mt-1.5 text-[11px] text-hunter">
+                        Profil zu {completionPercent}% vollständig
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {!error ? (
-          <div className="mt-6 flex flex-col items-stretch gap-2">
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-3 py-2 text-sm font-semibold text-foreground opacity-60"
-              title="Demnächst verfügbar"
-            >
-              Kontaktieren
-            </button>
+          <div className="mt-6 flex flex-col items-center gap-2">
             <Link
               href="/profile/edit"
-              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-strong"
+              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-strong"
             >
               Profil bearbeiten
             </Link>

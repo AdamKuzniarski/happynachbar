@@ -69,11 +69,8 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
               </div>
             )}
           </div>
-          <p className="text-xs text-hunter text-center">
-            JPG, PNG oder WebP · max. 10MB
-          </p>
         </div>
-        <div className="mt-3 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="mt-6 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
           <Input
             id="avatarUrl"
             name="avatarUrl"
@@ -108,9 +105,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
           />
         </div>
         {uploading ? (
-          <p className="mt-1 text-xs text-hunter text-center">
-            Upload läuft…
-          </p>
+          <p className="mt-1 text-xs text-hunter text-center">Upload läuft…</p>
         ) : null}
       </div>
 
@@ -151,7 +146,11 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
 
       <div className="flex justify-center gap-2">
         <SubmitButton />
-        <Button type="button" variant="secondary" onClick={() => history.back()}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => history.back()}
+        >
           Abbrechen
         </Button>
       </div>

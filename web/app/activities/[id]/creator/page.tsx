@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDate } from "@/lib/format";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -10,6 +11,8 @@ type PublicProfile = {
   displayName: string;
   avatarUrl?: string | null;
   bio?: string | null;
+  plz?: string | null;
+  createdAt?: string | null;
 };
 
 function getInitials(name?: string | null) {
@@ -65,16 +68,36 @@ export default async function ActivityCreatorPage({
             <div className="mt-3 text-base font-semibold">
               {profile.displayName || "Neighbor"}
             </div>
-            <p className="mt-2 text-sm text-foreground/80">
-              {profile.bio?.trim() || "Noch keine Bio hinterlegt."}
-            </p>
           </div>
 
-          <div className="mt-6 flex flex-col items-stretch gap-2">
+          <div className="mt-6 rounded-md border-2 border-fern bg-surface p-3 text-sm">
+            <dl className="space-y-2">
+              <div>
+                <dt className="text-xs opacity-80">Bio</dt>
+                <dd className="text-sm text-foreground">
+                  {profile.bio?.trim() || "Noch keine Bio hinterlegt."}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs opacity-80">PLZ</dt>
+                <dd className="text-sm font-medium text-foreground">
+                  {profile.plz?.trim() || "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs opacity-80">Mitglied seit</dt>
+                <dd className="text-sm text-foreground">
+                  {profile.createdAt ? formatDate(profile.createdAt) : "—"}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-2">
             <button
               type="button"
               disabled
-              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-3 py-2 text-sm font-semibold text-foreground opacity-60"
+              className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-4 py-1.5 text-sm font-semibold text-foreground opacity-60"
               title="Demnächst verfügbar"
             >
               Kontaktieren

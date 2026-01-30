@@ -29,3 +29,4 @@ export function formatActivityCategory(category?: string | null) {
   if (!category) return "—";
   return ACTIVITY_CATEGORY_LABELS[category] ?? category;
 }
+

@@ -182,32 +182,31 @@ export function ActivityImageGallery({
               Schliessen
             </Button>
 
-            {hasMultiple ? (
-              <>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-                  onClick={goPrev}
-                  disabled={isFirst}
-                  aria-label="Vorheriges Bild"
-                >
-                  ←
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-                  onClick={goNext}
-                  disabled={isLast}
-                  aria-label="Naechstes Bild"
-                >
-                  →
-                </Button>
-              </>
-            ) : null}
-
             <div className="relative h-[80vh] w-full rounded-md bg-surface overflow-hidden">
+              {hasMultiple ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={goPrev}
+                    disabled={isFirst}
+                    aria-label="Vorheriges Bild"
+                  >
+                    ←
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={goNext}
+                    disabled={isLast}
+                    aria-label="Naechstes Bild"
+                  >
+                    →
+                  </Button>
+                </>
+              ) : null}
               <SafeImage
                 src={active.url}
                 alt=""

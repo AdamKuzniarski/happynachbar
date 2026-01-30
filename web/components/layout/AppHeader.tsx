@@ -1,16 +1,56 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
 
-export function AppHeader({
+const apiBase =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.API_URL ??
+  "http://localhost:4000";
+
+type UserMeResponse = {
+  email?: string | null;
+  profile?: { displayName?: string | null } | null;
+};
+
+export async function AppHeader({
   variant,
   showBackOnAuth = false,
 }: {
   variant: HeaderVariant;
   showBackOnAuth?: boolean;
 }) {
+  const brandHref =
+    variant === "app"
+      ? "/homepage"
+      : variant === "auth"
+        ? "/"
+        : variant === "logout"
+          ? "/homepage"
+          : undefined;
+
+  let userLabel: string | null = null;
+  if (variant === "app") {
+    const token = (await cookies()).get("happynachbar_token")?.value;
+    if (token) {
+      try {
+        const res = await fetch(`${apiBase}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const me = (await res.json()) as UserMeResponse;
+          const displayName = me?.profile?.displayName?.trim();
+          userLabel = displayName || me?.email?.trim() || null;
+        }
+      } catch {
+        userLabel = null;
+      }
+    }
+  }
+
   const btn =
     "rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4";
   const iconBtn =
@@ -22,20 +62,18 @@ export function AppHeader({
         className="h-9 w-9 rounded bg-fern sm:h-10 sm:w-10"
         aria-hidden="true"
       />
-      <span className="text-sm font-semibold sm:text-lg text-foreground">
-        happynachbar
-      </span>
+      <div className="flex flex-col items-start">
+        <span className="text-sm font-semibold sm:text-lg text-foreground">
+          happynachbar
+        </span>
+        {variant === "app" && userLabel ? (
+          <span className="mt-1 text-xs text-foreground/80">
+            Angemeldet als {userLabel}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
-
-  const brandHref =
-    variant === "app"
-      ? "/homepage"
-      : variant === "auth"
-        ? "/"
-        : variant === "logout"
-          ? "/homepage"
-          : undefined;
 
   return (
     <header className="border-b-2 border-fern">

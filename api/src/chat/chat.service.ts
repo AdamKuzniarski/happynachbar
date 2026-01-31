@@ -24,6 +24,49 @@ function clamp(n: number, min: number, max: number) {
 export class ChatService {
   constructor(private prisma: PrismaService) {}
 
+  private async touchRead(userId: string, conversationId: string) {
+    await this.prisma.conversationRead.upsert({
+      where: {
+        conversationId_userId: { conversationId, userId },
+      },
+      update: { lastReadAt: new Date() },
+      create: { conversationId, userId, lastReadAt: new Date() },
+    });
+  }
+
+  private async listConversationRows(userId: string) {
+    return this.prisma.conversation.findMany({
+      where: {
+        OR: [{ participantAId: userId }, { participantBId: userId }],
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        participantA: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true, avatarUrl: true } },
+          },
+        },
+        participantB: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true, avatarUrl: true } },
+          },
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: { body: true, createdAt: true, senderId: true },
+        },
+        reads: {
+          where: { userId },
+          take: 1,
+          select: { lastReadAt: true },
+        },
+      },
+    });
+  }
+
   async assertConversationAccess(userId: string, conversationId: string) {
     const convo = await this.prisma.conversation.findFirst({
       where: {
@@ -99,6 +142,8 @@ export class ChatService {
       createdAt: m.createdAt.toISOString(),
     }));
 
+    await this.touchRead(userId, conversationId);
+
     return { items, nextCursor };
   }
 
@@ -128,32 +173,10 @@ export class ChatService {
     };
   }
 
-  async listConversations(userId: string): Promise<ListConversationsResponseDto> {
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        OR: [{ participantAId: userId }, { participantBId: userId }],
-      },
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        participantA: {
-          select: {
-            id: true,
-            profile: { select: { displayName: true, avatarUrl: true } },
-          },
-        },
-        participantB: {
-          select: {
-            id: true,
-            profile: { select: { displayName: true, avatarUrl: true } },
-          },
-        },
-        messages: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-          select: { body: true, createdAt: true },
-        },
-      },
-    });
+  async listConversations(
+    userId: string,
+  ): Promise<ListConversationsResponseDto> {
+    const conversations = await this.listConversationRows(userId);
 
     const items = conversations.map((c) => {
       const other =
@@ -175,34 +198,12 @@ export class ChatService {
 
   async markRead(userId: string, conversationId: string) {
     await this.assertConversationAccess(userId, conversationId);
-    await this.prisma.conversationRead.upsert({
-      where: {
-        conversationId_userId: { conversationId, userId },
-      },
-      update: { lastReadAt: new Date() },
-      create: { conversationId, userId, lastReadAt: new Date() },
-    });
+    await this.touchRead(userId, conversationId);
     return { ok: true };
   }
 
   async getUnreadCount(userId: string): Promise<UnreadCountDto> {
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        OR: [{ participantAId: userId }, { participantBId: userId }],
-      },
-      include: {
-        messages: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-          select: { createdAt: true, senderId: true },
-        },
-        reads: {
-          where: { userId },
-          take: 1,
-          select: { lastReadAt: true },
-        },
-      },
-    });
+    const conversations = await this.listConversationRows(userId);
 
     const count = conversations.filter((c) => {
       const last = c.messages[0];

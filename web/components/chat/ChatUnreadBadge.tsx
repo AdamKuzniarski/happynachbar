@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { MessageCircle, MessageCircleMore } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 import { getUnreadCount, listConversations } from "@/lib/api/chat";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-export function ChatUnreadBadge() {
+export function ChatUnreadBadge({ className }: { className: string }) {
   const [hasUnread, setHasUnread] = React.useState(false);
   const socketRef = React.useRef<Socket | null>(null);
   const joinedRef = React.useRef<Set<string>>(new Set());
@@ -46,6 +48,12 @@ export function ChatUnreadBadge() {
       refreshUnread();
     });
 
+    function handleRead() {
+      refreshUnread();
+    }
+
+    window.addEventListener("chat:read", handleRead);
+
     const interval = window.setInterval(() => {
       if (!alive) return;
       refreshUnread();
@@ -53,18 +61,28 @@ export function ChatUnreadBadge() {
 
     return () => {
       alive = false;
+      window.removeEventListener("chat:read", handleRead);
       window.clearInterval(interval);
       socket.disconnect();
       socketRef.current = null;
     };
   }, []);
 
-  if (!hasUnread) return null;
+  const glowClass = hasUnread
+    ? "!bg-limecream !text-evergreen !border-fern"
+    : "";
 
   return (
-    <span
-      className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-fern"
-      aria-label="Neue Nachrichten"
-    />
+    <Link
+      href="/chat"
+      className={`${className} ${glowClass}`}
+      aria-label="Nachrichten"
+    >
+      {hasUnread ? (
+        <MessageCircleMore className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <MessageCircle className="h-4 w-4" aria-hidden="true" />
+      )}
+    </Link>
   );
 }

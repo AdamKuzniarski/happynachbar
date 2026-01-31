@@ -27,6 +27,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   );
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const socketRef = React.useRef<Socket | null>(null);
+  const bottomRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     let alive = true;
@@ -37,7 +38,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         const items = res?.items ?? [];
         setMessages(items.slice().reverse());
         setError(null);
-        markConversationRead(conversationId).catch(() => {});
+        markConversationRead(conversationId)
+          .then(() => {
+            window.dispatchEvent(new Event("chat:read"));
+          })
+          .catch(() => {});
       })
       .catch((e) => {
         if (!alive) return;
@@ -103,7 +108,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     socket.on("message:new", (msg: SocketMessage) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) => [...prev, msg]);
-      markConversationRead(conversationId).catch(() => {});
+      markConversationRead(conversationId)
+        .then(() => {
+          window.dispatchEvent(new Event("chat:read"));
+        })
+        .catch(() => {});
     });
 
     return () => {
@@ -111,6 +120,10 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       socketRef.current = null;
     };
   }, [conversationId]);
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length, loading]);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -143,24 +156,32 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
               const authorLabel = isMine
                 ? "Du"
                 : participantName?.trim() || "Ersteller";
+              const alignment = isMine ? "ml-auto text-right" : "mr-auto text-left";
+              const bubble =
+                isMine
+                  ? "bg-fern text-limecream"
+                  : "bg-surface-strong text-foreground";
+
               return (
-                <div
-                  key={m.id}
-                  className={`rounded-xl px-3 py-2 text-sm ${
-                    isMine
-                      ? "bg-fern/15 text-foreground ml-auto"
-                      : "bg-surface"
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-[11px] opacity-80">
-                    <span>{authorLabel}</span>
-                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                <div key={m.id} className={alignment}>
+                  <div
+                    className={`inline-block max-w-[85%] rounded-xl px-3 py-2 text-sm ${bubble}`}
+                  >
+                    <div
+                      className={`flex w-full items-center gap-2 text-[11px] opacity-80 ${
+                        isMine ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <span>{authorLabel}</span>
+                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div className="mt-1 break-words">{m.body}</div>
                   </div>
-                  <div className="mt-1 break-words">{m.body}</div>
                 </div>
               );
             })
           )}
+          <div ref={bottomRef} />
         </div>
       )}
 

@@ -167,10 +167,10 @@ export function ChatInbox() {
               <div className="flex items-stretch gap-2">
                 <Link
                   href={`/chat/${encodeURIComponent(c.id)}`}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 hover:bg-surface-strong ${
+                  className={`flex-1 rounded-xl border-2 px-4 py-3 ${
                     c.hasUnread
-                      ? "border-fern bg-limecream text-evergreen"
-                      : "border-fern bg-surface"
+                      ? "border-fern bg-limecream text-evergreen hover:bg-limecream/80 dark:hover:bg-limecream/90 hover:text-evergreen"
+                      : "border-fern bg-surface hover:bg-surface-strong"
                   }`}
                 >
                   <div className="flex items-center gap-3">

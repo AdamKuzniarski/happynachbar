@@ -164,10 +164,10 @@ export function ChatInbox() {
         <ul className="space-y-3">
           {items.map((c) => (
             <li key={c.id}>
-              <div className="flex items-stretch gap-2">
+              <div className="relative">
                 <Link
                   href={`/chat/${encodeURIComponent(c.id)}`}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 ${
+                  className={`block rounded-xl border-2 px-4 py-3 pr-16 ${
                     c.hasUnread
                       ? "border-fern bg-limecream text-evergreen hover:bg-limecream/80 dark:hover:bg-limecream/90 hover:text-evergreen"
                       : "border-fern bg-surface hover:bg-surface-strong"
@@ -178,22 +178,22 @@ export function ChatInbox() {
                       {c.participantDisplayName?.trim()?.[0] ?? "N"}
                     </div>
                     <div className="min-w-0">
-                    <div className="text-sm font-semibold">
-                      {c.participantDisplayName || "Neighbor"}
-                      {c.activityTitle ? (
-                        <span className="text-xs font-normal opacity-70">
-                          {" "}
-                          · zur Aktivität: {c.activityTitle}
-                        </span>
-                      ) : null}
+                      <div className="text-sm font-semibold">
+                        {c.participantDisplayName || "Neighbor"}
+                        {c.activityTitle ? (
+                          <span className="text-xs font-normal opacity-70">
+                            {" "}
+                            · zur Aktivität: {c.activityTitle}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
                 <Button
                   type="button"
                   variant="secondary"
-                  className="px-3"
+                  className="absolute right-2 top-2 h-7 px-2 py-0 text-[11px] leading-none"
                   onClick={() => handleDelete(c.id)}
                   disabled={deletingId === c.id}
                   aria-label="Chat löschen"

@@ -181,7 +181,13 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                       }`}
                     >
                       <span>{authorLabel}</span>
-                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                      <span>
+                        {new Date(m.createdAt).toLocaleDateString("de-DE")}{" "}
+                        {new Date(m.createdAt).toLocaleTimeString("de-DE", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                     <div className="mt-1 break-words">{m.body}</div>
                   </div>

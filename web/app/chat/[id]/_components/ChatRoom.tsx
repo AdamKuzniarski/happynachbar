@@ -137,12 +137,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <section className="rounded-2xl bg-surface/60 p-4 shadow-sm ring-1 ring-fern/25">
-      <h1 className="text-lg font-semibold">
-        Chat Nachricht an{" "}
-        {participantName?.trim() ? participantName : "Ersteller"}
+    <>
+      <h1 className="text-lg font-semibold text-center">
+        Chat mit {participantName?.trim() ? participantName : "Ersteller"}
       </h1>
-      <FormError message={error} />
+      <section className="mt-3 rounded-2xl bg-surface/60 p-4 shadow-sm ring-1 ring-fern/25">
+        <FormError message={error} />
 
       {loading ? (
         <p className="mt-4 text-sm opacity-70">Lädt…</p>
@@ -185,14 +185,15 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         </div>
       )}
 
-      <form onSubmit={onSubmit} className="mt-4 flex gap-2">
-        <Input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Nachricht…"
-        />
-        <Button type="submit">Senden</Button>
-      </form>
-    </section>
+        <form onSubmit={onSubmit} className="mt-4 flex gap-2">
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Nachricht…"
+          />
+          <Button type="submit">Senden</Button>
+        </form>
+      </section>
+    </>
   );
 }

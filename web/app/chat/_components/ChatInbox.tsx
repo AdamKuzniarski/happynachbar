@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { listConversations } from "@/lib/api/chat";
+import { deleteConversation, listConversations } from "@/lib/api/chat";
 import { FormError } from "@/components/ui/FormError";
+import { Button } from "@/components/ui/Button";
 
 export function ChatInbox() {
   const [items, setItems] = React.useState<
@@ -11,6 +12,7 @@ export function ChatInbox() {
   >([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let alive = true;
@@ -39,6 +41,20 @@ export function ChatInbox() {
     return <p className="mt-4 text-sm opacity-70">Lädt…</p>;
   }
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Diesen Chat wirklich löschen?")) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      await deleteConversation(id);
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unbekannter Fehler");
+    } finally {
+      setDeletingId((current) => (current === id ? null : current));
+    }
+  };
+
   return (
     <div className="mt-4">
       <FormError message={error} />
@@ -48,24 +64,36 @@ export function ChatInbox() {
         <ul className="space-y-3">
           {items.map((c) => (
             <li key={c.id}>
-              <Link
-                href={`/chat/${encodeURIComponent(c.id)}`}
-                className="block rounded-xl border-2 border-fern bg-surface px-4 py-3 hover:bg-surface-strong"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
-                    {c.participantDisplayName?.trim()?.[0] ?? "N"}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold">
-                      {c.participantDisplayName || "Neighbor"}
+              <div className="flex items-stretch gap-2">
+                <Link
+                  href={`/chat/${encodeURIComponent(c.id)}`}
+                  className="flex-1 rounded-xl border-2 border-fern bg-surface px-4 py-3 hover:bg-surface-strong"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
+                      {c.participantDisplayName?.trim()?.[0] ?? "N"}
                     </div>
-                    <div className="truncate text-xs opacity-70">
-                      {c.lastMessageBody ?? "Noch keine Nachrichten"}
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold">
+                        {c.participantDisplayName || "Neighbor"}
+                      </div>
+                      <div className="truncate text-xs opacity-70">
+                        {c.lastMessageBody ?? "Noch keine Nachrichten"}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="px-3"
+                  onClick={() => handleDelete(c.id)}
+                  disabled={deletingId === c.id}
+                  aria-label="Chat löschen"
+                >
+                  {deletingId === c.id ? "…" : "Löschen"}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

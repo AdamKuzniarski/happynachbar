@@ -37,3 +37,9 @@ export async function markConversationRead(conversationId: string) {
 export async function getUnreadCount() {
   return apiFetch<{ count: number }>(`/chat/unread-count`);
 }
+
+export async function deleteConversation(conversationId: string) {
+  return apiFetch(`/chat/conversations/${encodeURIComponent(conversationId)}`, {
+    method: "DELETE",
+  });
+}

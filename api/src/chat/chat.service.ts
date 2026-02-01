@@ -216,4 +216,10 @@ export class ChatService {
 
     return { count };
   }
+
+  async deleteConversation(userId: string, conversationId: string) {
+    await this.assertConversationAccess(userId, conversationId);
+    await this.prisma.conversation.delete({ where: { id: conversationId } });
+    return { ok: true };
+  }
 }

@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -60,5 +61,13 @@ export class ChatController {
     @Query() q: ChatMessagesQueryDto,
   ) {
     return this.chat.listMessages(req.user.userId, id, q);
+  }
+
+  @Delete('conversations/:id')
+  deleteConversation(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.chat.deleteConversation(req.user.userId, id);
   }
 }

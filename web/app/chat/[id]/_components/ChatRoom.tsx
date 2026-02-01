@@ -25,6 +25,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [participantName, setParticipantName] = React.useState<string | null>(
     null,
   );
+  const [activityTitle, setActivityTitle] = React.useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const socketRef = React.useRef<Socket | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
@@ -65,10 +66,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         if (!alive) return;
         const item = res?.items?.find((c) => c.id === conversationId);
         setParticipantName(item?.participantDisplayName ?? null);
+        setActivityTitle(item?.activityTitle ?? null);
       })
       .catch(() => {
         if (!alive) return;
         setParticipantName(null);
+        setActivityTitle(null);
       });
 
     return () => {
@@ -140,6 +143,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     <>
       <h1 className="text-lg font-semibold text-center">
         Chat mit {participantName?.trim() ? participantName : "Ersteller"}
+        {activityTitle?.trim() ? (
+          <span className="mt-1 block text-sm font-normal opacity-75">
+            Aktivität: {activityTitle}
+          </span>
+        ) : null}
       </h1>
       <section className="mt-3 rounded-2xl bg-surface/60 p-4 shadow-sm ring-1 ring-fern/25">
         <FormError message={error} />

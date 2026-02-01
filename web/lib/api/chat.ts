@@ -6,6 +6,8 @@ export type ConversationListItem = {
   participantDisplayName: string;
   participantAvatarUrl: string | null;
   activityId: string | null;
+  activityTitle: string | null;
+  hasUnread: boolean;
   lastMessageBody: string | null;
   lastMessageAt: string | null;
 };

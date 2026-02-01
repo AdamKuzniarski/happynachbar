@@ -63,6 +63,9 @@ export class ChatService {
           take: 1,
           select: { lastReadAt: true },
         },
+        activity: {
+          select: { title: true },
+        },
       },
     });
   }
@@ -182,12 +185,19 @@ export class ChatService {
       const other =
         c.participantAId === userId ? c.participantB : c.participantA;
       const last = c.messages[0];
+      const lastReadAt = c.reads[0]?.lastReadAt;
+      const hasUnread =
+        !!last &&
+        last.senderId !== userId &&
+        (!lastReadAt || last.createdAt > lastReadAt);
       return {
         id: c.id,
         participantId: other.id,
         participantDisplayName: other.profile?.displayName ?? 'Neighbor',
         participantAvatarUrl: other.profile?.avatarUrl ?? null,
         activityId: c.activityId,
+        activityTitle: c.activity?.title ?? null,
+        hasUnread,
         lastMessageBody: last?.body ?? null,
         lastMessageAt: last?.createdAt ? last.createdAt.toISOString() : null,
       };

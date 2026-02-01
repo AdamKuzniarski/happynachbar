@@ -46,6 +46,7 @@ export function ChatUnreadBadge({ className }: { className: string }) {
 
     socket.on("message:new", () => {
       refreshUnread();
+      window.dispatchEvent(new Event("chat:unread"));
     });
 
     function handleRead() {

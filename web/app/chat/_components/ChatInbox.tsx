@@ -7,9 +7,12 @@ import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
 
 export function ChatInbox() {
-  const [items, setItems] = React.useState<
-    Awaited<ReturnType<typeof listConversations>>["items"]
-  >([]);
+  type ConversationList = NonNullable<
+    Awaited<ReturnType<typeof listConversations>>
+  >;
+  type ConversationListItem = ConversationList["items"][number];
+
+  const [items, setItems] = React.useState<ConversationListItem[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);

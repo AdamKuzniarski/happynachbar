@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { formatDate } from "@/lib/format";
-import { getHealth, getDbHealth } from "@/lib/api/health";
+import { getDbHealth } from "@/lib/api/health";
 import { apiFetch } from "@/lib/api/client";
 import {
   adminListActivities,
@@ -45,7 +45,6 @@ export function AdminOverviewScreen() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  const [health, setHealth] = React.useState<string>("-");
   const [db, setDb] = React.useState<{
     status: string;
     usersCount: number;
@@ -70,8 +69,7 @@ export function AdminOverviewScreen() {
     setError(null);
 
     try {
-      const [h, d, ping, act, arch, banned] = await Promise.all([
-        getHealth(),
+      const [d, ping, act, arch, banned] = await Promise.all([
         getDbHealth(),
         apiFetch<AdminPingRes>("/admin/ping"),
         adminListActivities({ take: 10, status: "ACTIVE" }),
@@ -79,7 +77,6 @@ export function AdminOverviewScreen() {
         adminListUsers({ take: 10, isBanned: true }),
       ]);
 
-      setHealth(h?.status ?? "_");
       setDb(d ? { status: d.status, usersCount: d.usersCount } : null);
       setAdminOk(!!ping?.ok);
 
@@ -100,8 +97,9 @@ export function AdminOverviewScreen() {
         countActivities("ARCHIVED"),
       ]);
       setCounts({ active, archived });
-    } catch {
-      //keep it silent}
+    } catch (err) {
+      // Log the error but keep UI silent; counts are non-critical
+      console.error("Failed to load activity counts:", err);
     }
   }
 
@@ -110,7 +108,6 @@ export function AdminOverviewScreen() {
       await loadLight();
       await loadCounts();
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalPosts =
@@ -151,7 +148,7 @@ export function AdminOverviewScreen() {
   const countsHint = (() => {
     const aT = counts.active?.truncated;
     const rT = counts.archived?.truncated;
-    if (aT || rT) return "Counts capped at 2000 rows .";
+    if (aT || rT) return "Counts capped at 2000 rows.";
     if (counts.active && counts.archived)
       return "Counts computed via paging (FE-only).";
     return "Counts not ready yet.";

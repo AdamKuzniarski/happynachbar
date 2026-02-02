@@ -45,9 +45,16 @@ export function adminListUsers({
   return apiFetch<ListResponse<AdminUserRow>>(`/admin/users?${qs}`);
 }
 
+export function adminSetUserRole(userId: string, role: AdminUserRole) {
+  return apiFetch<{ id: string; role: AdminUserRole }>(
+    `/admin/users/${encodeURIComponent(userId)}/role`,
+    { method: "PATCH", body: JSON.stringify({ role }) },
+  );
+}
+
 export function adminSetUserBan(
   userId: string,
-  payload: { isBanned: boolean; reason: string },
+  payload: { isBanned: boolean; reason?: string | null },
 ) {
   return apiFetch<{
     id: string;

@@ -160,7 +160,7 @@ export function AdminOverviewScreen() {
         <div>
           <h1 className="text-lg font-semibold">Admin Übersicht</h1>
           <p className="mt-1 text-sm opacity-80">
-            Health, totals Moderation queue...
+            Health, Gesamtübersicht, noch zur Moderation
           </p>
         </div>
 
@@ -169,7 +169,7 @@ export function AdminOverviewScreen() {
           onClick={() => void loadLight()}
           disabled={loading}
         >
-          Refresh
+          Akutalisieren
         </Button>
       </div>
 
@@ -201,7 +201,7 @@ export function AdminOverviewScreen() {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <div className="text-sm font-semibold">zuletzt achiviert</div>
+              <div className="text-sm font-semibold">Zuletzt achiviert</div>
               <div className="mt-2 space-y-2">
                 {recentArchived.length ? (
                   recentArchived.map((a) => (
@@ -220,14 +220,14 @@ export function AdminOverviewScreen() {
                           variant="secondary"
                           onClick={() => void setStatusQuick(a.id, "ACTIVE")}
                         >
-                          Restore
+                      Wiederhestellen
                         </Button>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="text-sm opacity-70">
-                    Zuleztz nichts archiviert...
+                    Zuletzt nichts archiviert...
                   </div>
                 )}
               </div>
@@ -275,7 +275,7 @@ export function AdminOverviewScreen() {
         </Card>
 
         <Card>
-          <h2 className="text-base font-semibold">Gesperrte Users</h2>
+          <h2 className="text-base font-semibold">Gesperrte User</h2>
           <p className="mt-1 text-sm opacity-80">Zuletzt gesperrte Accounts.</p>
 
           <div className="mt-4 space-y-2">
@@ -293,7 +293,7 @@ export function AdminOverviewScreen() {
                 </div>
               ))
             ) : (
-              <div className="text-sm opacity-70">Keine gesperrten Usern</div>
+              <div className="text-sm opacity-70">Keine gesperrten User</div>
             )}
           </div>
         </Card>
@@ -307,7 +307,7 @@ export function AdminOverviewScreen() {
           </Button>
 
           <Button asChild variant="secondary">
-            <Link href="/admin/users">Gehe zu Usern</Link>
+            <Link href="/admin/users">Gehe zu User</Link>
           </Button>
 
           <Button asChild variant="ghost">

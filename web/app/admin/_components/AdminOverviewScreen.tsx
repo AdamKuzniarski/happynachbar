@@ -299,7 +299,7 @@ export function AdminOverviewScreen() {
       </div>
 
       <Card>
-        <h2 className="text-base font-semibold">Schnellactionen</h2>
+        <h2 className="text-base font-semibold">Schnellaktionen</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button asChild variant="secondary">
             <Link href="/admin/activities">Gehe zu Aktivitäten</Link>

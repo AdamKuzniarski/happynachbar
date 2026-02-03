@@ -6,11 +6,16 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { FormError } from "@/components/ui/FormError";
-import { buildBanReason, parseBanUntil, stripBanMeta } from "../_lib/banReason";
+import {
+  buildBanReason,
+  buildBanReasonWithUntil,
+  parseBanUntil,
+  stripBanMeta,
+} from "../_lib/banReason";
 import { formatDate } from "@/lib/format";
 import type { AdminUserRow } from "@/lib/api/admin/users";
 
-type Duration = "1" | "3" | "7" | "30" | "PERM";
+type Duration = "1" | "3" | "7" | "30" | "PERM" | "KEEP";
 
 export function BanUserModal({
   open,
@@ -33,7 +38,7 @@ export function BanUserModal({
   React.useEffect(() => {
     if (!user) return;
     setReason(stripBanMeta(user.banReason));
-    setDuration("7");
+    setDuration(user.isBanned ? "KEEP" : "7");
   }, [user]);
 
   if (!user) return null;
@@ -54,6 +59,12 @@ export function BanUserModal({
           <Button
             variant="secondary"
             onClick={() => {
+              if (duration === "KEEP") {
+                const banReason = buildBanReasonWithUntil(reason, until);
+                onConfirmBan(banReason);
+                return;
+              }
+
               const days = duration === "PERM" ? "PERM" : Number(duration);
               const banReason = buildBanReason(reason, days);
               onConfirmBan(banReason);
@@ -72,6 +83,9 @@ export function BanUserModal({
         value={duration}
         onChange={(e) => setDuration(e.target.value as Duration)}
       >
+        {user.isBanned ? (
+          <option value="KEEP">Keep existing duration</option>
+        ) : null}
         <option value="1">1 Day</option>
         <option value="3">3 Days</option>
         <option value="7">7 Days</option>

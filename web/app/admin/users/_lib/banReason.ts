@@ -15,6 +15,19 @@ export function buildBanReason(
   return `${PREFIX}${until} | ${reason}`;
 }
 
+export function buildBanReasonWithUntil(
+  inputReason: string,
+  until: Date | null,
+) {
+  const reason = inputReason.trim();
+
+  if (!until) return reason || undefined;
+
+  const untilIso = until.toISOString();
+  if (!reason) return `${PREFIX}${untilIso}`;
+  return `${PREFIX}${untilIso} | ${reason}`;
+}
+
 export function parseBanUntil(banReason: string | null) {
   if (!banReason) return null;
   const m = banReason.match(

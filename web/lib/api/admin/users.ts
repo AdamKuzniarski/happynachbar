@@ -13,7 +13,7 @@ export type AdminUserRow = {
   bannedAt: string | null;
   banReason: string | null;
 
-  lastActivity: string | null;
+  lastActiveAt: string | null;
   createdAt: string;
 
   profile: { displayName: string | null; plz: string | null } | null;
@@ -77,7 +77,8 @@ export type AdminUserWarning = {
   message: string;
   severity: WarningSeverity;
   expiresAt: string | null;
-  createByAdmin: { id: string; displayName: string };
+  createdAt: string;
+  createdByAdmin: { id: string; displayName: string };
 };
 
 export function adminListUserWarnings(
@@ -90,7 +91,7 @@ export function adminListUserWarnings(
   });
 
   return apiFetch<ListResponse<AdminUserWarning>>(
-    `/admin/users/${encodeURIComponent(userId)}/warnings?{qs}`,
+    `/admin/users/${encodeURIComponent(userId)}/warnings?${qs}`,
   );
 }
 

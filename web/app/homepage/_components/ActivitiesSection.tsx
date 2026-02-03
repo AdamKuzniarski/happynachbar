@@ -1,6 +1,6 @@
 import type { Activity } from "@/lib/api/types";
 import { ActivityGrid } from "./ActivityGrid";
-import { LoadMoreButton } from "./LoadMoreButton";
+import { InfiniteLoadMore } from "./InfiniteLoadMore";
 
 type ActivitySectionProps = {
   activities: Activity[];
@@ -11,6 +11,7 @@ type ActivitySectionProps = {
   onLoadMore: () => void;
   hasMore: boolean;
   loadingMore: boolean;
+  totalCount: number;
 };
 
 export function ActivitiesSection(props: ActivitySectionProps) {
@@ -23,6 +24,7 @@ export function ActivitiesSection(props: ActivitySectionProps) {
     onLoadMore,
     hasMore,
     loadingMore,
+    totalCount,
   } = props;
 
   return (
@@ -30,7 +32,7 @@ export function ActivitiesSection(props: ActivitySectionProps) {
       <div className="flex items-baseline justify-between">
         <h2 className="text-sm font-semibold text-foreground">Aktivitäten</h2>
         <span className="text-xs ">
-          {loading ? "Lade…" : `${activities.length} Vorschläge`}
+          {loading ? "Lade…" : `${totalCount} Vorschläge`}
         </span>
       </div>
 
@@ -53,7 +55,7 @@ export function ActivitiesSection(props: ActivitySectionProps) {
             creating={creating}
             onCreate={onCreate}
           />
-          <LoadMoreButton
+          <InfiniteLoadMore
             onLoadMore={onLoadMore}
             loadingMore={loadingMore}
             hasMore={hasMore}

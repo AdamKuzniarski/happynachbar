@@ -15,6 +15,7 @@ export function useActivities(filters: {
 
   const [activities, setActivities] = React.useState<Activity[]>([]);
   const [nextCursor, setNextCursor] = React.useState<string | null>(null);
+  const [totalCount, setTotalCount] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
   const [loadingMore, setLoadingMore] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -32,10 +33,12 @@ export function useActivities(filters: {
       });
       setActivities(payload?.items ?? []);
       setNextCursor(payload?.nextCursor ?? null);
+      setTotalCount(payload?.totalCount ?? 0);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Unknown error");
       setActivities([]);
       setNextCursor(null);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -55,6 +58,7 @@ export function useActivities(filters: {
       });
       setActivities((prev) => [...prev, ...(payload?.items ?? [])]);
       setNextCursor(payload?.nextCursor ?? null);
+      setTotalCount(payload?.totalCount ?? 0);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Unknown error");
     } finally {
@@ -65,6 +69,7 @@ export function useActivities(filters: {
   return {
     activities,
     nextCursor,
+    totalCount,
     loading,
     loadingMore,
     error,

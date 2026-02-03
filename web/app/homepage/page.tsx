@@ -19,6 +19,7 @@ export default function HomepagePage() {
   const {
     activities,
     nextCursor,
+    totalCount,
     loading,
     loadingMore,
     error,
@@ -67,6 +68,7 @@ export default function HomepagePage() {
           onLoadMore={loadMore}
           hasMore={!!nextCursor}
           loadingMore={loadingMore}
+          totalCount={totalCount}
         />
       </div>
     </main>

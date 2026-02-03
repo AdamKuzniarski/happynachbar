@@ -5,6 +5,9 @@ export class ListActivitiesResponseDto {
   @ApiProperty({ type: () => [ActivityCardDto] })
   items!: ActivityCardDto[];
 
+  @ApiProperty({ example: 42 })
+  totalCount!: number;
+
   @ApiProperty({
     example: null,
     nullable: true,

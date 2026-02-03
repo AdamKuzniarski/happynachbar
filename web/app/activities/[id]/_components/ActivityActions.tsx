@@ -69,7 +69,7 @@ export function ActivityActions({
           <Button
             type="button"
             variant="secondary"
-            className="hover:bg-blue-600 hover:text-white"
+            className="hover:bg-fern/20 hover:text-foreground"
             onClick={onEdit}
             disabled={deleting}
           >
@@ -78,7 +78,7 @@ export function ActivityActions({
           <Button
             type="button"
             variant="secondary"
-            className="hover:bg-red-600 hover:text-white"
+            className="hover:bg-fern/20 hover:text-foreground"
             onClick={onDelete}
             disabled={deleting}
           >

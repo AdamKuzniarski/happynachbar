@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { MessageCircle, MessageCircleMore, User } from "lucide-react";
+import { LogIn, LogOut, MessageCircle, MessageCircleMore, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 
@@ -99,8 +99,8 @@ export async function AppHeader({
                 </Link>
               ) : null}
 
-              <a href="/auth/logout" className={btn}>
-                Logout
+              <a href="/auth/logout" className={iconBtn} aria-label="Logout">
+                <LogOut className="h-4 w-4" aria-hidden="true" />
               </a>
             </>
           ) : variant === "auth" ? (
@@ -108,10 +108,14 @@ export async function AppHeader({
               <Link href="/" className={btn}>
                 Back
               </Link>
-            ) : null
+            ) : (
+              <Link href="/auth/login" className={iconBtn} aria-label="Login">
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            )
           ) : (
-            <Link href="/auth/login" className={btn}>
-              Login
+            <Link href="/auth/login" className={iconBtn} aria-label="Login">
+              <LogIn className="h-4 w-4" aria-hidden="true" />
             </Link>
           )}
         </div>

@@ -6,8 +6,9 @@ import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
 import { ActivityActions } from "./_components/ActivityActions";
-import { Mail, User } from "lucide-react";
+import { CircleArrowLeft, Mail, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
+import { Button } from "@/components/ui/Button";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -52,12 +53,18 @@ export default async function ActivityDetailPage({
   return (
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-6 pb-10 sm:max-w-2xl sm:pt-10">
-        <Link
-          href="/homepage"
-          className="text-sm underline opacity-80 hover:opacity-100"
+        <Button
+          asChild
+          variant="secondary"
+          className="group h-7 px-2 py-0 text-[11px] leading-none"
         >
-          ← Zurück
-        </Link>
+          <Link href="/homepage">
+            <CircleArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span className="max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] duration-200 ease-out group-hover:ml-2 group-hover:max-w-48 group-hover:opacity-100 group-hover:overflow-visible">
+              Zurück zur Übersicht
+            </span>
+          </Link>
+        </Button>
 
         <section className="mt-4 overflow-hidden rounded-2xl bg-surface/60 shadow-sm ring-1 ring-fern/25">
           <header className="px-5 pt-5 pb-4">

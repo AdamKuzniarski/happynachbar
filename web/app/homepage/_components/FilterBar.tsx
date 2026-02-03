@@ -37,7 +37,7 @@ export function FiltersBar(props: filterBarProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Suche…"
-                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:ring-0"
+                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
               />
             </div>
 
@@ -46,7 +46,7 @@ export function FiltersBar(props: filterBarProps) {
                 value={category}
                 id="category"
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:ring-0"
+                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
               >
                 <option value="">Alle Kategorien</option>
                 {ACTIVITY_CATEGORIES.map((c) => (
@@ -66,7 +66,7 @@ export function FiltersBar(props: filterBarProps) {
                 placeholder="PLZ"
                 inputMode="numeric"
                 maxLength={5}
-                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:ring-0"
+                className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
               />
             </div>
 

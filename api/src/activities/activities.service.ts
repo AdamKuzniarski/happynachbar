@@ -31,7 +31,10 @@ export class ActivitiesService {
 
     const where: Prisma.ActivityWhereInput = { status: 'ACTIVE' };
 
-    if (q.plz) where.plz = q.plz;
+    if (q.plz) {
+      where.plz =
+        q.plz.length === 5 ? q.plz : { startsWith: q.plz };
+    }
     if (q.category)
       where.category = q.category as unknown as PrismaActivityCategory;
     if (q.createdById) where.createdById = q.createdById;

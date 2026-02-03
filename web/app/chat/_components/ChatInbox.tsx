@@ -4,12 +4,10 @@ import Link from "next/link";
 import * as React from "react";
 import { io, type Socket } from "socket.io-client";
 import {
-  deleteConversation,
   listConversations,
   type Message,
 } from "@/lib/api/chat";
 import { FormError } from "@/components/ui/FormError";
-import { Button } from "@/components/ui/Button";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -23,7 +21,6 @@ export function ChatInbox() {
   const [items, setItems] = React.useState<ConversationListItem[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [socketConnected, setSocketConnected] = React.useState(false);
   const socketRef = React.useRef<Socket | null>(null);
@@ -107,6 +104,13 @@ export function ChatInbox() {
       });
     });
 
+    function handleMessageUpdate() {
+      refreshConversations({ silent: true }).catch(() => {});
+    }
+
+    socket.on("message:updated", handleMessageUpdate);
+    socket.on("message:deleted", handleMessageUpdate);
+
     function handleRead() {
       refreshConversations({ silent: true }).catch(() => {});
     }
@@ -121,6 +125,8 @@ export function ChatInbox() {
     return () => {
       window.removeEventListener("chat:read", handleRead);
       window.removeEventListener("chat:unread", handleUnread);
+      socket.off("message:updated", handleMessageUpdate);
+      socket.off("message:deleted", handleMessageUpdate);
       socket.disconnect();
       socketRef.current = null;
     };
@@ -141,20 +147,6 @@ export function ChatInbox() {
     return <p className="mt-4 text-sm opacity-70">Lädt…</p>;
   }
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Diesen Chat wirklich löschen?")) return;
-    setDeletingId(id);
-    setError(null);
-    try {
-      await deleteConversation(id);
-      setItems((prev) => prev.filter((item) => item.id !== id));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unbekannter Fehler");
-    } finally {
-      setDeletingId((current) => (current === id ? null : current));
-    }
-  };
-
   return (
     <div className="mt-4">
       <FormError message={error} />
@@ -164,43 +156,31 @@ export function ChatInbox() {
         <ul className="space-y-3">
           {items.map((c) => (
             <li key={c.id}>
-              <div className="relative">
-                <Link
-                  href={`/chat/${encodeURIComponent(c.id)}`}
-                  className={`block rounded-xl border-2 px-4 py-3 pr-16 ${
-                    c.hasUnread
-                      ? "border-fern bg-limecream text-evergreen hover:bg-limecream/80 dark:hover:bg-limecream/90 hover:text-evergreen"
-                      : "border-fern bg-surface hover:bg-surface-strong"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
-                      {c.participantDisplayName?.trim()?.[0] ?? "N"}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold">
-                        {c.participantDisplayName || "Neighbor"}
-                        {c.activityTitle ? (
-                          <span className="text-xs font-normal opacity-70">
-                            {" "}
-                            · zur Aktivität: {c.activityTitle}
-                          </span>
-                        ) : null}
-                      </div>
+              <Link
+                href={`/chat/${encodeURIComponent(c.id)}`}
+                className={`block rounded-xl border-2 px-4 py-3 ${
+                  c.hasUnread
+                    ? "border-fern bg-limecream text-evergreen hover:bg-limecream/80 dark:hover:bg-limecream/90 hover:text-evergreen"
+                    : "border-fern bg-surface hover:bg-surface-strong"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
+                    {c.participantDisplayName?.trim()?.[0] ?? "N"}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">
+                      {c.participantDisplayName || "Neighbor"}
+                      {c.activityTitle ? (
+                        <span className="text-xs font-normal opacity-70">
+                          {" "}
+                          · zur Aktivität: {c.activityTitle}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
-                </Link>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="absolute right-2 top-2 h-7 px-2 py-0 text-[11px] leading-none"
-                  onClick={() => handleDelete(c.id)}
-                  disabled={deletingId === c.id}
-                  aria-label="Chat löschen"
-                >
-                  {deletingId === c.id ? "…" : "Löschen"}
-                </Button>
-              </div>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>

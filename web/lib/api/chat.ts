@@ -16,8 +16,10 @@ export type Message = {
   id: string;
   conversationId: string;
   senderId: string;
-  body: string;
+  body: string | null;
   createdAt: string;
+  editedAt: string | null;
+  deletedAt: string | null;
 };
 
 export async function listConversations() {
@@ -38,10 +40,4 @@ export async function markConversationRead(conversationId: string) {
 
 export async function getUnreadCount() {
   return apiFetch<{ count: number }>(`/chat/unread-count`);
-}
-
-export async function deleteConversation(conversationId: string) {
-  return apiFetch(`/chat/conversations/${encodeURIComponent(conversationId)}`, {
-    method: "DELETE",
-  });
 }

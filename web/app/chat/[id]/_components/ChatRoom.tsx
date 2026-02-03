@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 import {
   listConversations,
@@ -27,6 +28,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   );
   const [activityTitle, setActivityTitle] = React.useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editingText, setEditingText] = React.useState("");
   const socketRef = React.useRef<Socket | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -118,7 +121,19 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         .catch(() => {});
     });
 
+    function handleMessageUpdate(msg: SocketMessage) {
+      if (msg.conversationId !== conversationId) return;
+      setMessages((prev) =>
+        prev.map((item) => (item.id === msg.id ? msg : item)),
+      );
+    }
+
+    socket.on("message:updated", handleMessageUpdate);
+    socket.on("message:deleted", handleMessageUpdate);
+
     return () => {
+      socket.off("message:updated", handleMessageUpdate);
+      socket.off("message:deleted", handleMessageUpdate);
       socket.disconnect();
       socketRef.current = null;
     };
@@ -137,6 +152,35 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       body,
     });
     setText("");
+  }
+
+  function startEdit(message: Message) {
+    if (!message.body) return;
+    setEditingId(message.id);
+    setEditingText(message.body);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingText("");
+  }
+
+  function submitEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId) return;
+    const body = editingText.trim();
+    if (!body) return;
+    socketRef.current?.emit("message:edit", {
+      messageId: editingId,
+      body,
+    });
+    cancelEdit();
+  }
+
+  function deleteMessage(messageId: string) {
+    if (!window.confirm("Diese Nachricht wirklich löschen?")) return;
+    socketRef.current?.emit("message:delete", { messageId });
+    if (editingId === messageId) cancelEdit();
   }
 
   return (
@@ -169,6 +213,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                 isMine
                   ? "bg-fern text-limecream"
                   : "bg-surface-strong text-foreground";
+              const isEditing = editingId === m.id;
+              const canEdit = isMine && !m.deletedAt;
 
               return (
                 <div key={m.id} className={alignment}>
@@ -188,8 +234,68 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                           minute: "2-digit",
                         })}
                       </span>
+                      {m.editedAt && !m.deletedAt ? (
+                        <span className="italic opacity-80">bearbeitet</span>
+                      ) : null}
+                      {canEdit ? (
+                        <>
+                          <button
+                            type="button"
+                            className="opacity-80 hover:opacity-100"
+                            onClick={() => startEdit(m)}
+                            aria-label="Nachricht bearbeiten"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="opacity-80 hover:opacity-100"
+                            onClick={() => deleteMessage(m.id)}
+                            aria-label="Nachricht löschen"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      ) : null}
                     </div>
-                    <div className="mt-1 break-words">{m.body}</div>
+                    {m.deletedAt ? (
+                      <div className="mt-1 italic opacity-80">
+                        Nachricht gelöscht.
+                      </div>
+                    ) : isEditing ? (
+                      <form onSubmit={submitEdit} className="mt-2 space-y-1">
+                        <Input
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") {
+                              e.preventDefault();
+                              cancelEdit();
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <div className="text-[11px] opacity-70">
+                          Esc zum Abbrechen • Enter zum Speichern ·{" "}
+                          <button
+                            type="submit"
+                            className="underline hover:opacity-100"
+                          >
+                            Speichern
+                          </button>{" "}
+                          ·{" "}
+                          <button
+                            type="button"
+                            className="underline hover:opacity-100"
+                            onClick={cancelEdit}
+                          >
+                            Abbrechen
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <div className="mt-1 break-words">{m.body}</div>
+                    )}
                   </div>
                 </div>
               );

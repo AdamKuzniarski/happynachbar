@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ChatMessagesQueryDto,
@@ -20,9 +22,77 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
+const conversationInclude = {
+  participantA: {
+    select: {
+      id: true,
+      profile: { select: { displayName: true, avatarUrl: true } },
+    },
+  },
+  participantB: {
+    select: {
+      id: true,
+      profile: { select: { displayName: true, avatarUrl: true } },
+    },
+  },
+  messages: {
+    take: 1,
+    orderBy: { createdAt: 'desc' },
+    select: {
+      body: true,
+      createdAt: true,
+      senderId: true,
+      deletedAt: true,
+    },
+  },
+  reads: {
+    take: 1,
+    select: { lastReadAt: true },
+  },
+  activity: {
+    select: { title: true },
+  },
+} as const;
+
+type ConversationRow = Prisma.ConversationGetPayload<{
+  include: typeof conversationInclude;
+}>;
+
+type MessageWithMeta = Prisma.MessageGetPayload<{
+  select: {
+    id: true;
+    conversationId: true;
+    senderId: true;
+    body: true;
+    createdAt: true;
+    editedAt: true;
+    deletedAt: true;
+  };
+}>;
+
 @Injectable()
 export class ChatService {
   constructor(private prisma: PrismaService) {}
+
+  private toMessageDto(message: {
+    id: string;
+    conversationId: string;
+    senderId: string;
+    body: string;
+    createdAt: Date;
+    editedAt?: Date | null;
+    deletedAt?: Date | null;
+  }): MessageDto {
+    return {
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      body: message.deletedAt ? null : message.body,
+      createdAt: message.createdAt.toISOString(),
+      editedAt: message.editedAt ? message.editedAt.toISOString() : null,
+      deletedAt: message.deletedAt ? message.deletedAt.toISOString() : null,
+    };
+  }
 
   private async touchRead(userId: string, conversationId: string) {
     await this.prisma.conversationRead.upsert({
@@ -34,37 +104,20 @@ export class ChatService {
     });
   }
 
-  private async listConversationRows(userId: string) {
+  private async listConversationRows(
+    userId: string,
+  ): Promise<ConversationRow[]> {
     return this.prisma.conversation.findMany({
       where: {
         OR: [{ participantAId: userId }, { participantBId: userId }],
       },
       orderBy: { updatedAt: 'desc' },
       include: {
-        participantA: {
-          select: {
-            id: true,
-            profile: { select: { displayName: true, avatarUrl: true } },
-          },
-        },
-        participantB: {
-          select: {
-            id: true,
-            profile: { select: { displayName: true, avatarUrl: true } },
-          },
-        },
-        messages: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-          select: { body: true, createdAt: true, senderId: true },
-        },
+        ...conversationInclude,
         reads: {
           where: { userId },
           take: 1,
           select: { lastReadAt: true },
-        },
-        activity: {
-          select: { title: true },
         },
       },
     });
@@ -141,8 +194,10 @@ export class ChatService {
       id: m.id,
       conversationId: m.conversationId,
       senderId: m.senderId,
-      body: m.body,
+      body: m.deletedAt ? null : m.body,
       createdAt: m.createdAt.toISOString(),
+      editedAt: m.editedAt ? m.editedAt.toISOString() : null,
+      deletedAt: m.deletedAt ? m.deletedAt.toISOString() : null,
     }));
 
     await this.touchRead(userId, conversationId);
@@ -167,13 +222,7 @@ export class ChatService {
       }),
     ]);
 
-    return {
-      id: message.id,
-      conversationId: message.conversationId,
-      senderId: message.senderId,
-      body: message.body,
-      createdAt: message.createdAt.toISOString(),
-    };
+    return this.toMessageDto(message);
   }
 
   async listConversations(
@@ -198,7 +247,11 @@ export class ChatService {
         activityId: c.activityId,
         activityTitle: c.activity?.title ?? null,
         hasUnread,
-        lastMessageBody: last?.body ?? null,
+        lastMessageBody: last
+          ? last.deletedAt
+            ? 'Nachricht gelöscht'
+            : last.body
+          : null,
         lastMessageAt: last?.createdAt ? last.createdAt.toISOString() : null,
       };
     });
@@ -227,9 +280,71 @@ export class ChatService {
     return { count };
   }
 
-  async deleteConversation(userId: string, conversationId: string) {
-    await this.assertConversationAccess(userId, conversationId);
-    await this.prisma.conversation.delete({ where: { id: conversationId } });
-    return { ok: true };
+  async editMessage(
+    userId: string,
+    messageId: string,
+    body: string,
+  ): Promise<MessageDto> {
+    const message: MessageWithMeta | null =
+      await this.prisma.message.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          conversationId: true,
+          senderId: true,
+          body: true,
+          createdAt: true,
+          editedAt: true,
+          deletedAt: true,
+        },
+      });
+
+    if (!message) throw new NotFoundException('Message not found');
+    await this.assertConversationAccess(userId, message.conversationId);
+    if (message.senderId !== userId) {
+      throw new ForbiddenException('Cannot edit this message');
+    }
+    if (message.deletedAt) {
+      throw new BadRequestException('Message already deleted');
+    }
+
+    const nextBody = body.trim();
+    if (!nextBody) throw new BadRequestException('Message cannot be empty');
+
+    const updated = await this.prisma.message.update({
+      where: { id: messageId },
+      data: { body: nextBody, editedAt: new Date() },
+    });
+
+    return this.toMessageDto(updated);
+  }
+
+  async deleteMessage(userId: string, messageId: string): Promise<MessageDto> {
+    const message: MessageWithMeta | null =
+      await this.prisma.message.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          conversationId: true,
+          senderId: true,
+          body: true,
+          createdAt: true,
+          editedAt: true,
+          deletedAt: true,
+        },
+      });
+
+    if (!message) throw new NotFoundException('Message not found');
+    await this.assertConversationAccess(userId, message.conversationId);
+    if (message.senderId !== userId) {
+      throw new ForbiddenException('Cannot delete this message');
+    }
+
+    const updated = await this.prisma.message.update({
+      where: { id: messageId },
+      data: { deletedAt: message.deletedAt ?? new Date() },
+    });
+
+    return this.toMessageDto(updated);
   }
 }

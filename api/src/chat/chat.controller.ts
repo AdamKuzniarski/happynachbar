@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   Query,
@@ -15,6 +17,7 @@ import { ChatService } from './chat.service';
 import { ConversationDto } from './dto/conversation.dto';
 import {
   ChatMessagesQueryDto,
+  EditMessageDto,
   ListMessagesResponseDto,
 } from './dto/chat-messages.dto';
 import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
@@ -63,11 +66,20 @@ export class ChatController {
     return this.chat.listMessages(req.user.userId, id, q);
   }
 
-  @Delete('conversations/:id')
-  deleteConversation(
+  @Patch('messages/:id')
+  editMessage(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: EditMessageDto,
+  ) {
+    return this.chat.editMessage(req.user.userId, id, body.body);
+  }
+
+  @Delete('messages/:id')
+  deleteMessage(
     @Req() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    return this.chat.deleteConversation(req.user.userId, id);
+    return this.chat.deleteMessage(req.user.userId, id);
   }
 }

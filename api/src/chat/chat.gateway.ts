@@ -138,4 +138,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .to(`conversation:${conversationId}`)
       .emit('message:new', message);
   }
+
+  @SubscribeMessage('message:edit')
+  async handleEdit(
+    client: AuthedSocket,
+    payload: { messageId?: string; body?: string },
+  ) {
+    const userId = client.data.userId;
+    if (!userId) {
+      client.disconnect(true);
+      return;
+    }
+
+    const messageId =
+      typeof payload?.messageId === 'string' ? payload.messageId : '';
+    const body = typeof payload?.body === 'string' ? payload.body.trim() : '';
+    if (!messageId || !body) return;
+
+    const message = await this.chat.editMessage(userId, messageId, body);
+    this.server
+      .to(`conversation:${message.conversationId}`)
+      .emit('message:updated', message);
+  }
+
+  @SubscribeMessage('message:delete')
+  async handleDelete(client: AuthedSocket, payload: { messageId?: string }) {
+    const userId = client.data.userId;
+    if (!userId) {
+      client.disconnect(true);
+      return;
+    }
+
+    const messageId =
+      typeof payload?.messageId === 'string' ? payload.messageId : '';
+    if (!messageId) return;
+
+    const message = await this.chat.deleteMessage(userId, messageId);
+    this.server
+      .to(`conversation:${message.conversationId}`)
+      .emit('message:deleted', message);
+  }
 }

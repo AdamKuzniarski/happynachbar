@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class ChatMessagesQueryDto {
   @ApiPropertyOptional({ example: 20 })
@@ -30,11 +37,28 @@ export class MessageDto {
   @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   senderId!: string;
 
-  @ApiProperty({ example: 'Hallo!' })
-  body!: string;
+  @ApiPropertyOptional({
+    example: 'Hallo!',
+    nullable: true,
+    description: 'Null if the message has been deleted.',
+  })
+  body!: string | null;
+
+  @ApiPropertyOptional({ example: '2026-01-30T12:05:00.000Z', nullable: true })
+  editedAt!: string | null;
+
+  @ApiPropertyOptional({ example: '2026-01-30T12:10:00.000Z', nullable: true })
+  deletedAt!: string | null;
 
   @ApiProperty({ example: '2026-01-30T12:00:00.000Z' })
   createdAt!: string;
+}
+
+export class EditMessageDto {
+  @ApiProperty({ example: 'Aktualisierter Text' })
+  @IsString()
+  @MinLength(1)
+  body!: string;
 }
 
 export class ListMessagesResponseDto {

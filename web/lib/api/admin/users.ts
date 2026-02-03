@@ -94,7 +94,7 @@ export function adminListUserWarnings(
   );
 }
 
-export function adminCreateUserWarnig(
+export function adminCreateUserWarning(
   userId: string,
   payload: { message: string; severity: WarningSeverity; expiresAt?: string },
 ) {

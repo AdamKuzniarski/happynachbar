@@ -1,6 +1,6 @@
 import type { Activity } from "@/lib/api/types";
 import { ActivityGrid } from "./ActivityGrid";
-import { LoadMoreButton } from "./LoadMoreButton";
+import { InfiniteLoadMore } from "./InfiniteLoadMore";
 
 type ActivitySectionProps = {
   activities: Activity[];
@@ -53,7 +53,7 @@ export function ActivitiesSection(props: ActivitySectionProps) {
             creating={creating}
             onCreate={onCreate}
           />
-          <LoadMoreButton
+          <InfiniteLoadMore
             onLoadMore={onLoadMore}
             loadingMore={loadingMore}
             hasMore={hasMore}

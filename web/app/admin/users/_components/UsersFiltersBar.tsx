@@ -8,8 +8,6 @@ import type { AdminUserRole } from "@/lib/api/admin/users";
 export function UsersFiltersBar({
   q,
   onQ,
-  banned,
-  onBanned,
   onSearch,
   loading,
   role,
@@ -24,6 +22,12 @@ export function UsersFiltersBar({
   onSearch: () => void;
   loading: boolean;
 }) {
+  const isRoleValue = (value: string): value is AdminUserRole | "all" =>
+    value === "all" ||
+    value === "USER" ||
+    value === "MODERATOR" ||
+    value === "ADMIN";
+
   return (
     <div className="grid gap-2 sm:grid-cols-4">
       <Input
@@ -32,7 +36,13 @@ export function UsersFiltersBar({
         placeholder="Search email / displayName"
       />
 
-      <Select value={role} onChange={(e) => onRole(e.target.value as any)}>
+      <Select
+        value={role}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (isRoleValue(value)) onRole(value);
+        }}
+      >
         <option value="all">All roles</option>
 
         <option value="USER">USER</option>

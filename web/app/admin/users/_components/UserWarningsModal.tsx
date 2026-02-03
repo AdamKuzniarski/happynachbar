@@ -36,6 +36,12 @@ export function UserWarningsModal({
   const [message, setMessage] = React.useState("");
   const [expiresIn, setExpiresIn] = React.useState<"none" | "7" | "30">("none");
 
+  const isSeverityValue = (value: string): value is WarningSeverity =>
+    value === "LOW" || value === "MEDIUM" || value === "HIGH";
+
+  const isExpiresInValue = (value: string): value is "none" | "7" | "30" =>
+    value === "none" || value === "7" || value === "30";
+
   async function load(reset: boolean) {
     if (!userId) return;
     setLoading(true);
@@ -123,7 +129,10 @@ export function UserWarningsModal({
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
           <Select
             value={severity}
-            onChange={(e) => setSeverity(e.target.value as WarningSeverity)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (isSeverityValue(value)) setSeverity(value);
+            }}
           >
             <option value="LOW">LOW</option>
             <option value="MEDIUM">MEDIUM</option>
@@ -132,7 +141,10 @@ export function UserWarningsModal({
 
           <Select
             value={expiresIn}
-            onChange={(e) => setExpiresIn(e.target.value as any)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (isExpiresInValue(value)) setExpiresIn(value);
+            }}
           >
             <option value="none">No expiry</option>
             <option value="7">Expires in 7d</option>

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ImgHTMLAttributes } from "react";
 import Image, { type ImageProps } from "next/image";
 
 const CDN_BASE = process.env.NEXT_PUBLIC_CLOUDFRONT_BASE_URL;
@@ -79,11 +80,11 @@ export function SafeImage(props: SafeImageProps) {
         .join(" ")
         .trim()}
       onLoad={(e) => {
-        onLoad?.(e as any);
+        onLoad?.(e);
         const img = e.currentTarget;
         onLoadingComplete?.(img);
       }}
-      {...(rest as any)}
+      {...(rest as ImgHTMLAttributes<HTMLImageElement>)}
     />
   );
 }

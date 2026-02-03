@@ -55,7 +55,7 @@ export function BanUserModal({
             variant="secondary"
             onClick={() => {
               const days = duration === "PERM" ? "PERM" : Number(duration);
-              const banReason = buildBanReason(reason, days as any);
+              const banReason = buildBanReason(reason, days);
               onConfirmBan(banReason);
             }}
             disabled={busy}

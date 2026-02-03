@@ -26,7 +26,7 @@ export function BanUserModal({
   onConfirmBan,
 }: {
   open: boolean;
-  user: AdminUserRow;
+  user: AdminUserRow | null;
   busy: boolean;
   error: string | null;
   onClose: () => void;

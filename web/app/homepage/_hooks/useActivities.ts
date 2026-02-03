@@ -31,9 +31,14 @@ export function useActivities(filters: {
         plz,
         category: category || undefined,
       });
-      setActivities(payload?.items ?? []);
+      const items = payload?.items ?? [];
+      setActivities(items);
       setNextCursor(payload?.nextCursor ?? null);
-      setTotalCount(payload?.totalCount ?? 0);
+      if (typeof payload?.totalCount === "number") {
+        setTotalCount(payload.totalCount);
+      } else {
+        setTotalCount(items.length);
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Unknown error");
       setActivities([]);
@@ -56,9 +61,12 @@ export function useActivities(filters: {
         plz,
         category: category || undefined,
       });
-      setActivities((prev) => [...prev, ...(payload?.items ?? [])]);
+      const nextItems = payload?.items ?? [];
+      setActivities((prev) => [...prev, ...nextItems]);
       setNextCursor(payload?.nextCursor ?? null);
-      setTotalCount(payload?.totalCount ?? 0);
+      if (typeof payload?.totalCount === "number") {
+        setTotalCount(payload.totalCount);
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Unknown error");
     } finally {

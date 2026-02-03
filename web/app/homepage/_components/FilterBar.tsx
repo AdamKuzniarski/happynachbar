@@ -74,7 +74,7 @@ export function FiltersBar(props: filterBarProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1"
+                className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-fern/40"
               >
                 {loading ? "…" : "Finden"}
               </button>

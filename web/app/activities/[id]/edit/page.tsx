@@ -34,7 +34,7 @@ export default async function EditActivityPage({
           <Link href={`/activities/${encodeURIComponent(id)}`}>
             <CircleArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span className="max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] duration-200 ease-out group-hover:ml-2 group-hover:max-w-48 group-hover:opacity-100 group-hover:overflow-visible">
-              Zurück zur Übersicht
+              Zurück zur Aktivität
             </span>
           </Link>
         </Button>

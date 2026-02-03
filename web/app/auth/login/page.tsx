@@ -7,7 +7,7 @@ import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
-import { notifyError, notifySuccess } from "@/lib/toast";
+import { notifyError } from "@/lib/toast";
 import { TOAST_MESSAGES } from "@/lib/toast-messages";
 
 export default function LoginPage() {
@@ -32,7 +32,6 @@ export default function LoginPage() {
         }
         return;
       }
-      notifySuccess(TOAST_MESSAGES.auth.loginSuccess);
       router.push("/homepage");
       router.refresh();
     } finally {

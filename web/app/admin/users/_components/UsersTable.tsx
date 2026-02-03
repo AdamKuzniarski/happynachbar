@@ -57,7 +57,7 @@ export function UsersTable({
                   </td>
 
                   <td className="px-3 py-3">
-                    <Select
+                    <select
                       value={u.role}
                       onChange={(e) =>
                         onRole(u.id, e.target.value as AdminUserRole)
@@ -67,7 +67,7 @@ export function UsersTable({
                       <option value="USER">USER</option>
                       <option value="MODERATOR">MODERATOR</option>
                       <option value="ADMIN">ADMIN</option>
-                    </Select>
+                    </select>
                   </td>
 
                   <td className="px-3 py-3">

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import * as React from "react";
 import { logout } from "../login/actions";
 
@@ -11,25 +10,15 @@ export default function LogoutPage() {
 
   return (
     <main className="px-4">
-      <div className="mx-auto w-full max-w-md pt-10 pb-12 sm:max-w-2xl sm:pt-16">
+      <div className="mx-auto w-full max-w-md pt-12 pb-16 sm:max-w-2xl sm:pt-20">
         <h1 className="text-center text-xl font-semibold sm:text-2xl">
           Du bist erfolgreich ausgeloggt.
         </h1>
+        <p className="mt-5 text-center text-sm text-foreground/80">
+          Schön, dass du da warst – bis bald in der Nachbarschaft.
+        </p>
 
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <Link
-            href="/"
-            className="inline-flex w-56 justify-center rounded-md border-2 border-fern bg-limecream px-4 py-2 text-center text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream"
-          >
-            Zur Landingpage
-          </Link>
-          <Link
-            href="/auth/login"
-            className="inline-flex w-56 justify-center rounded-md border-2 border-fern bg-surface px-4 py-2 text-center text-sm font-medium hover:bg-surface-strong"
-          >
-            Zum Login
-          </Link>
-        </div>
+        <div className="mt-10" />
       </div>
     </main>
   );

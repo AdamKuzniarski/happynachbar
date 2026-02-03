@@ -28,7 +28,7 @@ export function useActivities(filters: {
         take: TAKE,
         cursor: null,
         q: query,
-        plz,
+        plz: plz || undefined,
         category: category || undefined,
       });
       const items = payload?.items ?? [];
@@ -58,7 +58,7 @@ export function useActivities(filters: {
         take: TAKE,
         cursor: nextCursor,
         q: query,
-        plz,
+        plz: plz || undefined,
         category: category || undefined,
       });
       const nextItems = payload?.items ?? [];

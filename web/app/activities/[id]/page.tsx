@@ -6,7 +6,7 @@ import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
 import { ActivityActions } from "./_components/ActivityActions";
-import { CircleArrowLeft, Mail, User } from "lucide-react";
+import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
 

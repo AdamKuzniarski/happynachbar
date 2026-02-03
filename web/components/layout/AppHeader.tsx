@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { LogIn, LogOut, MessageCircle, MessageCircleMore, User } from "lucide-react";
+import { LogIn, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 

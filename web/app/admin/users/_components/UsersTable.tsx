@@ -3,7 +3,6 @@
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Select";
 import { formatDate } from "@/lib/format";
 import type { AdminUserRole, AdminUserRow } from "@/lib/api/admin/users";
 import { parseBanUntil } from "../_lib/banReason";

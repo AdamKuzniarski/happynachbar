@@ -7,6 +7,7 @@ import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { formatActivityCategory } from "@/lib/api/enums";
 import { ActivityActions } from "./_components/ActivityActions";
 import { Mail, User } from "lucide-react";
+import { StartChatButton } from "./creator/StartChatButton";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -104,15 +105,9 @@ export default async function ActivityDetailPage({
                       >
                         <User className="h-4 w-4" aria-hidden="true" />
                       </Link>
-                      <button
-                        type="button"
-                        disabled
-                        aria-label="Kontaktieren (demnächst)"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/50"
-                        title="Demnächst verfügbar"
-                      >
-                        <Mail className="h-4 w-4" aria-hidden="true" />
-                      </button>
+                      <div className="inline-flex items-center">
+                        <StartChatButton activityId={a.id} variant="icon" />
+                      </div>
                     </>
                   ) : null}
                 </dd>

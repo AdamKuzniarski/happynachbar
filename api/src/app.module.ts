@@ -11,6 +11,7 @@ import { NeighborsModule } from './neighbors/neighbors.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { RbacModule } from './rbac/rbac.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RbacModule } from './rbac/rbac.module';
     ActivitiesModule,
     UploadsModule,
     RbacModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

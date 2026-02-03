@@ -78,7 +78,9 @@ export class ActivitiesService {
       ];
     }
 
-    const rows = await this.prisma.activity.findMany({
+    const [totalCount, rows] = await this.prisma.$transaction([
+      this.prisma.activity.count({ where }),
+      this.prisma.activity.findMany({
       where,
       take: take + 1,
       ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
@@ -92,7 +94,8 @@ export class ActivitiesService {
           },
         },
       },
-    });
+      }),
+    ]);
 
     const hasMore = rows.length > take;
     const page = rows.slice(0, take);
@@ -114,7 +117,7 @@ export class ActivitiesService {
       thumbnailUrl: a.images[0]?.url ?? null,
     }));
 
-    return { items, nextCursor };
+    return { items, nextCursor, totalCount };
   }
 
   // Detail public route GET /activities/:id

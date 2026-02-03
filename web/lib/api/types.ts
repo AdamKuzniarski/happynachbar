@@ -13,6 +13,7 @@ export type Activity = {
 
 export type ListActivitiesResponse = {
   items: Activity[];
+  totalCount: number;
   nextCursor: string | null;
 };
 export type ActivityImage = {

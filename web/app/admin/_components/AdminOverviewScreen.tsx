@@ -209,17 +209,19 @@ export function AdminOverviewScreen() {
                       className="rounded-md border-2 border-fern bg-surface-strong p-3"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="truncate font-medium">{a.title}</div>
-                        <div className="text-xs opacity-70">
-                          {formatDate(a.createdAt)} · {a.plz} ·{" "}
-                          {a.createdBy.email}
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{a.title}</div>
+                          <div className="truncate text-xs opacity-70">
+                            {formatDate(a.createdAt)} · {a.plz} ·{" "}
+                            {a.createdBy.email}
+                          </div>
                         </div>
-
                         <Button
+                          className="shrink-0"
                           variant="secondary"
                           onClick={() => void setStatusQuick(a.id, "ACTIVE")}
                         >
-                          Wiederherstellen
+                          Restore
                         </Button>
                       </div>
                     </div>
@@ -284,7 +286,7 @@ export function AdminOverviewScreen() {
                   key={u.id}
                   className="rounded-md border-2 border-fern bg-surface-strong p-3"
                 >
-                  <div className="font-medium">{u.email}</div>
+                  <div className="font-medium break-all">{u.email}</div>
                   <div className="text-xs opacity-70">
                     {u.profile?.displayName ?? "Neighbor"} ·{" "}
                     {u.profile?.plz ?? "-"}

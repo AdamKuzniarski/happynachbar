@@ -108,7 +108,11 @@ export async function AppHeader({
               <Link href="/" className={btn}>
                 Back
               </Link>
-            ) : null
+            ) : (
+              <Link href="/auth/login" className={iconBtn} aria-label="Login">
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            )
           ) : (
             <Link href="/auth/login" className={iconBtn} aria-label="Login">
               <LogIn className="h-4 w-4" aria-hidden="true" />

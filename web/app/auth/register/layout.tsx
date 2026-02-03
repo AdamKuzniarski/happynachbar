@@ -6,5 +6,5 @@ export default function RegisterLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppShell variant="auth" showBackOnAuth>{children}</AppShell>;
+  return <AppShell variant="auth" showBackOnAuth={false}>{children}</AppShell>;
 }

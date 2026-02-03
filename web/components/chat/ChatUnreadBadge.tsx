@@ -1,0 +1,89 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { MessageCircle, MessageCircleMore } from "lucide-react";
+import { io, type Socket } from "socket.io-client";
+import { getUnreadCount, listConversations } from "@/lib/api/chat";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+export function ChatUnreadBadge({ className }: { className: string }) {
+  const [hasUnread, setHasUnread] = React.useState(false);
+  const socketRef = React.useRef<Socket | null>(null);
+  const joinedRef = React.useRef<Set<string>>(new Set());
+
+  async function refreshUnread() {
+    try {
+      const res = await getUnreadCount();
+      setHasUnread((res?.count ?? 0) > 0);
+    } catch {
+      setHasUnread(false);
+    }
+  }
+
+  async function joinConversations(socket: Socket) {
+    const res = await listConversations();
+    const items = res?.items ?? [];
+    items.forEach((c) => {
+      if (joinedRef.current.has(c.id)) return;
+      joinedRef.current.add(c.id);
+      socket.emit("chat:join", { conversationId: c.id });
+    });
+  }
+
+  React.useEffect(() => {
+    let alive = true;
+    refreshUnread();
+
+    const socket = io(`${API_BASE_URL}/chat`, { withCredentials: true });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      joinConversations(socket).catch(() => {});
+    });
+
+    socket.on("message:new", () => {
+      refreshUnread();
+      window.dispatchEvent(new Event("chat:unread"));
+    });
+
+    function handleRead() {
+      refreshUnread();
+    }
+
+    window.addEventListener("chat:read", handleRead);
+
+    const interval = window.setInterval(() => {
+      if (!alive) return;
+      refreshUnread();
+    }, 20000);
+
+    return () => {
+      alive = false;
+      window.removeEventListener("chat:read", handleRead);
+      window.clearInterval(interval);
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  const glowClass = hasUnread
+    ? "!bg-limecream !text-evergreen !border-fern"
+    : "";
+
+  return (
+    <Link
+      href="/chat"
+      className={`${className} ${glowClass}`}
+      aria-label="Nachrichten"
+    >
+      {hasUnread ? (
+        <MessageCircleMore className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <MessageCircle className="h-4 w-4" aria-hidden="true" />
+      )}
+    </Link>
+  );
+}

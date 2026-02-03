@@ -19,7 +19,6 @@ import type {
 } from "@/lib/api/admin/types";
 import type { AdminUserRow } from "@/lib/api/admin/users";
 import { StatCard } from "./StatCard";
-import { NeighborsMetricsWidget } from "./NeighborsMetricsWidget";
 
 type AdminPingRes = { ok: boolean; role: string };
 type CountRes = { count: number; truncated: boolean };
@@ -220,7 +219,7 @@ export function AdminOverviewScreen() {
                           variant="secondary"
                           onClick={() => void setStatusQuick(a.id, "ACTIVE")}
                         >
-                      Wiederhestellen
+                          Wiederherstellen
                         </Button>
                       </div>
                     </div>
@@ -300,7 +299,7 @@ export function AdminOverviewScreen() {
       </div>
 
       <Card>
-        <h2 className="text-base font-semibold">Schnellactionen</h2>
+        <h2 className="text-base font-semibold">Schnellaktionen</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button asChild variant="secondary">
             <Link href="/admin/activities">Gehe zu Aktivitäten</Link>
@@ -318,8 +317,6 @@ export function AdminOverviewScreen() {
           </div>
         </div>
       </Card>
-
-      <NeighborsMetricsWidget />
     </div>
   );
 }

@@ -56,7 +56,7 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {}
 export class ListActivitiesQueryDto {
   @ApiPropertyOptional({ example: '63073' })
   @IsOptional()
-  @Matches(/^\d{5}$/)
+  @Matches(/^\d{1,5}$/)
   plz?: string;
 
   @ApiPropertyOptional({ example: 'walk' })

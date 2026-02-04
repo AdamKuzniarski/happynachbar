@@ -7,8 +7,6 @@ import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
-import { notifyError } from "@/lib/toast";
-import { TOAST_MESSAGES } from "@/lib/toast-messages";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,9 +25,6 @@ export default function LoginPage() {
       const result = await loginAndSetCookie(email.trim(), password);
       if (!result.ok) {
         setError(result.error);
-        if (result.error.toLowerCase().includes("invalid credentials")) {
-          notifyError(TOAST_MESSAGES.auth.loginFailed);
-        }
         return;
       }
       router.push("/homepage");
@@ -41,16 +36,16 @@ export default function LoginPage() {
 
   return (
     <main className="px-4">
-      <div className="mx-auto mt-8 max-w-sm">
+      <div className="mx-auto mt-10 max-w-sm">
         <h1 className="text-center text-2xl font-bold sm:text-3xl">Log in</h1>
-        <p className="mt-2 text-center text-sm text-hunter">
+        <p className="mt-4 text-center text-sm text-foreground/80">
           Melde dich an, um deine Nachbarschaft zu entdecken.
         </p>
       </div>
 
       <form
         onSubmit={onSubmit}
-        className="mx-auto mt-6 flex max-w-sm flex-col gap-3"
+        className="mx-auto mt-8 flex max-w-sm flex-col gap-3"
       >
         <Input
           value={email}

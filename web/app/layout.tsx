@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
-import { ToastProvider } from "../components/toast/ToastProvider";
 
 const poppins = Poppins({
   variable: "--font-geist-sans",
@@ -39,7 +38,6 @@ export default function RootLayout({
       >
         <ThemeProvider>
           {children}
-          <ToastProvider />
         </ThemeProvider>
       </body>
     </html>

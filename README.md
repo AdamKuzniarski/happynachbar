@@ -20,7 +20,7 @@
   <p align="center">
     A neighborhood platform for discovering, creating, and discussing local activities.
     <br />
-    <a href="https://your-demo-url.example.com/">View Demo</a>
+    <a href="https://happynachbar.adamkuzniarski.dev">Deployment</a>
     ·
     <a href="#preview">Preview</a>
     ·

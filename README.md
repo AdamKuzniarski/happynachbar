@@ -13,7 +13,11 @@
 <br />
 
 <div align="center">
-  <img width="640" height="360" src="public/assets/hero-homepage.png" alt="Happynachbar preview">
+  <a href="https://happynachbar.adamkuzniarski.dev">Deployment</a>
+  <br />
+  <a href="https://happynachbar.adamkuzniarski.dev">
+    <img width="640" height="360" src="Homepage.png" alt="Happynachbar preview">
+  </a>
 
   <h1 align="center">Happynachbar</h1>
 

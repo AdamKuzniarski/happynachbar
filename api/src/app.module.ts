@@ -12,6 +12,7 @@ import { ActivitiesModule } from './activities/activities.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { RbacModule } from './rbac/rbac.module';
 import { ChatModule } from './chat/chat.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ChatModule } from './chat/chat.module';
     UploadsModule,
     RbacModule,
     ChatModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

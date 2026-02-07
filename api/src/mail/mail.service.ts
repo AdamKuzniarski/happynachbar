@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 
 @Injectable()
 export class MailService {
@@ -13,7 +13,7 @@ export class MailService {
     const from =
       this.config.get<string>('MAIL_FROM') || 'noreply@happynachbar.local';
 
-    const transporter = nodemailer.createTransport({
+    const transporter: Transporter = nodemailer.createTransport({
       host,
       port,
       secure: false,

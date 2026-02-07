@@ -5,7 +5,7 @@ import { MailService } from 'src/mail/mail.service';
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const mail = app.get(MailService);
+  const mail = app.get(MailService, { strict: false });
 
   await mail.sendVerificationEmail(
     'test@example.com',
@@ -15,4 +15,4 @@ async function main() {
   await app.close();
 }
 
-main();
+void main();

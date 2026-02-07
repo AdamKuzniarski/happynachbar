@@ -13,7 +13,7 @@ export class MailService {
     const from =
       this.config.get<string>('MAIL_FROM') || 'noreply@happynachbar.local';
 
-    const transporter = nodemailer.createTreansport({
+    const transporter = nodemailer.createTransport({
       host,
       port,
       secure: false,
@@ -26,8 +26,8 @@ export class MailService {
       from,
       to,
       subject,
-      text: `Bitte bestätige deien E-Mail:\n${link}`,
-      html: `<p>Bitte bestätige deine E-Mail:</p><p><a href="${link}>E-Mail bestätigen</a></p>`,
+      text: `Bitte bestätige deine E-Mail:\n${link}`,
+      html: `<p>Bitte bestätige deine E-Mail:</p><p><a href="${link}">E-Mail bestätigen</a></p>`,
     });
 
     this.logger.log(`Verification email sent to ${to}`);

@@ -13,7 +13,10 @@ export class ConversationListItemDto {
   @ApiProperty({ example: 'https://example.com/avatar.png', nullable: true })
   participantAvatarUrl!: string | null;
 
-  @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc', nullable: true })
+  @ApiProperty({
+    example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc',
+    nullable: true,
+  })
   activityId!: string | null;
 
   @ApiProperty({ example: 'Gemeinsamer Spaziergang', nullable: true })

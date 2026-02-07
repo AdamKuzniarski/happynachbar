@@ -26,6 +26,10 @@ services:
     ports:
       - "4000:4000"
     environment:
+      SMTP_HOST: "mailpit"
+      SMTP_PORT: "1025"
+      MAIL_FROM: "noreply@happynachbar.local"
+      WEB_URL: "http://localhost:3000"
       API_PORT: 4000
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/happynachbar?schema=public"
       JWT_SECRET: "dev-super-secret-change-me"

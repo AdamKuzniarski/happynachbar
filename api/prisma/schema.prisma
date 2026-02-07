@@ -13,6 +13,7 @@ model User {
   passwordHash                                   String
   id                                             String             @id @default(uuid()) @db.Uuid
   lastActiveAt                                   DateTime?
+  emailVerifiedAt                                DateTime?
   role                                           UserRole           @default(USER)
   banReason                                      String?
   bannedAt                                       DateTime?

@@ -76,10 +76,7 @@ export class ChatController {
   }
 
   @Delete('messages/:id')
-  deleteMessage(
-    @Req() req: any,
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ) {
+  deleteMessage(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.chat.deleteMessage(req.user.userId, id);
   }
 }

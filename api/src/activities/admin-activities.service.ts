@@ -202,7 +202,8 @@ export class AdminActivitiesService {
       }
       data.title = title;
     }
-    if (dto.description !== undefined) data.description = dto.description?.trim();
+    if (dto.description !== undefined)
+      data.description = dto.description?.trim();
     if (dto.category !== undefined) data.category = dto.category as any;
     if (dto.plz !== undefined) data.plz = dto.plz;
     if (dto.scheduledAt !== undefined)

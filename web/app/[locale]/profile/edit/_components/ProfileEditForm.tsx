@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { normalizePostalCodeInput } from "@/lib/validators";
 import { uploadAvatarImage } from "@/lib/api/uploads";
+import { useLocale, useTranslations } from "next-intl";
 
 type ProfileEditFormProps = {
   initial: {
@@ -32,14 +33,18 @@ function getInitials(name?: string | null) {
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Speichern…" : "Speichern"}
+      {pending ? tCommon("saving") : t("actions.save")}
     </Button>
   );
 }
 
 export function ProfileEditForm({ initial }: ProfileEditFormProps) {
+  const t = useTranslations("profile");
+  const locale = useLocale();
   const [state, formAction] = React.useActionState<FormState, FormData>(
     updateProfileAction,
     {},
@@ -52,15 +57,18 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
 
   return (
     <form action={formAction} className="mt-4 space-y-4">
+      <input type="hidden" name="locale" value={locale} />
       <div className="flex flex-col items-center">
-        <Label>Avatar</Label>
+        <Label>{t("form.avatarLabel")}</Label>
         <div className="mt-2 flex flex-col items-center gap-2">
           <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-fern bg-surface-strong text-lg font-semibold text-foreground">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={avatarUrl}
-                alt={`${displayName || "Neighbor"} Avatar`}
+                alt={t("avatarAlt", {
+                  name: displayName || t("fallback.neighbor"),
+                })}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -76,7 +84,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
             name="avatarUrl"
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://..."
+            placeholder={t("form.avatarUrlPlaceholder")}
             className="h-9 text-xs"
           />
           <Input
@@ -93,7 +101,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
                 setAvatarUrl(url);
               } catch (err: unknown) {
                 setLocalError(
-                  err instanceof Error ? err.message : "Upload fehlgeschlagen.",
+                  err instanceof Error ? err.message : t("errors.uploadFailed"),
                 );
               } finally {
                 setUploading(false);
@@ -105,40 +113,42 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
           />
         </div>
         {uploading ? (
-          <p className="mt-1 text-xs text-hunter text-center">Upload läuft…</p>
+          <p className="mt-1 text-xs text-hunter text-center">
+            {t("form.uploading")}
+          </p>
         ) : null}
       </div>
 
       <div>
-        <Label htmlFor="displayName">Displayname</Label>
+        <Label htmlFor="displayName">{t("form.displayNameLabel")}</Label>
         <Input
           id="displayName"
           name="displayName"
           defaultValue={displayName}
-          placeholder="z.B. Julia"
+          placeholder={t("form.displayNamePlaceholder")}
         />
       </div>
 
       <div>
-        <Label htmlFor="plz">PLZ</Label>
+        <Label htmlFor="plz">{t("form.postalCodeLabel")}</Label>
         <Input
           id="plz"
           name="plz"
           value={plz}
           onChange={(e) => setPlz(normalizePostalCodeInput(e.target.value))}
-          placeholder="z.B. 10115"
+          placeholder={t("form.postalCodePlaceholder")}
           inputMode="numeric"
           maxLength={5}
         />
       </div>
 
       <div>
-        <Label htmlFor="bio">Bio</Label>
+        <Label htmlFor="bio">{t("form.bioLabel")}</Label>
         <Textarea
           id="bio"
           name="bio"
           defaultValue={initial.bio ?? ""}
-          placeholder="Erzähl kurz etwas über dich…"
+          placeholder={t("form.bioPlaceholder")}
         />
       </div>
 
@@ -151,7 +161,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
           variant="secondary"
           onClick={() => history.back()}
         >
-          Abbrechen
+          {t("actions.cancel")}
         </Button>
       </div>
     </form>

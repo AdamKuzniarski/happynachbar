@@ -127,5 +127,51 @@
       "create": "Erstellen",
       "cancel": "Abbrechen"
     }
+  },
+  "profile": {
+    "title": "Profil",
+    "editTitle": "Profil bearbeiten",
+    "backToOverview": "Zurück zur Übersicht",
+    "loginCta": "Zum Login",
+    "editCta": "Profil bearbeiten",
+    "avatarAlt": "{name} Avatar",
+    "labels": {
+      "displayName": "Displayname",
+      "postalCode": "PLZ",
+      "bio": "Bio",
+      "memberSince": "Mitglied seit"
+    },
+    "status": {
+      "title": "Profilstatus",
+      "completion": "Profil zu {percent}% vollständig"
+    },
+    "fallback": {
+      "neighbor": "Nachbar",
+      "noBio": "Noch keine Bio hinterlegt.",
+      "empty": "—"
+    },
+    "form": {
+      "avatarLabel": "Avatar",
+      "avatarUrlPlaceholder": "https://…",
+      "uploading": "Upload läuft…",
+      "displayNameLabel": "Displayname",
+      "displayNamePlaceholder": "z.B. Julia",
+      "postalCodeLabel": "PLZ",
+      "postalCodePlaceholder": "z.B. 10115",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Erzähl kurz etwas über dich…"
+    },
+    "actions": {
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    },
+    "errors": {
+      "notLoggedIn": "Bitte logge dich ein, um dein Profil zu sehen.",
+      "notLoggedInEdit": "Bitte logge dich ein, um dein Profil zu bearbeiten.",
+      "loadFailed": "Profil konnte nicht geladen werden.",
+      "noChanges": "Keine Änderungen zum Speichern.",
+      "saveFailed": "Profil konnte nicht gespeichert werden.",
+      "uploadFailed": "Upload fehlgeschlagen."
+    }
   }
 }

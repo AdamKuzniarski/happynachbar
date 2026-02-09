@@ -127,5 +127,51 @@
       "create": "Create",
       "cancel": "Cancel"
     }
+  },
+  "profile": {
+    "title": "Profile",
+    "editTitle": "Edit profile",
+    "backToOverview": "Back to overview",
+    "loginCta": "Go to login",
+    "editCta": "Edit profile",
+    "avatarAlt": "{name} avatar",
+    "labels": {
+      "displayName": "Display name",
+      "postalCode": "Postal code",
+      "bio": "Bio",
+      "memberSince": "Member since"
+    },
+    "status": {
+      "title": "Profile status",
+      "completion": "Profile {percent}% complete"
+    },
+    "fallback": {
+      "neighbor": "Neighbor",
+      "noBio": "No bio yet.",
+      "empty": "—"
+    },
+    "form": {
+      "avatarLabel": "Avatar",
+      "avatarUrlPlaceholder": "https://…",
+      "uploading": "Uploading…",
+      "displayNameLabel": "Display name",
+      "displayNamePlaceholder": "e.g. Julia",
+      "postalCodeLabel": "Postal code",
+      "postalCodePlaceholder": "e.g. 10115",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "Tell us a bit about yourself…"
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "notLoggedIn": "Please log in to view your profile.",
+      "notLoggedInEdit": "Please log in to edit your profile.",
+      "loadFailed": "Profile could not be loaded.",
+      "noChanges": "No changes to save.",
+      "saveFailed": "Profile could not be saved.",
+      "uploadFailed": "Upload failed."
+    }
   }
 }

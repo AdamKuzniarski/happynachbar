@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { defaultLocale, isLocale } from "@/lib/i18n";
 
 type FormState = { error?: string };
 
@@ -23,9 +25,12 @@ export async function updateProfileAction(
   _prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  const localeValue = String(formData.get("locale") ?? "").trim();
+  const locale = isLocale(localeValue) ? localeValue : defaultLocale;
+  const t = await getTranslations({ locale, namespace: "profile" });
   const cookieStore = await cookies();
   const token = cookieStore.get("happynachbar_token")?.value;
-  if (!token) return { error: "Bitte logge dich ein." };
+  if (!token) return { error: t("errors.notLoggedIn") };
 
   const payload: Record<string, string> = {};
   const displayName = String(formData.get("displayName") ?? "").trim();
@@ -39,7 +44,7 @@ export async function updateProfileAction(
   if (bio) payload.bio = bio;
 
   if (Object.keys(payload).length === 0) {
-    return { error: "Keine Änderungen zum Speichern." };
+    return { error: t("errors.noChanges") };
   }
 
   const res = await fetch(`${getApiUrl()}/users/me`, {
@@ -54,9 +59,9 @@ export async function updateProfileAction(
 
   const json = await res.json().catch(() => null);
   if (!res.ok) {
-    const msg = getMessage(json) || "Profil konnte nicht gespeichert werden.";
+    const msg = getMessage(json) || t("errors.saveFailed");
     return { error: msg };
   }
 
-  redirect("/profile");
+  redirect(`/${locale}/profile`);
 }

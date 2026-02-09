@@ -126,6 +126,28 @@ export class AuthService {
 
     return { verified: true };
   }
+  async resendVerificationEmail(email: string) {
+    const normalized = this.normalizeEmail(email);
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalized },
+      select: { id: true, email: true, emailVerifiedAt: true },
+    });
+
+    // Immer gleich antworten (anti user-enumeration)
+    if (!user) return { ok: true };
+
+    // Wenn schon verified: auch ok zurück, kein Drama
+    if (user.emailVerifiedAt) return { ok: true };
+
+    const token = await this.signEmailVerificationToken(user.id);
+    const webUrl =
+      this.config.get<string>('WEB_URL') ?? 'http://localhost:3000';
+    const verifyLink = `${webUrl}/auth/verify?token=${encodeURIComponent(token)}`;
+
+    await this.mail.sendVerificationEmail(user.email, verifyLink);
+    return { ok: true };
+  }
 
   private async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findUnique({

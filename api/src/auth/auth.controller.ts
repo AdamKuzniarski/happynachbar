@@ -41,4 +41,9 @@ export class AuthController {
     if (!token) throw new BadRequestException('Token is required');
     return this.auth.verifyEmail(token);
   }
+
+  @Post('resend-verification')
+  resendVerification(@Body() dto: { email: string }) {
+    return this.auth.resendVerificationEmail(dto.email);
+  }
 }

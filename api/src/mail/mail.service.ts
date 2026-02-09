@@ -5,31 +5,59 @@ import nodemailer, { type Transporter } from 'nodemailer';
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
+  private transporter?: Transporter;
+
   constructor(private readonly config: ConfigService) {}
 
-  async sendVerificationEmail(to: string, link: string) {
-    const host = this.config.get<string>('SMTP_HOST') || 'mailpit';
-    const port = Number(this.config.get<string>('SMTP_PORT') || 1025);
-    const from =
-      this.config.get<string>('MAIL_FROM') || 'noreply@happynachbar.local';
+  private env(key: string, fallback?: string) {
+    return this.config.get<string>(key) ?? process.env[key] ?? fallback;
+  }
 
-    const transporter: Transporter = nodemailer.createTransport({
+  private getTransporter() {
+    if (this.transporter) return this.transporter;
+
+    const host = this.env('SMTP_HOST', 'mailpit');
+    const port = Number(this.env('SMTP_PORT', '1025'));
+    const user = this.env('SMTP_USER'); 
+    const pass = this.env('SMTP_PASS');
+    const secure = port === 465; 
+
+    this.logger.log(`SMTP host=${host} port=${port} user=${user ?? 'none'}`);
+
+    this.transporter = nodemailer.createTransport({
       host,
       port,
-      secure: false,
-      tls: { rejectUnauthorized: false }, //nur dev
+      secure,
+      auth: user && pass ? { user, pass } : undefined,
+
+      requireTLS: port === 587,
     });
 
+    return this.transporter;
+  }
+
+  async sendVerificationEmail(to: string, link: string) {
+    const from = this.env('MAIL_FROM', 'noreply@happynachbar.local');
     const subject = 'Bitte bestätige deine E-Mail-Adresse';
 
-    await transporter.sendMail({
-      from,
-      to,
-      subject,
-      text: `Bitte bestätige deine E-Mail:\n${link}`,
-      html: `<p>Bitte bestätige deine E-Mail:</p><p><a href="${link}">E-Mail bestätigen</a></p>`,
-    });
+    try {
+      const transporter = this.getTransporter();
 
-    this.logger.log(`Verification email sent to ${to}`);
+      await transporter.sendMail({
+        from,
+        to,
+        subject,
+        text: `Bitte bestätige deine E-Mail:\n${link}`,
+        html: `<p>Bitte bestätige deine E-Mail:</p><p><a href="${link}">E-Mail bestätigen</a></p><p><small>${link}</small></p>`,
+      });
+
+      this.logger.log(`Verification email sent to=${to}`);
+    } catch (e: any) {
+      this.logger.error(
+        `sendVerificationEmail failed to=${to}`,
+        e?.stack ?? String(e),
+      );
+      throw e;
+    }
   }
 }

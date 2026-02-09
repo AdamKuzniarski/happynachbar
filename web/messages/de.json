@@ -125,7 +125,11 @@
       "createFailed": "Fehler beim Erstellen.",
       "uploadFailed": "Upload fehlgeschlagen.",
       "notOwner": "Du kannst nur Aktivitäten bearbeiten/löschen, die du auch erstellt hast",
-      "deleteFailed": "Löschen fehlgeschlagen."
+      "deleteFailed": "Löschen fehlgeschlagen.",
+      "missingActivity": "Fehlende Aktivität.",
+      "loginRequired": "Bitte einloggen.",
+      "chatStartFailed": "Chat konnte nicht gestartet werden.",
+      "invalidResponse": "Ungültige Antwort."
     },
     "actions": {
       "save": "Speichern",
@@ -139,15 +143,25 @@
       "createdBy": "Erstellt von",
       "start": "Start",
       "updated": "Aktualisiert",
-      "description": "Beschreibung"
+      "description": "Beschreibung",
+      "bio": "Bio",
+      "memberSince": "Mitglied seit"
     },
     "aria": {
       "profileLink": "Zum Profil"
     },
     "fallback": {
-      "neighbor": "Nachbar"
+      "neighbor": "Nachbar",
+      "noBio": "Noch keine Bio hinterlegt.",
+      "empty": "—"
     },
     "confirmDelete": "Aktivität wirklich löschen?",
+    "creator": {
+      "profileTitle": "Profil",
+      "avatarAlt": "{name} Avatar",
+      "contact": "Kontaktieren",
+      "contactAria": "Kontaktieren"
+    },
     "gallery": {
       "expandAria": "Bild vergrößern",
       "close": "Schließen",

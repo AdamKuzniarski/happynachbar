@@ -2,17 +2,22 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { defaultLocale, isLocale } from "@/lib/i18n";
 
 function getApiUrl() {
   return process.env.API_URL ?? "http://localhost:4000";
 }
 
 export async function startChatWithActivity(_prev: unknown, formData: FormData) {
+  const localeValue = String(formData.get("locale") ?? "").trim();
+  const locale = isLocale(localeValue) ? localeValue : defaultLocale;
+  const t = await getTranslations({ locale, namespace: "activities" });
   const activityId = String(formData.get("activityId") ?? "").trim();
-  if (!activityId) return { error: "Fehlende Aktivität." };
+  if (!activityId) return { error: t("errors.missingActivity") };
 
   const token = (await cookies()).get("happynachbar_token")?.value;
-  if (!token) return { error: "Bitte einloggen." };
+  if (!token) return { error: t("errors.loginRequired") };
 
   const res = await fetch(
     `${getApiUrl()}/chat/conversations/by-activity/${encodeURIComponent(
@@ -26,11 +31,11 @@ export async function startChatWithActivity(_prev: unknown, formData: FormData) 
   );
 
   if (!res.ok) {
-    return { error: "Chat konnte nicht gestartet werden." };
+    return { error: t("errors.chatStartFailed") };
   }
 
   const convo = (await res.json()) as { id?: string };
-  if (!convo?.id) return { error: "Ungültige Antwort." };
+  if (!convo?.id) return { error: t("errors.invalidResponse") };
 
-  redirect(`/chat/${encodeURIComponent(convo.id)}`);
+  redirect(`/${locale}/chat/${encodeURIComponent(convo.id)}`);
 }

@@ -125,7 +125,11 @@
       "createFailed": "Failed to create.",
       "uploadFailed": "Upload failed.",
       "notOwner": "You can only edit or delete activities you created.",
-      "deleteFailed": "Delete failed."
+      "deleteFailed": "Delete failed.",
+      "missingActivity": "Missing activity.",
+      "loginRequired": "Please log in.",
+      "chatStartFailed": "Chat could not be started.",
+      "invalidResponse": "Invalid response."
     },
     "actions": {
       "save": "Save",
@@ -139,15 +143,25 @@
       "createdBy": "Created by",
       "start": "Start",
       "updated": "Updated",
-      "description": "Description"
+      "description": "Description",
+      "bio": "Bio",
+      "memberSince": "Member since"
     },
     "aria": {
       "profileLink": "Go to profile"
     },
     "fallback": {
-      "neighbor": "Neighbor"
+      "neighbor": "Neighbor",
+      "noBio": "No bio yet.",
+      "empty": "—"
     },
     "confirmDelete": "Delete this activity?",
+    "creator": {
+      "profileTitle": "Profile",
+      "avatarAlt": "{name} avatar",
+      "contact": "Contact",
+      "contactAria": "Contact"
+    },
     "gallery": {
       "expandAria": "Expand image",
       "close": "Close",

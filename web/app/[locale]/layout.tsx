@@ -4,6 +4,8 @@ import { Poppins, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { isLocale } from "@/lib/i18n";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 
 const poppins = Poppins({
   variable: "--font-geist-sans",
@@ -21,7 +23,7 @@ export const metadata: Metadata = {
   description: "Get to know your neighbors better.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: Readonly<{
@@ -29,6 +31,8 @@ export default function RootLayout({
   params: { locale: string };
 }>) {
   if (!isLocale(params.locale)) notFound();
+  setRequestLocale(params.locale);
+  const messages = await getMessages();
   return (
     <html lang={params.locale} suppressHydrationWarning>
       <head>
@@ -41,9 +45,9 @@ export default function RootLayout({
       <body
         className={`min-h-screen bg-background text-foreground ${poppins.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

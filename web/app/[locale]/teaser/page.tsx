@@ -14,15 +14,15 @@ export default async function TeaserPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
   searchParams: Promise<SP>;
 }) {
+  const { locale } = await params;
   const t = useTranslations("teaser");
   const raw = (await searchParams).postalCode;
   const postalCode = Array.isArray(raw) ? raw[0] : raw;
 
-  if (!postalCode || !isValidPostalCode(postalCode))
-    redirect(`/${params.locale}`);
+  if (!postalCode || !isValidPostalCode(postalCode)) redirect(`/${locale}`);
 
   const res = await fetch(
     `${apiBase}/activities?plz=${encodeURIComponent(postalCode)}&status=ACTIVE`,
@@ -42,7 +42,7 @@ export default async function TeaserPage({
 
           <div className="mt-12 flex justify-center">
             <Link
-              href={`/${params.locale}/auth/register`}
+              href={`/${locale}/auth/register`}
               className="rounded-md border-2 border-fern bg-limecream px-5 py-3 text-base font-semibold text-evergreen hover:bg-palm hover:text-limecream transition-colors"
             >
               {t("cta")}

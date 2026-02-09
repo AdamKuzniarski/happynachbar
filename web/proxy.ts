@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { defaultLocale, locales } from "./lib/i18n";
 
 const COOKIE_NAME = "happynachbar_token";
 
@@ -6,6 +7,30 @@ const COOKIE_NAME = "happynachbar_token";
 function normalizePath(pathname: string) {
   if (pathname === "/") return "/";
   return pathname.replace(/\/+$/, "");
+}
+
+function hasLocalePrefix(pathname: string) {
+  return locales.some(
+    (locale) =>
+      pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+  );
+}
+
+function getLocaleFromPath(pathname: string) {
+  const match = locales.find(
+    (locale) =>
+      pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+  );
+  return match ?? defaultLocale;
+}
+
+function stripLocalePrefix(pathname: string) {
+  const locale = getLocaleFromPath(pathname);
+  if (pathname === `/${locale}`) return "/";
+  if (pathname.startsWith(`/${locale}/`)) {
+    return pathname.slice(locale.length + 1);
+  }
+  return pathname;
 }
 
 function decodeBase64Url(input: string) {
@@ -59,33 +84,53 @@ function buildRedirect(req: NextRequest, pathname: string) {
 // middleware() -> proxy()
 export function proxy(req: NextRequest) {
   const pathname = normalizePath(req.nextUrl.pathname);
+  if (!hasLocalePrefix(pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${defaultLocale}${pathname === "/" ? "" : pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  const locale = getLocaleFromPath(pathname);
+  const pathWithoutLocale = stripLocalePrefix(pathname);
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const tokenExpired = token ? isTokenExpired(token) : false;
   const isLoggedIn = !!token && !tokenExpired;
 
   // If already logged in, never show login page
-  if (isLoggedIn && pathname === "/auth/login") {
-    return withClearedTokenCookie(buildRedirect(req, "/homepage"), tokenExpired);
+  if (isLoggedIn && pathWithoutLocale === "/auth/login") {
+    return withClearedTokenCookie(
+      buildRedirect(req, `/${locale}/homepage`),
+      tokenExpired,
+    );
   }
 
   // If already logged in, never show landing page
-  if (isLoggedIn && pathname === "/") {
-    return withClearedTokenCookie(buildRedirect(req, "/homepage"), tokenExpired);
+  if (isLoggedIn && pathWithoutLocale === "/") {
+    return withClearedTokenCookie(
+      buildRedirect(req, `/${locale}/homepage`),
+      tokenExpired,
+    );
   }
 
   // If already logged in, skip the public teaser funnel and go straight to the homepage
-  if (isLoggedIn && pathname === "/activity") {
-    return withClearedTokenCookie(buildRedirect(req, "/homepage"), tokenExpired);
+  if (isLoggedIn && pathWithoutLocale === "/activity") {
+    return withClearedTokenCookie(
+      buildRedirect(req, `/${locale}/homepage`),
+      tokenExpired,
+    );
   }
 
   // Allow public routes
-  if (PUBLIC_PATHS.has(pathname)) {
+  if (PUBLIC_PATHS.has(pathWithoutLocale)) {
     return withClearedTokenCookie(NextResponse.next(), tokenExpired);
   }
 
   // All other routes require auth
   if (!isLoggedIn) {
-    return withClearedTokenCookie(buildRedirect(req, "/auth/login"), tokenExpired);
+    return withClearedTokenCookie(
+      buildRedirect(req, `/${locale}/auth/login`),
+      tokenExpired,
+    );
   }
 
   return withClearedTokenCookie(NextResponse.next(), tokenExpired);

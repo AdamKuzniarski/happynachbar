@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Poppins, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { isLocale } from "@/lib/i18n";
 
 const poppins = Poppins({
   variable: "--font-geist-sans",
@@ -26,6 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }>) {
+  if (!isLocale(params.locale)) notFound();
   return (
     <html lang={params.locale} suppressHydrationWarning>
       <head>

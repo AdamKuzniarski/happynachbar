@@ -15,7 +15,10 @@ function VerifyInner() {
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL ??
+      process.env.API_URL ??
+      "http://localhost:4000";
     fetch(`${apiUrl}/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((r) => (r.ok ? setStatus("ok") : setStatus("error")))
       .catch(() => setStatus("error"));

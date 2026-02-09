@@ -33,7 +33,7 @@ export default async function RootLayout({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -46,7 +46,7 @@ export default async function RootLayout({
       <body
         className={`min-h-screen bg-background text-foreground ${poppins.variable} ${geistMono.variable} antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>{children}</ThemeProvider>
         </NextIntlClientProvider>
       </body>

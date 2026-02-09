@@ -18,7 +18,7 @@ export default async function TeaserPage({
   searchParams: Promise<SP>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations("teaser");
+  const t = await getTranslations({ locale, namespace: "teaser" });
   const raw = (await searchParams).postalCode;
   const postalCode = Array.isArray(raw) ? raw[0] : raw;
 

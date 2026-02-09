@@ -1,9 +1,14 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { PostalCodeForm } from "@/components/postal-code-form";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export default function LandingPage() {
-  const t = useTranslations("landing");
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "landing" });
   return (
     <AppShell variant="public">
       <main className="px-4">

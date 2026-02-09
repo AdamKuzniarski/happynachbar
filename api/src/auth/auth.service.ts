@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
+import type { StringValue } from 'ms';
 
 type VerifyEmailPayload = {
   sub: string;
@@ -37,8 +38,8 @@ export class AuthService {
     );
   }
 
-  private getEmailTokenExpiresIn() {
-    return this.config.get<string>('EMAIL_TOKEN_EXPIRES_IN') ?? '24h';
+  private getEmailTokenExpiresIn(): StringValue {
+    return this.config.get<StringValue>('EMAIL_TOKEN_EXPIRES_IN') ?? '24h';
   }
 
   private async signEmailVerificationToken(userId: string) {

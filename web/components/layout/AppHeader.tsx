@@ -1,9 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { cookies } from "next/headers";
+import * as React from "react";
 import { LogIn, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
-import { getLocale, getTranslations } from "next-intl/server";
+import { useLocale, useTranslations } from "next-intl";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
 
@@ -17,15 +19,15 @@ type UserMeResponse = {
   profile?: { displayName?: string | null } | null;
 };
 
-export async function AppHeader({
+export function AppHeader({
   variant,
   showBackOnAuth = false,
 }: {
   variant: HeaderVariant;
   showBackOnAuth?: boolean;
 }) {
-  const locale = await getLocale();
-  const t = await getTranslations("header");
+  const locale = useLocale();
+  const t = useTranslations("header");
   const brandHref =
     variant === "app"
       ? `/${locale}/homepage`
@@ -35,25 +37,31 @@ export async function AppHeader({
           ? `/${locale}/homepage`
           : undefined;
 
-  let userLabel: string | null = null;
-  if (variant === "app") {
-    const token = (await cookies()).get("happynachbar_token")?.value;
-    if (token) {
-      try {
-        const res = await fetch(`${apiBase}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
-        });
-        if (res.ok) {
-          const me = (await res.json()) as UserMeResponse;
-          const displayName = me?.profile?.displayName?.trim();
-          userLabel = displayName || me?.email?.trim() || null;
-        }
-      } catch {
-        userLabel = null;
-      }
-    }
-  }
+  const [userLabel, setUserLabel] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (variant !== "app") return;
+    let alive = true;
+    fetch(`${apiBase}/users/me`, {
+      credentials: "include",
+      cache: "no-store",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me: UserMeResponse | null) => {
+        if (!alive) return;
+        const displayName = me?.profile?.displayName?.trim();
+        const label = displayName || me?.email?.trim() || null;
+        setUserLabel(label);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setUserLabel(null);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [variant]);
 
   const btn =
     "rounded-md border-2 border-fern bg-limecream px-3 py-2 text-sm font-medium text-evergreen hover:bg-palm hover:text-limecream transition-colors sm:px-4";

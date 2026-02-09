@@ -63,7 +63,7 @@ export class AuthService {
         data: {
           email: this.normalizeEmail(email),
           passwordHash,
-          emailVerifiedAt: null, // ✅ wichtig: unverified
+          emailVerifiedAt: null,
           profile: { create: dn ? { displayName: dn } : {} },
         },
         select: { id: true, email: true, createdAt: true, updatedAt: true },
@@ -134,10 +134,8 @@ export class AuthService {
       select: { id: true, email: true, emailVerifiedAt: true },
     });
 
-    // Immer gleich antworten (anti user-enumeration)
     if (!user) return { ok: true };
 
-    // Wenn schon verified: auch ok zurück, kein Drama
     if (user.emailVerifiedAt) return { ok: true };
 
     const token = await this.signEmailVerificationToken(user.id);

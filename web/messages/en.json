@@ -2,6 +2,15 @@
   "common": {
     "loading": "…"
   },
+  "header": {
+    "greeting": "Hello {name}",
+    "profileAria": "Profile",
+    "admin": "Admin",
+    "logoutAria": "Log out",
+    "back": "Back",
+    "loginAria": "Log in",
+    "chatAria": "Messages"
+  },
   "landing": {
     "title": "Welcome to happynachbar",
     "subtitleLine1": "Create your own activities or find events and help near you.",

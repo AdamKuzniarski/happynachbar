@@ -2,6 +2,15 @@
   "common": {
     "loading": "…"
   },
+  "header": {
+    "greeting": "Hallo {name}",
+    "profileAria": "Profil",
+    "admin": "Admin",
+    "logoutAria": "Logout",
+    "back": "Zurück",
+    "loginAria": "Login",
+    "chatAria": "Nachrichten"
+  },
   "landing": {
     "title": "Herzlich Willkommen bei happynachbar",
     "subtitleLine1": "Erstelle eigene Aktivitäten oder finde Events und Hilfsangebote in deiner Nähe.",

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { LogIn, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export type HeaderVariant = "public" | "auth" | "app" | "logout";
 
@@ -23,13 +24,15 @@ export async function AppHeader({
   variant: HeaderVariant;
   showBackOnAuth?: boolean;
 }) {
+  const locale = await getLocale();
+  const t = await getTranslations("header");
   const brandHref =
     variant === "app"
-      ? "/homepage"
+      ? `/${locale}/homepage`
       : variant === "auth"
-        ? "/"
+        ? `/${locale}`
         : variant === "logout"
-          ? "/homepage"
+          ? `/${locale}/homepage`
           : undefined;
 
   let userLabel: string | null = null;
@@ -69,7 +72,7 @@ export async function AppHeader({
         </span>
         {variant === "app" && userLabel ? (
           <span className="mt-1 text-xs text-foreground/80">
-            Hallo {userLabel}
+            {t("greeting", { name: userLabel })}
           </span>
         ) : null}
       </div>
@@ -90,31 +93,47 @@ export async function AppHeader({
           {variant === "app" ? (
             <>
               <ChatUnreadBadge className={iconBtn} />
-              <Link href="/profile" className={iconBtn} aria-label="Profil">
+              <Link
+                href={`/${locale}/profile`}
+                className={iconBtn}
+                aria-label={t("profileAria")}
+              >
                 <User className="h-4 w-4" aria-hidden="true" />
               </Link>
               {showAdminLink ? (
-                <Link href="/admin/activities" className={btn}>
-                  Admin
+                <Link href={`/${locale}/admin/activities`} className={btn}>
+                  {t("admin")}
                 </Link>
               ) : null}
 
-              <a href="/auth/logout" className={iconBtn} aria-label="Logout">
+              <a
+                href={`/${locale}/auth/logout`}
+                className={iconBtn}
+                aria-label={t("logoutAria")}
+              >
                 <LogOut className="h-4 w-4" aria-hidden="true" />
               </a>
             </>
           ) : variant === "auth" ? (
             showBackOnAuth ? (
-              <Link href="/" className={btn}>
-                Back
+              <Link href={`/${locale}`} className={btn}>
+                {t("back")}
               </Link>
             ) : (
-              <Link href="/auth/login" className={iconBtn} aria-label="Login">
+              <Link
+                href={`/${locale}/auth/login`}
+                className={iconBtn}
+                aria-label={t("loginAria")}
+              >
                 <LogIn className="h-4 w-4" aria-hidden="true" />
               </Link>
             )
           ) : (
-            <Link href="/auth/login" className={iconBtn} aria-label="Login">
+            <Link
+              href={`/${locale}/auth/login`}
+              className={iconBtn}
+              aria-label={t("loginAria")}
+            >
               <LogIn className="h-4 w-4" aria-hidden="true" />
             </Link>
           )}

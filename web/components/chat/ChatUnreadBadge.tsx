@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { MessageCircle, MessageCircleMore } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 import { getUnreadCount, listConversations } from "@/lib/api/chat";
+import { defaultLocale, isLocale } from "@/lib/i18n";
+import { useTranslations } from "next-intl";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -13,6 +16,13 @@ export function ChatUnreadBadge({ className }: { className: string }) {
   const [hasUnread, setHasUnread] = React.useState(false);
   const socketRef = React.useRef<Socket | null>(null);
   const joinedRef = React.useRef<Set<string>>(new Set());
+  const params = useParams();
+  const t = useTranslations("header");
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
 
   async function refreshUnread() {
     try {
@@ -75,9 +85,9 @@ export function ChatUnreadBadge({ className }: { className: string }) {
 
   return (
     <Link
-      href="/chat"
+      href={`/${locale}/chat`}
       className={`${className} ${glowClass}`}
-      aria-label="Nachrichten"
+      aria-label={t("chatAria")}
     >
       {hasUnread ? (
         <MessageCircleMore className="h-4 w-4" aria-hidden="true" />

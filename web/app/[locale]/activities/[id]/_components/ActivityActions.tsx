@@ -40,7 +40,7 @@ export function ActivityActions({
       return;
     }
     setError(null);
-    router.push(`/activities/${encodeURIComponent(id)}/edit`);
+    router.push(`/${locale}/activities/${encodeURIComponent(id)}/edit`);
   }
 
   async function onDelete() {

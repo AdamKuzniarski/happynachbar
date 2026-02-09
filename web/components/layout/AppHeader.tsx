@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { LogIn, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
@@ -28,6 +29,7 @@ export function AppHeader({
 }) {
   const locale = useLocale();
   const t = useTranslations("header");
+  const pathname = usePathname();
   const brandHref =
     variant === "app"
       ? `/${locale}/homepage`
@@ -90,6 +92,17 @@ export function AppHeader({
   const showAdminLink =
     variant === "app" && process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === "true";
 
+  function buildLocaleHref(targetLocale: string) {
+    if (!pathname) return `/${targetLocale}`;
+    const parts = pathname.split("/");
+    if (parts.length < 2) return `/${targetLocale}`;
+    if (parts[1] === locale) {
+      parts[1] = targetLocale;
+      return parts.join("/") || `/${targetLocale}`;
+    }
+    return `/${targetLocale}${pathname === "/" ? "" : pathname}`;
+  }
+
   return (
     <header className="border-b-2 border-fern">
       <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3 sm:max-w-2xl sm:px-6 sm:py-4">
@@ -97,6 +110,30 @@ export function AppHeader({
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <div className="flex items-center gap-1 rounded-md border-2 border-fern bg-surface px-1 py-1 text-[11px] font-semibold">
+            <Link
+              href={buildLocaleHref("de")}
+              className={`rounded px-2 py-1 transition-colors ${
+                locale === "de"
+                  ? "bg-fern text-limecream"
+                  : "text-foreground hover:bg-fern/10"
+              }`}
+              aria-label={t("switchToDe")}
+            >
+              DE
+            </Link>
+            <Link
+              href={buildLocaleHref("en")}
+              className={`rounded px-2 py-1 transition-colors ${
+                locale === "en"
+                  ? "bg-fern text-limecream"
+                  : "text-foreground hover:bg-fern/10"
+              }`}
+              aria-label={t("switchToEn")}
+            >
+              EN
+            </Link>
+          </div>
 
           {variant === "app" ? (
             <>

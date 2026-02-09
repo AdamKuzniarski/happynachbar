@@ -20,7 +20,9 @@
     "logoutAria": "Logout",
     "back": "Zurück",
     "loginAria": "Login",
-    "chatAria": "Nachrichten"
+    "chatAria": "Nachrichten",
+    "switchToDe": "Zu Deutsch wechseln",
+    "switchToEn": "Zu Englisch wechseln"
   },
   "landing": {
     "title": "Herzlich Willkommen bei happynachbar",

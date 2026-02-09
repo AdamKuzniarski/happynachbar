@@ -20,7 +20,9 @@
     "logoutAria": "Log out",
     "back": "Back",
     "loginAria": "Log in",
-    "chatAria": "Messages"
+    "chatAria": "Messages",
+    "switchToDe": "Switch to German",
+    "switchToEn": "Switch to English"
   },
   "landing": {
     "title": "Welcome to happynachbar",

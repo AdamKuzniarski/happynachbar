@@ -173,5 +173,30 @@
       "saveFailed": "Profil konnte nicht gespeichert werden.",
       "uploadFailed": "Upload fehlgeschlagen."
     }
+  },
+  "chat": {
+    "inboxTitle": "Nachrichten",
+    "backToOverview": "Zurück zur Übersicht",
+    "emptyInbox": "Noch keine Chats.",
+    "neighbor": "Nachbar",
+    "activityLabel": " · zur Aktivität: {title}",
+    "errors": {
+      "unknown": "Unbekannter Fehler"
+    },
+    "chatWith": "Chat mit {name}",
+    "creator": "Ersteller",
+    "activityTitle": "Aktivität: {title}",
+    "emptyMessages": "Noch keine Nachrichten.",
+    "you": "Du",
+    "edited": "bearbeitet",
+    "editMessageAria": "Nachricht bearbeiten",
+    "deleteMessageAria": "Nachricht löschen",
+    "messageDeleted": "Nachricht gelöscht.",
+    "editHints": "Esc zum Abbrechen • Enter zum Speichern ·",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirmDelete": "Diese Nachricht wirklich löschen?",
+    "messagePlaceholder": "Nachricht…",
+    "send": "Senden"
   }
 }

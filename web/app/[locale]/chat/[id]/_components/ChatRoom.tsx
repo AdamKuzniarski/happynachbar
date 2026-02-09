@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listConversations,
   listMessages,
@@ -19,6 +20,9 @@ const API_BASE_URL =
 type SocketMessage = Message;
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
+  const locale = useLocale();
+  const t = useTranslations("chat");
+  const tCommon = useTranslations("common");
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -50,7 +54,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       })
       .catch((e) => {
         if (!alive) return;
-        setError(e instanceof Error ? e.message : "Unbekannter Fehler");
+        setError(e instanceof Error ? e.message : t("errors.unknown"));
       })
       .finally(() => {
         if (!alive) return;
@@ -178,7 +182,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   function deleteMessage(messageId: string) {
-    if (!window.confirm("Diese Nachricht wirklich löschen?")) return;
+    if (!window.confirm(t("confirmDelete"))) return;
     socketRef.current?.emit("message:delete", { messageId });
     if (editingId === messageId) cancelEdit();
   }
@@ -186,10 +190,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   return (
     <>
       <h1 className="text-lg font-semibold text-center">
-        Chat mit {participantName?.trim() ? participantName : "Ersteller"}
+        {t("chatWith", {
+          name: participantName?.trim() ? participantName : t("creator"),
+        })}
         {activityTitle?.trim() ? (
           <span className="mt-1 block text-sm font-normal opacity-75">
-            Aktivität: {activityTitle}
+            {t("activityTitle", { title: activityTitle })}
           </span>
         ) : null}
       </h1>
@@ -197,17 +203,17 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         <FormError message={error} />
 
       {loading ? (
-        <p className="mt-4 text-sm opacity-70">Lädt…</p>
+        <p className="mt-4 text-sm opacity-70">{tCommon("loading")}</p>
       ) : (
         <div className="mt-4 space-y-2 max-h-[50vh] overflow-y-auto pr-1">
           {messages.length === 0 ? (
-            <p className="text-sm opacity-70">Noch keine Nachrichten.</p>
+            <p className="text-sm opacity-70">{t("emptyMessages")}</p>
           ) : (
             messages.map((m) => {
               const isMine = !!currentUserId && m.senderId === currentUserId;
               const authorLabel = isMine
-                ? "Du"
-                : participantName?.trim() || "Ersteller";
+                ? t("you")
+                : participantName?.trim() || t("creator");
               const alignment = isMine ? "ml-auto text-right" : "mr-auto text-left";
               const bubble =
                 isMine
@@ -228,14 +234,16 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                     >
                       <span>{authorLabel}</span>
                       <span>
-                        {new Date(m.createdAt).toLocaleDateString("de-DE")}{" "}
-                        {new Date(m.createdAt).toLocaleTimeString("de-DE", {
+                        {new Date(m.createdAt).toLocaleDateString(locale)}{" "}
+                        {new Date(m.createdAt).toLocaleTimeString(locale, {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
                       </span>
                       {m.editedAt && !m.deletedAt ? (
-                        <span className="italic opacity-80">bearbeitet</span>
+                        <span className="italic opacity-80">
+                          {t("edited")}
+                        </span>
                       ) : null}
                       {canEdit ? (
                         <>
@@ -243,7 +251,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                             type="button"
                             className="opacity-80 hover:opacity-100"
                             onClick={() => startEdit(m)}
-                            aria-label="Nachricht bearbeiten"
+                            aria-label={t("editMessageAria")}
                           >
                             <Pencil size={14} />
                           </button>
@@ -251,7 +259,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                             type="button"
                             className="opacity-80 hover:opacity-100"
                             onClick={() => deleteMessage(m.id)}
-                            aria-label="Nachricht löschen"
+                            aria-label={t("deleteMessageAria")}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -260,7 +268,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                     </div>
                     {m.deletedAt ? (
                       <div className="mt-1 italic opacity-80">
-                        Nachricht gelöscht.
+                        {t("messageDeleted")}
                       </div>
                     ) : isEditing ? (
                       <form onSubmit={submitEdit} className="mt-2 space-y-1">
@@ -276,12 +284,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                           autoFocus
                         />
                         <div className="text-[11px] opacity-70">
-                          Esc zum Abbrechen • Enter zum Speichern ·{" "}
+                          {t("editHints")}{" "}
                           <button
                             type="submit"
                             className="underline hover:opacity-100"
                           >
-                            Speichern
+                            {t("save")}
                           </button>{" "}
                           ·{" "}
                           <button
@@ -289,7 +297,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                             className="underline hover:opacity-100"
                             onClick={cancelEdit}
                           >
-                            Abbrechen
+                            {t("cancel")}
                           </button>
                         </div>
                       </form>
@@ -309,9 +317,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Nachricht…"
+            placeholder={t("messagePlaceholder")}
           />
-          <Button type="submit">Senden</Button>
+          <Button type="submit">{t("send")}</Button>
         </form>
       </section>
     </>

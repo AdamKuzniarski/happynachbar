@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import * as React from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { io, type Socket } from "socket.io-client";
 import {
   listConversations,
@@ -13,6 +14,9 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function ChatInbox() {
+  const locale = useLocale();
+  const t = useTranslations("chat");
+  const tCommon = useTranslations("common");
   type ConversationList = NonNullable<
     Awaited<ReturnType<typeof listConversations>>
   >;
@@ -45,7 +49,7 @@ export function ChatInbox() {
           });
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Unbekannter Fehler");
+        setError(e instanceof Error ? e.message : t("errors.unknown"));
       } finally {
         if (!silent) setLoading(false);
       }
@@ -144,20 +148,20 @@ export function ChatInbox() {
   }, [items, socketConnected]);
 
   if (loading) {
-    return <p className="mt-4 text-sm opacity-70">Lädt…</p>;
+    return <p className="mt-4 text-sm opacity-70">{tCommon("loading")}</p>;
   }
 
   return (
     <div className="mt-4">
       <FormError message={error} />
       {items.length === 0 ? (
-        <p className="text-sm opacity-70">Noch keine Chats.</p>
+        <p className="text-sm opacity-70">{t("emptyInbox")}</p>
       ) : (
         <ul className="space-y-3">
           {items.map((c) => (
             <li key={c.id}>
               <Link
-                href={`/chat/${encodeURIComponent(c.id)}`}
+                href={`/${locale}/chat/${encodeURIComponent(c.id)}`}
                 className={`block rounded-xl border-2 px-4 py-3 ${
                   c.hasUnread
                     ? "border-fern bg-limecream text-evergreen hover:bg-limecream/80 dark:hover:bg-limecream/90 hover:text-evergreen"
@@ -170,11 +174,10 @@ export function ChatInbox() {
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold">
-                      {c.participantDisplayName || "Neighbor"}
+                      {c.participantDisplayName || t("neighbor")}
                       {c.activityTitle ? (
                         <span className="text-xs font-normal opacity-70">
-                          {" "}
-                          · zur Aktivität: {c.activityTitle}
+                          {t("activityLabel", { title: c.activityTitle })}
                         </span>
                       ) : null}
                     </div>

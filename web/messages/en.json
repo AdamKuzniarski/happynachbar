@@ -173,5 +173,30 @@
       "saveFailed": "Profile could not be saved.",
       "uploadFailed": "Upload failed."
     }
+  },
+  "chat": {
+    "inboxTitle": "Messages",
+    "backToOverview": "Back to overview",
+    "emptyInbox": "No chats yet.",
+    "neighbor": "Neighbor",
+    "activityLabel": " · about activity: {title}",
+    "errors": {
+      "unknown": "Unknown error"
+    },
+    "chatWith": "Chat with {name}",
+    "creator": "Creator",
+    "activityTitle": "Activity: {title}",
+    "emptyMessages": "No messages yet.",
+    "you": "You",
+    "edited": "edited",
+    "editMessageAria": "Edit message",
+    "deleteMessageAria": "Delete message",
+    "messageDeleted": "Message deleted.",
+    "editHints": "Esc to cancel • Enter to save ·",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete this message?",
+    "messagePlaceholder": "Message…",
+    "send": "Send"
   }
 }

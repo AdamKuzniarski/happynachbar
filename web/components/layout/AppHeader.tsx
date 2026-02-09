@@ -109,31 +109,14 @@ export function AppHeader({
         {brandHref ? <Link href={brandHref}>{brand}</Link> : brand}
 
         <div className="flex items-center gap-2">
+          <Link
+            href={buildLocaleHref(locale === "de" ? "en" : "de")}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border-2 border-fern bg-surface text-[11px] font-semibold text-foreground transition-colors hover:bg-palm hover:text-limecream sm:h-10 sm:w-10"
+            aria-label={locale === "de" ? t("switchToEn") : t("switchToDe")}
+          >
+            {locale === "de" ? "DE" : "EN"}
+          </Link>
           <ThemeToggle />
-          <div className="flex items-center gap-1 rounded-md border-2 border-fern bg-surface px-1 py-1 text-[11px] font-semibold">
-            <Link
-              href={buildLocaleHref("de")}
-              className={`rounded px-2 py-1 transition-colors ${
-                locale === "de"
-                  ? "bg-fern text-limecream"
-                  : "text-foreground hover:bg-fern/10"
-              }`}
-              aria-label={t("switchToDe")}
-            >
-              DE
-            </Link>
-            <Link
-              href={buildLocaleHref("en")}
-              className={`rounded px-2 py-1 transition-colors ${
-                locale === "en"
-                  ? "bg-fern text-limecream"
-                  : "text-foreground hover:bg-fern/10"
-              }`}
-              aria-label={t("switchToEn")}
-            >
-              EN
-            </Link>
-          </div>
 
           {variant === "app" ? (
             <>

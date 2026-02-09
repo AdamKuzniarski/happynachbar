@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -25,5 +34,11 @@ export class AuthController {
   @Get('me')
   me(@Req() req: any) {
     return req.user;
+  }
+
+  @Get('verify-email')
+  verifyEmail(@Query('token') token?: string) {
+    if (!token) throw new BadRequestException('Token is required');
+    return this.auth.verifyEmail(token);
   }
 }

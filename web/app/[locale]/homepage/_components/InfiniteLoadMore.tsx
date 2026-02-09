@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 type InfiniteLoadMoreProps = {
   disabled: boolean;
@@ -10,6 +11,7 @@ type InfiniteLoadMoreProps = {
 };
 
 export function InfiniteLoadMore(props: InfiniteLoadMoreProps) {
+  const t = useTranslations("homepage.loadMore");
   const { disabled, loadingMore, hasMore, onLoadMore } = props;
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
   const onLoadMoreRef = React.useRef(onLoadMore);
@@ -41,10 +43,10 @@ export function InfiniteLoadMore(props: InfiniteLoadMoreProps) {
     <div className="mt-4 flex justify-center">
       <div ref={sentinelRef} className="text-xs opacity-70">
         {loadingMore
-          ? "Lade mehr…"
+          ? t("loadingMore")
           : hasMore
-            ? "Lade weitere…"
-            : "Keine weiteren"}
+            ? t("loadingNext")
+            : t("noMore")}
       </div>
     </div>
   );

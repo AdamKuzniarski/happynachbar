@@ -2,6 +2,14 @@
   "common": {
     "loading": "…"
   },
+  "categories": {
+    "OUTDOOR": "Outdoor",
+    "SPORT": "Sports",
+    "SOCIAL": "Social",
+    "INDOOR": "Indoor",
+    "HELP": "Help",
+    "OTHER": "Other"
+  },
   "header": {
     "greeting": "Hello {name}",
     "profileAria": "Profile",
@@ -42,5 +50,36 @@
     "loginLink": "Log in",
     "logoutTitle": "You have been logged out successfully.",
     "logoutSubtitle": "Glad you stopped by — see you around the neighborhood."
+  },
+  "homepage": {
+    "filters": {
+      "searchPlaceholder": "Search…",
+      "allCategories": "All categories",
+      "postalCodePlaceholder": "Postal code",
+      "searchButton": "Find"
+    },
+    "section": {
+      "title": "Activities",
+      "suggestions": "{count, plural, =0 {No suggestions} =1 {# suggestion} other {# suggestions}}",
+      "loadError": "Error loading: {error}",
+      "empty": "No activities found."
+    },
+    "create": {
+      "aria": "Create new activity",
+      "label": "New"
+    },
+    "card": {
+      "start": "Start",
+      "postalCode": "Postal code",
+      "by": "By",
+      "updated": "Updated",
+      "neighbor": "Neighbor",
+      "fallback": "—"
+    },
+    "loadMore": {
+      "loadingMore": "Loading more…",
+      "loadingNext": "Loading more…",
+      "noMore": "No more"
+    }
   }
 }

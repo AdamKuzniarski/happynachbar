@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
+import { ACTIVITY_CATEGORIES } from "@/lib/api/enums";
 import { normalizePostalCodeInput } from "@/lib/validators";
+import { useTranslations } from "next-intl";
 
 type filterBarProps = {
   query: string;
@@ -16,6 +17,9 @@ type filterBarProps = {
 };
 
 export function FiltersBar(props: filterBarProps) {
+  const t = useTranslations("homepage.filters");
+  const tCommon = useTranslations("common");
+  const tCategories = useTranslations("categories");
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     props.onSearch();
@@ -36,7 +40,7 @@ export function FiltersBar(props: filterBarProps) {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Suche…"
+                placeholder={t("searchPlaceholder")}
                 className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
               />
             </div>
@@ -48,10 +52,10 @@ export function FiltersBar(props: filterBarProps) {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
               >
-                <option value="">Alle Kategorien</option>
+                <option value="">{t("allCategories")}</option>
                 {ACTIVITY_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
-                    {formatActivityCategory(c)}
+                    {tCategories(c)}
                   </option>
                 ))}
               </select>
@@ -63,7 +67,7 @@ export function FiltersBar(props: filterBarProps) {
                 onChange={(e) =>
                   setPlz(normalizePostalCodeInput(e.target.value))
                 }
-                placeholder="PLZ"
+                placeholder={t("postalCodePlaceholder")}
                 inputMode="numeric"
                 maxLength={5}
                 className="w-full border-0 rounded-none bg-transparent px-2 text-sm font-medium text-foreground focus:outline-none focus:ring-0 focus-visible:outline-none"
@@ -76,7 +80,7 @@ export function FiltersBar(props: filterBarProps) {
                 disabled={loading}
                 className="h-9 w-full sm:w-auto rounded-full bg-palm px-4 text-xs font-medium text-white hover:bg-hunter transition-colors disabled:opacity-60 m-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-fern/40"
               >
-                {loading ? "…" : "Finden"}
+                {loading ? tCommon("loading") : t("searchButton")}
               </button>
             </div>
           </div>

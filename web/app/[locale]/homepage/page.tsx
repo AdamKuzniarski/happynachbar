@@ -1,15 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { FiltersBar } from "./_components/FilterBar";
 import { ActivitiesSection } from "./_components/ActivitiesSection";
 import { useActivities } from "./_hooks/useActivities";
-
-const CREATE_ACTIVITY_ROUTE = "/activities/new";
+import { defaultLocale, isLocale } from "@/lib/i18n";
 
 export default function HomepagePage() {
   const router = useRouter();
+  const params = useParams();
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
 
   const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState("");
@@ -39,7 +44,7 @@ export default function HomepagePage() {
   async function handleCreateActivity() {
     setCreating(true);
     try {
-      router.push(CREATE_ACTIVITY_ROUTE);
+      router.push(`/${locale}/activities/new`);
     } finally {
       setCreating(false);
     }

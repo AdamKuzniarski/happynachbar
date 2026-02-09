@@ -1,6 +1,7 @@
 import type { Activity } from "@/lib/api/types";
 import { ActivityGrid } from "./ActivityGrid";
 import { InfiniteLoadMore } from "./InfiniteLoadMore";
+import { useTranslations } from "next-intl";
 
 type ActivitySectionProps = {
   activities: Activity[];
@@ -15,6 +16,8 @@ type ActivitySectionProps = {
 };
 
 export function ActivitiesSection(props: ActivitySectionProps) {
+  const t = useTranslations("homepage.section");
+  const tCommon = useTranslations("common");
   const {
     activities,
     loading,
@@ -30,21 +33,23 @@ export function ActivitiesSection(props: ActivitySectionProps) {
   return (
     <section className="mx-auto mt-6 w-full max-w-md sm:max-w-2xl">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Aktivitäten</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
         <span className="text-xs ">
-          {loading ? "Lade…" : `${totalCount} Vorschläge`}
+          {loading
+            ? tCommon("loading")
+            : t("suggestions", { count: totalCount })}
         </span>
       </div>
 
       {error && (
         <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm">
-          Fehler beim Laden: {error}
+          {t("loadError", { error })}
         </div>
       )}
 
       {!loading && !error && activities.length === 0 && (
         <div className="mt-3 rounded-md border-2 border-fern bg-surface p-3 text-sm">
-          Keine Aktivitäten gefunden.
+          {t("empty")}
         </div>
       )}
 

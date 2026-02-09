@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "…",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "deleting": "Deleting…",
+    "fallback": "—"
   },
   "categories": {
     "OUTDOOR": "Outdoor",
@@ -121,12 +123,36 @@
       "postalCodeInvalid": "Postal code must be exactly 5 digits.",
       "maxImages": "Maximum 5 images in total.",
       "createFailed": "Failed to create.",
-      "uploadFailed": "Upload failed."
+      "uploadFailed": "Upload failed.",
+      "notOwner": "You can only edit or delete activities you created.",
+      "deleteFailed": "Delete failed."
     },
     "actions": {
       "save": "Save",
       "create": "Create",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "labels": {
+      "postalCode": "Postal code",
+      "createdBy": "Created by",
+      "start": "Start",
+      "updated": "Updated",
+      "description": "Description"
+    },
+    "aria": {
+      "profileLink": "Go to profile"
+    },
+    "fallback": {
+      "neighbor": "Neighbor"
+    },
+    "confirmDelete": "Delete this activity?",
+    "gallery": {
+      "expandAria": "Expand image",
+      "close": "Close",
+      "prev": "Previous image",
+      "next": "Next image"
     }
   },
   "profile": {

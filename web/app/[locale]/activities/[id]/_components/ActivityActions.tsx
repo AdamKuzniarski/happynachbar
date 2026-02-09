@@ -1,10 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
+import { defaultLocale, isLocale } from "@/lib/i18n";
+import { useTranslations } from "next-intl";
 
 export function ActivityActions({
   id,
@@ -16,6 +18,14 @@ export function ActivityActions({
   currentUserId?: string;
 }) {
   const router = useRouter();
+  const params = useParams();
+  const t = useTranslations("activities");
+  const tCommon = useTranslations("common");
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
   const [deleting, setDeleting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const canManage =
@@ -25,7 +35,7 @@ export function ActivityActions({
     if (deleting) return;
     if (createdById && currentUserId && createdById !== currentUserId) {
       setError(
-        "Du kannst nur Aktivitäten bearbeiten/löschen, die du auch erstellt hast",
+        t("errors.notOwner"),
       );
       return;
     }
@@ -37,12 +47,12 @@ export function ActivityActions({
     if (deleting) return;
     if (createdById && currentUserId && createdById !== currentUserId) {
       setError(
-        "Du kannst nur Aktivitäten bearbeiten/löschen, die du auch erstellt hast",
+        t("errors.notOwner"),
       );
       return;
     }
     setError(null);
-    const ok = window.confirm("Aktivitaet wirklich löschen?");
+    const ok = window.confirm(t("confirmDelete"));
     if (!ok) return;
     setDeleting(true);
     try {
@@ -50,11 +60,11 @@ export function ActivityActions({
       if (!res.ok) {
         const msg = Array.isArray(res.message)
           ? res.message.join(", ")
-          : res.message ?? "Löschen fehlgeschlagen.";
+          : res.message ?? t("errors.deleteFailed");
         setError(msg);
         return;
       }
-      router.push("/homepage");
+      router.push(`/${locale}/homepage`);
       router.refresh();
     } finally {
       setDeleting(false);
@@ -72,7 +82,7 @@ export function ActivityActions({
             onClick={onEdit}
             disabled={deleting}
           >
-            Bearbeiten
+            {t("actions.edit")}
           </Button>
           <Button
             type="button"
@@ -81,7 +91,7 @@ export function ActivityActions({
             onClick={onDelete}
             disabled={deleting}
           >
-            {deleting ? "Löschen…" : "Löschen"}
+            {deleting ? tCommon("deleting") : t("actions.delete")}
           </Button>
         </div>
       ) : null}

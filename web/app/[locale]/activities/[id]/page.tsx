@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
-import { formatActivityCategory } from "@/lib/api/enums";
 import { ActivityActions } from "./_components/ActivityActions";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
+import { getTranslations } from "next-intl/server";
+import { ACTIVITY_CATEGORIES, type ActivityCategory } from "@/lib/api/enums";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -18,9 +19,12 @@ const apiBase =
 export default async function ActivityDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "activities" });
+  const tCommon = await getTranslations({ locale, namespace: "common" });
+  const tCategories = await getTranslations({ locale, namespace: "categories" });
   const res = await fetch(`${apiBase}/activities/${encodeURIComponent(id)}`, {
     cache: "no-store",
   });
@@ -44,11 +48,19 @@ export default async function ActivityDetailPage({
     } catch {
     }
   }
-  const isOwner = !!(currentUserId && a?.createdById && currentUserId === a.createdById);
+  const isOwner = !!(
+    currentUserId &&
+    a?.createdById &&
+    currentUserId === a.createdById
+  );
   const creatorHref =
     currentUserId && a?.createdById && currentUserId === a.createdById
-      ? "/profile"
-      : `/activities/${encodeURIComponent(a.id)}/creator`;
+      ? `/${locale}/profile`
+      : `/${locale}/activities/${encodeURIComponent(a.id)}/creator`;
+  const categoryLabel =
+    a?.category && ACTIVITY_CATEGORIES.includes(a.category as ActivityCategory)
+      ? tCategories(a.category)
+      : tCommon("fallback");
 
   return (
     <main className="px-4">
@@ -58,10 +70,10 @@ export default async function ActivityDetailPage({
           variant="secondary"
           className="group h-7 px-2 py-0 text-[11px] leading-none"
         >
-          <Link href="/homepage">
+          <Link href={`/${locale}/homepage`}>
             <CircleArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span className="max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] duration-200 ease-out group-hover:ml-2 group-hover:max-w-48 group-hover:opacity-100 group-hover:overflow-visible">
-              Zurück zur Übersicht
+              {t("backToOverview")}
             </span>
           </Link>
         </Button>
@@ -71,15 +83,15 @@ export default async function ActivityDetailPage({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="truncate text-xl font-semibold tracking-tight text-center sm:text-left">
-                  {a?.title ?? "Aktivität"}
+                  {a?.title ?? tCommon("fallback")}
                 </h1>
 
                 <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
                   <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
-                    {formatActivityCategory(a?.category)}
+                    {categoryLabel}
                   </span>
                   <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
-                    PLZ {a?.plz ?? "—"}
+                    {t("labels.postalCode")} {a?.plz ?? tCommon("fallback")}
                   </span>
                 </div>
               </div>
@@ -89,7 +101,7 @@ export default async function ActivityDetailPage({
 
           <div className="px-0">
             <ActivityImageGallery
-              title={a?.title ?? "Aktivität"}
+              title={a?.title ?? tCommon("fallback")}
               thumbnailUrl={a?.thumbnailUrl}
               images={images}
             />
@@ -98,16 +110,16 @@ export default async function ActivityDetailPage({
           <div className="px-5 py-5">
             <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
               <div>
-                <dt className="opacity-80">Erstellt von</dt>
+                <dt className="opacity-80">{t("labels.createdBy")}</dt>
                 <dd className="mt-1 flex items-center gap-2 font-medium">
                   <span>
-                    {a?.createdBy?.displayName?.trim() || "Neighbor"}
+                    {a?.createdBy?.displayName?.trim() || t("fallback.neighbor")}
                   </span>
                   {!isOwner ? (
                     <>
                       <Link
                         href={creatorHref}
-                        aria-label="Zum Profil"
+                        aria-label={t("aria.profileLink")}
                         className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-fern/50 text-foreground/80 hover:bg-fern/10 hover:text-foreground"
                       >
                         <User className="h-4 w-4" aria-hidden="true" />
@@ -120,13 +132,13 @@ export default async function ActivityDetailPage({
                 </dd>
               </div>
               <div>
-                <dt className="opacity-80">Start</dt>
+                <dt className="opacity-80">{t("labels.start")}</dt>
                 <dd className="mt-1 font-medium">
                   {formatDate(a?.startAt ?? a?.scheduledAt)}
                 </dd>
               </div>
               <div>
-                <dt className="opacity-80">Aktualisiert</dt>
+                <dt className="opacity-80">{t("labels.updated")}</dt>
 
                 <dd className="mt-1 font-medium">{formatDate(a?.updatedAt)}</dd>
               </div>
@@ -134,7 +146,9 @@ export default async function ActivityDetailPage({
 
             {a?.description ? (
               <div className="mt-5">
-                <div className="text-sm font-semibold">Beschreibung</div>
+                <div className="text-sm font-semibold">
+                  {t("labels.description")}
+                </div>
                 <p className="mt-2 rounded-xl bg-fern/10 p-4 text-sm ring-1 ring-fern/20 break-words">
                   {a.description}
                 </p>

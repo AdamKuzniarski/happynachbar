@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "…",
-    "saving": "Speichern…"
+    "saving": "Speichern…",
+    "deleting": "Löschen…",
+    "fallback": "—"
   },
   "categories": {
     "OUTDOOR": "Outdoor",
@@ -121,12 +123,36 @@
       "postalCodeInvalid": "PLZ muss genau 5 Ziffern sein.",
       "maxImages": "Maximal 5 Bilder insgesamt erlaubt.",
       "createFailed": "Fehler beim Erstellen.",
-      "uploadFailed": "Upload fehlgeschlagen."
+      "uploadFailed": "Upload fehlgeschlagen.",
+      "notOwner": "Du kannst nur Aktivitäten bearbeiten/löschen, die du auch erstellt hast",
+      "deleteFailed": "Löschen fehlgeschlagen."
     },
     "actions": {
       "save": "Speichern",
       "create": "Erstellen",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
+    },
+    "labels": {
+      "postalCode": "PLZ",
+      "createdBy": "Erstellt von",
+      "start": "Start",
+      "updated": "Aktualisiert",
+      "description": "Beschreibung"
+    },
+    "aria": {
+      "profileLink": "Zum Profil"
+    },
+    "fallback": {
+      "neighbor": "Nachbar"
+    },
+    "confirmDelete": "Aktivität wirklich löschen?",
+    "gallery": {
+      "expandAria": "Bild vergrößern",
+      "close": "Schließen",
+      "prev": "Vorheriges Bild",
+      "next": "Nächstes Bild"
     }
   },
   "profile": {

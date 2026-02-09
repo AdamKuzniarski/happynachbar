@@ -4,6 +4,7 @@ import * as React from "react";
 import type { ActivityImage } from "@/lib/api/types";
 import { Button } from "@/components/ui/Button";
 import { SafeImage } from "@/components/ui/SafeImage";
+import { useTranslations } from "next-intl";
 
 type GalleryImage = {
   url: string;
@@ -39,6 +40,7 @@ export function ActivityImageGallery({
   thumbnailUrl,
   images,
 }: ActivityImageGalleryProps) {
+  const t = useTranslations("activities");
   const normalizedImages: GalleryImage[] = uniqueByUrl([
     ...(thumbnailUrl ? [{ url: thumbnailUrl, alt: title }] : []),
     ...(images ?? []).map((img) => ({ url: img.url, alt: img.alt ?? title })),
@@ -104,7 +106,7 @@ export function ActivityImageGallery({
           setActiveIndex(0);
           setOpen(true);
         }}
-        aria-label="Bild vergrössern"
+        aria-label={t("gallery.expandAria")}
       >
         <div className="mx-auto w-full" style={{ maxWidth: heroMaxW }}>
           <div
@@ -145,7 +147,7 @@ export function ActivityImageGallery({
                 setActiveIndex(idx + 1);
                 setOpen(true);
               }}
-              aria-label="Bild vergrössern"
+              aria-label={t("gallery.expandAria")}
             >
               <div className="relative h-20 w-full rounded-md overflow-hidden">
                 <SafeImage
@@ -179,7 +181,7 @@ export function ActivityImageGallery({
               className="absolute -top-10 right-0 rounded-full border-0 bg-foreground/90 px-3 py-1 text-sm font-medium text-background hover:bg-foreground"
               onClick={() => setOpen(false)}
             >
-              Schliessen
+              {t("gallery.close")}
             </Button>
 
             <div className="relative h-[80vh] w-full rounded-md overflow-hidden">
@@ -191,7 +193,7 @@ export function ActivityImageGallery({
                     className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                     onClick={goPrev}
                     disabled={isFirst}
-                    aria-label="Vorheriges Bild"
+                    aria-label={t("gallery.prev")}
                   >
                     ←
                   </Button>
@@ -201,7 +203,7 @@ export function ActivityImageGallery({
                     className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border-0 bg-foreground/90 px-3 py-2 text-sm font-medium text-background hover:bg-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                     onClick={goNext}
                     disabled={isLast}
-                    aria-label="Naechstes Bild"
+                    aria-label={t("gallery.next")}
                   >
                     →
                   </Button>

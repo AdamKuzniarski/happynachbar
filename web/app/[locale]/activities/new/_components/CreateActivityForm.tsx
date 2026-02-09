@@ -7,7 +7,7 @@ import {
   updateActivity,
   uploadActivityImages,
 } from "@/lib/api/activities";
-import { ActivityFormFields } from "@/app/activities/_components/ActivityFormFields";
+import { ActivityFormFields } from "../../_components/ActivityFormFields";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "../components/theme/ThemeProvider";
+import "../globals.css";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const poppins = Poppins({
   variable: "--font-geist-sans",
@@ -21,11 +21,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { locale: string };
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={params.locale} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

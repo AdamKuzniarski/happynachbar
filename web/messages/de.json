@@ -1,6 +1,7 @@
 {
   "common": {
-    "loading": "…"
+    "loading": "…",
+    "saving": "Speichern…"
   },
   "categories": {
     "OUTDOOR": "Outdoor",
@@ -80,6 +81,51 @@
       "loadingMore": "Lade mehr…",
       "loadingNext": "Lade weitere…",
       "noMore": "Keine weiteren"
+    }
+  },
+  "activities": {
+    "backToOverview": "Zurück zur Übersicht",
+    "headingCreate": "Erstelle eine neue Aktivität",
+    "headingEdit": "Aktivität bearbeiten",
+    "form": {
+      "titleLabel": "Titel *",
+      "titlePlaceholder": "z.B. Spaziergang im Park",
+      "categoryLabel": "Kategorie *",
+      "categoryPlaceholder": "Bitte wählen",
+      "postalCodeLabel": "PLZ *",
+      "postalCodePlaceholder": "10115",
+      "descriptionLabel": "Beschreibung",
+      "descriptionPlaceholder": "Optional…",
+      "startAtLabel": "Startzeit (optional)"
+    },
+    "images": {
+      "label": "Bilder (optional)",
+      "selectedCount": "{count, plural, =1 {# Bild ausgewählt} other {# Bilder ausgewählt}}",
+      "alt": "Aktivitätsbild",
+      "remove": "Entfernen",
+      "urlLabel": "Bild-URL (optional)",
+      "urlPlaceholder": "https://…",
+      "addUrlButton": "+ weiteres Bild",
+      "reorderHint": "Bilder kannst du per Drag & Drop neu anordnen.",
+      "status": {
+        "invalid": "Bitte eine gültige http(s) URL eingeben.",
+        "limit": "Maximal 5 Bilder insgesamt erlaubt.",
+        "duplicate": "Wurde nicht hinzugefügt, es handelt sich um ein Duplikat.",
+        "added": "URL hinzugefügt."
+      }
+    },
+    "errors": {
+      "titleMin": "Titel muss mindestens 3 Zeichen haben.",
+      "categoryRequired": "Bitte Kategorie auswählen.",
+      "postalCodeInvalid": "PLZ muss genau 5 Ziffern sein.",
+      "maxImages": "Maximal 5 Bilder insgesamt erlaubt.",
+      "createFailed": "Fehler beim Erstellen.",
+      "uploadFailed": "Upload fehlgeschlagen."
+    },
+    "actions": {
+      "save": "Speichern",
+      "create": "Erstellen",
+      "cancel": "Abbrechen"
     }
   }
 }

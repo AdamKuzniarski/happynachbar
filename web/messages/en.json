@@ -1,6 +1,7 @@
 {
   "common": {
-    "loading": "…"
+    "loading": "…",
+    "saving": "Saving…"
   },
   "categories": {
     "OUTDOOR": "Outdoor",
@@ -80,6 +81,51 @@
       "loadingMore": "Loading more…",
       "loadingNext": "Loading more…",
       "noMore": "No more"
+    }
+  },
+  "activities": {
+    "backToOverview": "Back to overview",
+    "headingCreate": "Create a new activity",
+    "headingEdit": "Edit activity",
+    "form": {
+      "titleLabel": "Title *",
+      "titlePlaceholder": "e.g. Walk in the park",
+      "categoryLabel": "Category *",
+      "categoryPlaceholder": "Please select",
+      "postalCodeLabel": "Postal code *",
+      "postalCodePlaceholder": "10115",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional…",
+      "startAtLabel": "Start time (optional)"
+    },
+    "images": {
+      "label": "Images (optional)",
+      "selectedCount": "{count, plural, =1 {# image selected} other {# images selected}}",
+      "alt": "Activity image",
+      "remove": "Remove",
+      "urlLabel": "Image URL (optional)",
+      "urlPlaceholder": "https://…",
+      "addUrlButton": "+ add another image",
+      "reorderHint": "You can reorder images via drag & drop.",
+      "status": {
+        "invalid": "Please enter a valid http(s) URL.",
+        "limit": "Maximum 5 images in total.",
+        "duplicate": "Not added because it is a duplicate.",
+        "added": "URL added."
+      }
+    },
+    "errors": {
+      "titleMin": "Title must be at least 3 characters.",
+      "categoryRequired": "Please select a category.",
+      "postalCodeInvalid": "Postal code must be exactly 5 digits.",
+      "maxImages": "Maximum 5 images in total.",
+      "createFailed": "Failed to create.",
+      "uploadFailed": "Upload failed."
+    },
+    "actions": {
+      "save": "Save",
+      "create": "Create",
+      "cancel": "Cancel"
     }
   }
 }

@@ -1,14 +1,17 @@
 "use client";
 
-import { ACTIVITY_CATEGORIES, formatActivityCategory } from "@/lib/api/enums";
+import { ACTIVITY_CATEGORIES, type ActivityCategory } from "@/lib/api/enums";
 import type { ActivityFormFieldsProps } from "@/lib/api/types";
 import { normalizePostalCodeInput } from "@/lib/validators";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { useTranslations } from "next-intl";
 
 export function ActivityFormFields(props: ActivityFormFieldsProps) {
+  const t = useTranslations("activities");
+  const tCategories = useTranslations("categories");
   const {
     title,
     setTitle,
@@ -25,12 +28,12 @@ export function ActivityFormFields(props: ActivityFormFieldsProps) {
   return (
     <>
       <div>
-        <Label htmlFor="title">Title *</Label>
+        <Label htmlFor="title">{t("form.titleLabel")}</Label>
         <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="z.B. Spaziergang im Park"
+          placeholder={t("form.titlePlaceholder")}
         />
         <div className="mt-1 text-right text-xs text-hunter">
           {title.length}/120
@@ -38,39 +41,39 @@ export function ActivityFormFields(props: ActivityFormFieldsProps) {
       </div>
 
       <div>
-        <Label htmlFor="category">Kategorie *</Label>
+        <Label htmlFor="category">{t("form.categoryLabel")}</Label>
         <Select
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option value="">Bitte wählen</option>
+          <option value="">{t("form.categoryPlaceholder")}</option>
           {ACTIVITY_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {formatActivityCategory(c)}
+              {tCategories(c as ActivityCategory)}
             </option>
           ))}
         </Select>
       </div>
 
       <div>
-        <Label htmlFor="plz">PLZ *</Label>
+        <Label htmlFor="plz">{t("form.postalCodeLabel")}</Label>
         <Input
           value={plz}
-        onChange={(e) => setPlz(normalizePostalCodeInput(e.target.value))}
+          onChange={(e) => setPlz(normalizePostalCodeInput(e.target.value))}
           inputMode="numeric"
           maxLength={5}
-          placeholder="10115"
+          placeholder={t("form.postalCodePlaceholder")}
         />
       </div>
 
       <div>
-        <Label htmlFor="desc">Beschreibung</Label>
+        <Label htmlFor="desc">{t("form.descriptionLabel")}</Label>
         <Textarea
           id="desc"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Optional…"
+          placeholder={t("form.descriptionPlaceholder")}
         />
         <div className="mt-1 text-right text-xs text-hunter">
           {description.length}/2000
@@ -78,7 +81,7 @@ export function ActivityFormFields(props: ActivityFormFieldsProps) {
       </div>
 
       <div>
-        <Label htmlFor="startAt">Startzeit (optional)</Label>
+        <Label htmlFor="startAt">{t("form.startAtLabel")}</Label>
         <Input
           id="startAt"
           type="datetime-local"

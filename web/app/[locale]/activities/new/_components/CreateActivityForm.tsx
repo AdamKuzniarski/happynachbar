@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   createActivity,
   updateActivity,
@@ -12,13 +12,11 @@ import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import {
-  isValidPostalCode,
-  getManualUrlAddResult,
-  MANUAL_URL_STATUS_MESSAGES,
-} from "@/lib/validators";
+import { isValidPostalCode, getManualUrlAddResult } from "@/lib/validators";
 import type { ActivityDetail, ManualUrlAddStatus } from "@/lib/api/types";
 import { toDateTimeLocal } from "@/lib/format";
+import { defaultLocale, isLocale } from "@/lib/i18n";
+import { useTranslations } from "next-intl";
 
 type CreateActivityFormProps =
   | { mode?: "create"; activity?: undefined }
@@ -28,6 +26,14 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
   const mode = props.mode ?? "create";
   const activity = props.mode === "edit" ? props.activity : undefined;
   const router = useRouter();
+  const params = useParams();
+  const t = useTranslations("activities");
+  const tCommon = useTranslations("common");
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
 
   const [title, setTitle] = React.useState(activity?.title ?? "");
   const [category, setCategory] = React.useState(activity?.category ?? "");
@@ -50,7 +56,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
 
   function applyManualUrlResult(status: ManualUrlAddStatus, value?: string) {
     if (status === "invalid" || status === "limit") {
-      setError(MANUAL_URL_STATUS_MESSAGES[status]);
+      setError(t(`images.status.${status}`));
       return false;
     }
     if (status === "duplicate") {
@@ -82,10 +88,9 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
 
     //checks
     if (title.trim().length < 3)
-      return setError("Titel muss mindestens 3 Zeichen haben.");
-    if (!category) return setError("Bitte Kategorie auswählen.");
-    if (!isValidPostalCode(plz))
-      return setError("PLZ muss genau 5 Ziffern sein.");
+      return setError(t("errors.titleMin"));
+    if (!category) return setError(t("errors.categoryRequired"));
+    if (!isValidPostalCode(plz)) return setError(t("errors.postalCodeInvalid"));
 
     let nextImageUrls = imageUrls;
     const normalizedUrlInput = urlInput.trim();
@@ -97,7 +102,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
         files.length,
       );
       if (status === "invalid" || status === "limit") {
-        setError(MANUAL_URL_STATUS_MESSAGES[status]);
+        setError(t(`images.status.${status}`));
         return;
       }
       if (status === "duplicate") {
@@ -118,7 +123,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
     }
 
     if (files.length + nextImageUrls.length > 5) {
-      return setError("Maximal 5 Bilder insgesamt erlaubt.");
+      return setError(t("errors.maxImages"));
     }
 
     setSaving(true);
@@ -147,18 +152,18 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
       if (!result.ok) {
         const msg = Array.isArray(result.message)
           ? result.message.join(", ")
-          : result.message ?? "Fehler beim Erstellen.";
+          : result.message ?? t("errors.createFailed");
         setError(msg);
         return;
       }
       if (mode === "edit" && activity) {
-        router.push(`/activities/${encodeURIComponent(activity.id)}`);
+        router.push(`/${locale}/activities/${encodeURIComponent(activity.id)}`);
       } else {
-        router.push("/homepage");
+        router.push(`/${locale}/homepage`);
       }
       router.refresh();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
+      const msg = err instanceof Error ? err.message : t("errors.uploadFailed");
       setError(msg);
     } finally {
       setSaving(false);
@@ -168,7 +173,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
   return (
     <section className="rounded-md border-2 border-fern bg-surface p-4 shadow-sm sm:p-6">
       <h1 className="text-lg font-semibold text-center">
-        {mode === "edit" ? "Aktivität bearbeiten" : "Erstelle eine neue Aktivität"}
+        {mode === "edit" ? t("headingEdit") : t("headingCreate")}
       </h1>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
@@ -186,7 +191,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
         />
 
         <div>
-          <Label htmlFor="images">Bilder (optional)</Label>
+          <Label htmlFor="images">{t("images.label")}</Label>
           <Input
             id="images"
             type="file"
@@ -196,7 +201,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
               const list = Array.from(e.target.files ?? []);
               const maxFiles = Math.max(0, 5 - imageUrls.length);
               if (list.length > maxFiles) {
-                setError("Maximal 5 Bilder insgesamt erlaubt.");
+                setError(t("errors.maxImages"));
                 setFiles(list.slice(0, maxFiles));
                 return;
               }
@@ -205,7 +210,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
           />
           {files.length ? (
             <p className="mt-1 text-xs text-hunter">
-              {files.length} Bild{files.length === 1 ? "" : "er"} ausgewählt
+              {t("images.selectedCount", { count: files.length })}
             </p>
           ) : null}
           {mode === "edit" && imageUrls.length ? (
@@ -231,7 +236,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
                 >
                   <img
                     src={url}
-                    alt="Aktivitaetsbild"
+                    alt={t("images.alt")}
                     className="h-20 w-full rounded-md object-cover"
                   />
                   <Button
@@ -242,7 +247,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
                       setImageUrls((prev) => prev.filter((_, i) => i !== idx))
                     }
                   >
-                    Entfernen
+                    {t("images.remove")}
                   </Button>
                 </div>
               ))}
@@ -251,13 +256,13 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="imageUrl">Bild-URL (optional)</Label>
+          <Label htmlFor="imageUrl">{t("images.urlLabel")}</Label>
           <div className="mt-1 flex gap-2">
             <Input
               id="imageUrl"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="https://..."
+              placeholder={t("images.urlPlaceholder")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -294,17 +299,17 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
                 applyManualUrlResult(status, value);
               }}
             >
-              + weiteres Bild
+              {t("images.addUrlButton")}
             </Button>
           </div>
           {urlStatus === "added" ? (
             <p className="text-xs text-hunter">
-              {MANUAL_URL_STATUS_MESSAGES.added}
+              {t("images.status.added")}
             </p>
           ) : null}
           {urlStatus === "duplicate" ? (
             <p className="text-xs text-red-600">
-              {MANUAL_URL_STATUS_MESSAGES.duplicate}
+              {t("images.status.duplicate")}
             </p>
           ) : null}
           {mode === "create" && imageUrls.length ? (
@@ -320,7 +325,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
                       setImageUrls((prev) => prev.filter((_, i) => i !== idx))
                     }
                   >
-                    Entfernen
+                    {t("images.remove")}
                   </Button>
                 </div>
               ))}
@@ -328,7 +333,7 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
           ) : null}
           {mode === "edit" && imageUrls.length ? (
             <p className="mt-2 text-xs text-hunter">
-              Bilder kannst du per Drag & Drop neu anordnen.
+              {t("images.reorderHint")}
             </p>
           ) : null}
         </div>
@@ -337,17 +342,21 @@ export function CreateActivityForm(props: CreateActivityFormProps) {
 
         <div className="flex justify-center gap-2">
           <Button type="submit" disabled={saving}>
-            {saving ? "Speichern…" : mode === "edit" ? "Speichern" : "Erstellen"}
+            {saving
+              ? tCommon("saving")
+              : mode === "edit"
+                ? t("actions.save")
+                : t("actions.create")}
           </Button>
           {mode === "edit" && activity ? (
             <Button
               type="button"
               variant="secondary"
               onClick={() =>
-                router.push(`/activities/${encodeURIComponent(activity.id)}`)
+                router.push(`/${locale}/activities/${encodeURIComponent(activity.id)}`)
               }
             >
-              Abbrechen
+              {t("actions.cancel")}
             </Button>
           ) : null}
         </div>

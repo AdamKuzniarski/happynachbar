@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { JwtAuthGuard } from './jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -40,5 +41,10 @@ export class AuthController {
   verifyEmail(@Query('token') token?: string) {
     if (!token) throw new BadRequestException('Token is required');
     return this.auth.verifyEmail(token);
+  }
+
+  @Post('resend-verification')
+  resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.auth.resendVerificationEmail(dto.email);
   }
 }

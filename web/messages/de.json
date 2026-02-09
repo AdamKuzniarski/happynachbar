@@ -85,6 +85,7 @@
   },
   "activities": {
     "backToOverview": "Zurück zur Übersicht",
+    "backToActivity": "Zurück zur Aktivität",
     "headingCreate": "Erstelle eine neue Aktivität",
     "headingEdit": "Aktivität bearbeiten",
     "form": {

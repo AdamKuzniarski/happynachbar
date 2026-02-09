@@ -85,6 +85,7 @@
   },
   "activities": {
     "backToOverview": "Back to overview",
+    "backToActivity": "Back to activity",
     "headingCreate": "Create a new activity",
     "headingEdit": "Edit activity",
     "form": {

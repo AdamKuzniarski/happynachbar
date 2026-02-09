@@ -1,1 +1,37 @@
-{}
+{
+  "common": {
+    "loading": "…"
+  },
+  "landing": {
+    "title": "Welcome to happynachbar",
+    "subtitleLine1": "Create your own activities or find events and help near you.",
+    "subtitleLine2": "No hassle."
+  },
+  "postalCodeForm": {
+    "label": "Postal code",
+    "placeholder": "e.g. 10115",
+    "invalid": "Please enter a valid 5-digit postal code.",
+    "submit": "Continue"
+  },
+  "teaser": {
+    "nearbyCount": "{count, plural, =0 {# people are active near you!} =1 {# person is active near you!} other {# people are active near you!}}",
+    "cta": "Get to know your neighborhood",
+    "postalCodeLabel": "Postal code:"
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "loginSubtitle": "Sign in to discover your neighborhood.",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Sign in",
+    "registerPrompt": "Don't have an account yet? Go to",
+    "registerLink": "Sign up",
+    "registerTitle": "Sign up",
+    "displayNamePlaceholder": "Display name (optional)",
+    "registerButton": "Create account",
+    "loginPrompt": "Already have an account? Go to",
+    "loginLink": "Log in",
+    "logoutTitle": "You have been logged out successfully.",
+    "logoutSubtitle": "Glad you stopped by — see you around the neighborhood."
+  }
+}

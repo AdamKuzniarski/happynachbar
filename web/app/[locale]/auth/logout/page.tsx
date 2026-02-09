@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { logout } from "../login/actions";
+import { useTranslations } from "next-intl";
 
 export default function LogoutPage() {
+  const t = useTranslations("auth");
   React.useEffect(() => {
     logout();
   }, []);
@@ -12,10 +14,10 @@ export default function LogoutPage() {
     <main className="px-4">
       <div className="mx-auto w-full max-w-md pt-12 pb-16 sm:max-w-2xl sm:pt-20">
         <h1 className="text-center text-xl font-semibold sm:text-2xl">
-          Du bist erfolgreich ausgeloggt.
+          {t("logoutTitle")}
         </h1>
         <p className="mt-5 text-center text-sm text-foreground/80">
-          Schön, dass du da warst – bis bald in der Nachbarschaft.
+          {t("logoutSubtitle")}
         </p>
 
         <div className="mt-10" />

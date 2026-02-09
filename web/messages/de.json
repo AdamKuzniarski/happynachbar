@@ -1,1 +1,37 @@
-{}
+{
+  "common": {
+    "loading": "…"
+  },
+  "landing": {
+    "title": "Herzlich Willkommen bei happynachbar",
+    "subtitleLine1": "Erstelle eigene Aktivitäten oder finde Events und Hilfsangebote in deiner Nähe.",
+    "subtitleLine2": "Ganz unkompliziert."
+  },
+  "postalCodeForm": {
+    "label": "Postleitzahl",
+    "placeholder": "z.B. 10115",
+    "invalid": "Bitte gib eine gültige 5-stellige Postleitzahl ein.",
+    "submit": "Weiter"
+  },
+  "teaser": {
+    "nearbyCount": "{count, plural, =0 {# Personen sind gerade in deiner Nähe aktiv!} =1 {# Person ist gerade in deiner Nähe aktiv!} other {# Personen sind gerade in deiner Nähe aktiv!}}",
+    "cta": "Lerne deine Nachbarschaft kennen",
+    "postalCodeLabel": "PLZ:"
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "loginSubtitle": "Melde dich an, um deine Nachbarschaft zu entdecken.",
+    "emailPlaceholder": "E-Mail",
+    "passwordPlaceholder": "Passwort",
+    "loginButton": "Anmelden",
+    "registerPrompt": "Du hast noch kein Konto? Dann hier entlang zum",
+    "registerLink": "Registrieren",
+    "registerTitle": "Registrieren",
+    "displayNamePlaceholder": "Anzeigename (optional)",
+    "registerButton": "Konto erstellen",
+    "loginPrompt": "Du hast bereits ein Konto? Dann hier entlang zum",
+    "loginLink": "Login",
+    "logoutTitle": "Du bist erfolgreich ausgeloggt.",
+    "logoutSubtitle": "Schön, dass du da warst – bis bald in der Nachbarschaft."
+  }
+}

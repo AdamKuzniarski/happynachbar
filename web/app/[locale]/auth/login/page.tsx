@@ -1,15 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
+import { useTranslations } from "next-intl";
+import { defaultLocale, isLocale } from "@/lib/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
+  const params = useParams();
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -27,7 +37,7 @@ export default function LoginPage() {
         setError(result.error);
         return;
       }
-      router.push("/homepage");
+      router.push(`/${locale}/homepage`);
       router.refresh();
     } finally {
       setLoading(false);
@@ -37,9 +47,11 @@ export default function LoginPage() {
   return (
     <main className="px-4">
       <div className="mx-auto mt-10 max-w-sm">
-        <h1 className="text-center text-2xl font-bold sm:text-3xl">Log in</h1>
+        <h1 className="text-center text-2xl font-bold sm:text-3xl">
+          {t("loginTitle")}
+        </h1>
         <p className="mt-4 text-center text-sm text-foreground/80">
-          Melde dich an, um deine Nachbarschaft zu entdecken.
+          {t("loginSubtitle")}
         </p>
       </div>
 
@@ -50,20 +62,25 @@ export default function LoginPage() {
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-Mail"
+          placeholder={t("emailPlaceholder")}
         />
         <Input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Passwort"
+          placeholder={t("passwordPlaceholder")}
           type="password"
         />
         <FormError message={error} />
-        <Button disabled={loading}>{loading ? "…" : "Anmelden"}</Button>
+        <Button disabled={loading}>
+          {loading ? tCommon("loading") : t("loginButton")}
+        </Button>
         <p className="text-center text-xs">
-          Du hast noch kein Konto? Dann hier entlang zum{" "}
-          <Link href="/auth/register" className="underline font-semibold">
-            Registrieren
+          {t("registerPrompt")}{" "}
+          <Link
+            href={`/${locale}/auth/register`}
+            className="underline font-semibold"
+          >
+            {t("registerLink")}
           </Link>
           .
         </p>

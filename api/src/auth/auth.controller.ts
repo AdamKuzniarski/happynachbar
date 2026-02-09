@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { JwtAuthGuard } from './jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -43,7 +44,7 @@ export class AuthController {
   }
 
   @Post('resend-verification')
-  resendVerification(@Body() dto: { email: string }) {
+  resendVerification(@Body() dto: ResendVerificationDto) {
     return this.auth.resendVerificationEmail(dto.email);
   }
 }

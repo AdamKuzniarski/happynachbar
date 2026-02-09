@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isValidPostalCode } from "@/lib/validators";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -18,7 +18,7 @@ export default async function TeaserPage({
   searchParams: Promise<SP>;
 }) {
   const { locale } = await params;
-  const t = useTranslations("teaser");
+  const t = await getTranslations("teaser");
   const raw = (await searchParams).postalCode;
   const postalCode = Array.isArray(raw) ? raw[0] : raw;
 

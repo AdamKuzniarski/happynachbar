@@ -48,6 +48,7 @@ const PUBLIC_PATHS = new Set<string>([
   "/auth/login", // login page
   "/auth/register", // register page
   "/teaser", // activity teaser page
+  "/auth/verify"
 ]);
 
 function buildRedirect(req: NextRequest, pathname: string) {

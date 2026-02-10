@@ -54,7 +54,12 @@
     "loginPrompt": "Already have an account? Go to",
     "loginLink": "Log in",
     "logoutTitle": "You have been logged out successfully.",
-    "logoutSubtitle": "Glad you stopped by — see you around the neighborhood."
+    "logoutSubtitle": "Glad you stopped by — see you around the neighborhood.",
+    "verify": {
+      "loading": "Verifying…",
+      "success": "Email verified. You can now log in.",
+      "error": "Link is invalid or expired. Please resend the email."
+    }
   },
   "homepage": {
     "filters": {

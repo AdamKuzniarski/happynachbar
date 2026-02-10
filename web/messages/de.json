@@ -54,7 +54,12 @@
     "loginPrompt": "Du hast bereits ein Konto? Dann hier entlang zum",
     "loginLink": "Login",
     "logoutTitle": "Du bist erfolgreich ausgeloggt.",
-    "logoutSubtitle": "Schön, dass du da warst – bis bald in der Nachbarschaft."
+    "logoutSubtitle": "Schön, dass du da warst – bis bald in der Nachbarschaft.",
+    "verify": {
+      "loading": "Verifiziere…",
+      "success": "E-Mail bestätigt. Du kannst dich jetzt einloggen.",
+      "error": "Link ungültig oder abgelaufen. Bitte „Mail erneut senden“."
+    }
   },
   "homepage": {
     "filters": {

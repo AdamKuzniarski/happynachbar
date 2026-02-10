@@ -73,7 +73,7 @@ export class AuthService {
 
       const webUrl =
         this.config.get<string>('WEB_URL') ?? 'http://localhost:3000';
-      const verifyLink = `${webUrl}/auth/verify?token=${encodeURIComponent(token)}`;
+      const verifyLink = `${webUrl}/de/auth/verify?token=${encodeURIComponent(token)}`;
 
       try {
         await this.mail.sendVerificationEmail(user.email, verifyLink);
@@ -141,7 +141,7 @@ export class AuthService {
     const token = await this.signEmailVerificationToken(user.id);
     const webUrl =
       this.config.get<string>('WEB_URL') ?? 'http://localhost:3000';
-    const verifyLink = `${webUrl}/auth/verify?token=${encodeURIComponent(token)}`;
+    const verifyLink = `${webUrl}/de/auth/verify?token=${encodeURIComponent(token)}`;
 
     await this.mail.sendVerificationEmail(user.email, verifyLink);
     return { ok: true };

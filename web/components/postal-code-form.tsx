@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { isValidPostalCode, normalizePostalCodeInput } from "@/lib/validators";
+import { defaultLocale, isLocale } from "@/lib/i18n";
+import { useTranslations } from "next-intl";
 
 export function PostalCodeForm() {
   const [postalCode, setPostalCode] = useState("");
   const router = useRouter();
+  const params = useParams();
+  const t = useTranslations("postalCodeForm");
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
 
   const isValid = isValidPostalCode(postalCode);
 
@@ -16,13 +25,15 @@ export function PostalCodeForm() {
     if (!isValid) return;
 
     localStorage.setItem("postalCode", postalCode);
-    router.push(`/teaser?postalCode=${encodeURIComponent(postalCode)}`);
+    router.push(
+      `/${locale}/teaser?postalCode=${encodeURIComponent(postalCode)}`,
+    );
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col items-center gap-2">
       <label htmlFor="postalCode" className="text-xs font-medium text-center">
-        Postleitzahl
+        {t("label")}
       </label>
 
       <input
@@ -31,7 +42,7 @@ export function PostalCodeForm() {
         inputMode="numeric"
         maxLength={5}
         autoComplete="postal-code"
-        placeholder="z.B. 10115"
+        placeholder={t("placeholder")}
         value={postalCode}
         onChange={(e) => {
           setPostalCode(normalizePostalCodeInput(e.target.value));
@@ -51,7 +62,7 @@ export function PostalCodeForm() {
 
       {postalCode.length > 0 && !isValid && (
         <p className="text-xs text-red-600 text-center">
-          Bitte gib eine gültige 5-stellige Postleitzahl ein.
+          {t("invalid")}
         </p>
       )}
 
@@ -75,7 +86,7 @@ export function PostalCodeForm() {
           sm:w-64
         "
       >
-        Weiter
+        {t("submit")}
       </Button>
     </form>
   );

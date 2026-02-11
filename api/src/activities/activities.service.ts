@@ -26,7 +26,10 @@ export class ActivitiesService {
   constructor(private prisma: PrismaService) {}
 
   //Public route GET /activities
-  async list(q: ListActivitiesQueryDto): Promise<ListActivitiesResponseDto> {
+  async list(
+    q: ListActivitiesQueryDto,
+    userId?: string,
+  ): Promise<ListActivitiesResponseDto> {
     const take = clamp(q.take ?? 20, 1, 50);
 
     const where: Prisma.ActivityWhereInput = { status: 'ACTIVE' };
@@ -80,6 +83,24 @@ export class ActivitiesService {
       ];
     }
 
+    const include: Prisma.ActivityInclude = {
+      images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+      createdBy: {
+        select: {
+          id: true,
+          profile: { select: { displayName: true } },
+        },
+      },
+      _count: { select: { participants: true } },
+    };
+
+    if (userId) {
+      include.participants = {
+        where: { userId },
+        select: { userId: true },
+      };
+    }
+
     const [totalCount, rows] = await this.prisma.$transaction([
       this.prisma.activity.count({ where }),
       this.prisma.activity.findMany({
@@ -87,15 +108,7 @@ export class ActivitiesService {
         take: take + 1,
         ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        include: {
-          images: { orderBy: { sortOrder: 'asc' }, take: 1 },
-          createdBy: {
-            select: {
-              id: true,
-              profile: { select: { displayName: true } },
-            },
-          },
-        },
+        include,
       }),
     ]);
 
@@ -117,6 +130,10 @@ export class ActivitiesService {
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
       thumbnailUrl: a.images[0]?.url ?? null,
+      participantsCount: a._count?.participants ?? 0,
+      isJoined: userId
+        ? Array.isArray(a.participants) && a.participants.length > 0
+        : undefined,
     }));
 
     return { items, nextCursor, totalCount };
@@ -124,15 +141,25 @@ export class ActivitiesService {
 
   // Detail public route GET /activities/:id
 
-  async getById(id: string): Promise<ActivityDetailDto> {
+  async getById(id: string, userId?: string): Promise<ActivityDetailDto> {
+    const include: Prisma.ActivityInclude = {
+      images: { orderBy: { sortOrder: 'asc' } },
+      createdBy: {
+        select: { id: true, profile: { select: { displayName: true } } },
+      },
+      _count: { select: { participants: true } },
+    };
+
+    if (userId) {
+      include.participants = {
+        where: { userId },
+        select: { userId: true },
+      };
+    }
+
     const a = await this.prisma.activity.findFirst({
       where: { id, status: 'ACTIVE' },
-      include: {
-        images: { orderBy: { sortOrder: 'asc' } },
-        createdBy: {
-          select: { id: true, profile: { select: { displayName: true } } },
-        },
-      },
+      include,
     });
 
     if (!a) throw new NotFoundException('Activity not found');
@@ -158,6 +185,10 @@ export class ActivitiesService {
       })),
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
+      participantsCount: a._count?.participants ?? 0,
+      isJoined: userId
+        ? Array.isArray(a.participants) && a.participants.length > 0
+        : undefined,
     };
   }
 

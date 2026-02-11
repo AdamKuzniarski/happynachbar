@@ -260,4 +260,38 @@ export class ActivitiesService {
 
     return { ok: true };
   }
+
+  async join(userId: string, activityId: string): Promise<{ ok: true }> {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true },
+    });
+
+    if (!existing || existing.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+
+    try {
+      await this.prisma.activityParticipant.create({
+        data: { activityId, userId },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return { ok: true };
+      }
+      throw error;
+    }
+
+    return { ok: true };
+  }
+
+  async leave(userId: string, activityId: string): Promise<{ ok: true }> {
+    await this.prisma.activityParticipant.deleteMany({
+      where: { activityId, userId },
+    });
+
+    return { ok: true };
+  }
 }

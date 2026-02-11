@@ -110,6 +110,25 @@ export async function deleteActivity(
   }
 }
 
+export async function joinActivity(
+  id: string,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}/join`, {
+      method: "POST",
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function uploadActivityImages(files: File[]) {
   if (!files.length) return [];
 

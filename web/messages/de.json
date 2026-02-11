@@ -143,13 +143,16 @@
       "create": "Erstellen",
       "cancel": "Abbrechen",
       "edit": "Bearbeiten",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "join": "Teilnehmen",
+      "joined": "Teilnahme gespeichert"
     },
     "labels": {
       "postalCode": "PLZ",
       "createdBy": "Erstellt von",
       "start": "Start",
       "updated": "Aktualisiert",
+      "participants": "Teilnehmende",
       "description": "Beschreibung",
       "bio": "Bio",
       "memberSince": "Mitglied seit"

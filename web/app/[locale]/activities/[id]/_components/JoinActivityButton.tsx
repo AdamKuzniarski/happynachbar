@@ -1,0 +1,64 @@
+"use client";
+
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
+import { FormError } from "@/components/ui/FormError";
+import { joinActivity } from "@/lib/api/activities";
+
+export function JoinActivityButton({
+  activityId,
+  isAuthenticated,
+}: {
+  activityId: string;
+  isAuthenticated: boolean;
+}) {
+  const t = useTranslations("activities");
+  const tCommon = useTranslations("common");
+  const [joining, setJoining] = React.useState(false);
+  const [done, setDone] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function onJoin() {
+    if (joining || done) return;
+    if (!isAuthenticated) {
+      setError(t("errors.loginRequired"));
+      return;
+    }
+
+    setError(null);
+    setJoining(true);
+    try {
+      const res = await joinActivity(activityId);
+      if (!res.ok) {
+        const msg = Array.isArray(res.message)
+          ? res.message.join(", ")
+          : res.message ?? t("errors.invalidResponse");
+        setError(msg);
+        return;
+      }
+      setDone(true);
+    } finally {
+      setJoining(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <Button
+        type="button"
+        variant="primary"
+        className="hover:bg-fern/20 hover:text-foreground"
+        onClick={onJoin}
+        disabled={joining || done}
+      >
+        {joining
+          ? tCommon("loading")
+          : done
+            ? t("actions.joined")
+            : t("actions.join")}
+      </Button>
+      <FormError message={error} />
+    </div>
+  );
+}

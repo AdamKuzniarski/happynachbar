@@ -9,6 +9,7 @@ export type Activity = {
   thumbnailUrl?: string | null;
   updatedAt?: string;
   createdBy?: { displayName?: string };
+  participantsCount?: number;
 };
 
 export type ListActivitiesResponse = {

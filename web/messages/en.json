@@ -143,13 +143,16 @@
       "create": "Create",
       "cancel": "Cancel",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "join": "Join activity",
+      "joined": "Participation saved"
     },
     "labels": {
       "postalCode": "Postal code",
       "createdBy": "Created by",
       "start": "Start",
       "updated": "Updated",
+      "participants": "Participants",
       "description": "Description",
       "bio": "Bio",
       "memberSince": "Member since"

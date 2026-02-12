@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { openGroupChat } from "@/lib/api/chat";
@@ -49,8 +50,14 @@ export function GroupChatButton({
         className="hover:bg-fern/20 hover:text-foreground"
         onClick={onOpen}
         disabled={loading}
+        aria-label={t("actions.groupChat")}
+        title={t("actions.groupChat")}
       >
-        {loading ? tCommon("loading") : t("actions.groupChat")}
+        {loading ? (
+          tCommon("loading")
+        ) : (
+          <MessagesSquare className="h-4 w-4" aria-hidden="true" />
+        )}
       </Button>
       <FormError message={error} />
     </div>

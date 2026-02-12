@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import {
@@ -94,17 +95,30 @@ export function JoinActivityButton({
     <div className="flex flex-col items-center gap-2">
       {done ? (
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
-            {t("actions.joined")}
-          </span>
+          <Button
+            type="button"
+            variant="secondary"
+            className="hover:bg-fern/20 hover:text-foreground"
+            disabled
+            aria-label={t("actions.joined")}
+            title={t("actions.joined")}
+          >
+            <UserCheck className="h-4 w-4" aria-hidden="true" />
+          </Button>
           <Button
             type="button"
             variant="secondary"
             className="hover:bg-fern/20 hover:text-foreground"
             onClick={onLeave}
             disabled={checking || leaving}
+            aria-label={t("actions.leave")}
+            title={t("actions.leave")}
           >
-            {checking || leaving ? tCommon("loading") : t("actions.leave")}
+            {checking || leaving ? (
+              tCommon("loading")
+            ) : (
+              <UserX className="h-4 w-4" aria-hidden="true" />
+            )}
           </Button>
           <GroupChatButton activityId={activityId} />
         </div>
@@ -115,8 +129,14 @@ export function JoinActivityButton({
           className="hover:bg-fern/20 hover:text-foreground"
           onClick={onJoin}
           disabled={checking || joining}
+          aria-label={t("actions.join")}
+          title={t("actions.join")}
         >
-          {checking || joining ? tCommon("loading") : t("actions.join")}
+          {checking || joining ? (
+            tCommon("loading")
+          ) : (
+            <UserCheck className="h-4 w-4" aria-hidden="true" />
+          )}
         </Button>
       )}
       <FormError message={error} />

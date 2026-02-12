@@ -120,18 +120,19 @@ export class ActivitiesService {
       ];
     }
 
-    const [totalCount, rows] = await this.prisma.$transaction<
-      [number, ActivityListRow[]]
-    >([
-      this.prisma.activity.count({ where }),
-      this.prisma.activity.findMany({
-        where,
-        take: take + 1,
-        ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        include: activityListInclude,
-      }),
-    ]);
+    const [totalCount, rows] = await this.prisma.$transaction(
+      async (tx): Promise<[number, ActivityListRow[]]> => {
+        const total = await tx.activity.count({ where });
+        const items = await tx.activity.findMany({
+          where,
+          take: take + 1,
+          ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          include: activityListInclude,
+        });
+        return [total, items];
+      },
+    );
 
     const hasMore = rows.length > take;
     const page = rows.slice(0, take);

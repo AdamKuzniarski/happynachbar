@@ -17,6 +17,7 @@ export function JoinActivityButton({
   const t = useTranslations("activities");
   const tCommon = useTranslations("common");
   const router = useRouter();
+  const [checking, setChecking] = React.useState(false);
   const [joining, setJoining] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -24,10 +25,12 @@ export function JoinActivityButton({
   React.useEffect(() => {
     if (!isAuthenticated) return;
     let active = true;
+    setChecking(true);
     (async () => {
       const res = await getActivityJoinStatus(activityId);
       if (!active) return;
       if (res.ok) setDone(res.joined);
+      setChecking(false);
     })();
     return () => {
       active = false;
@@ -66,9 +69,11 @@ export function JoinActivityButton({
         variant="primary"
         className="hover:bg-fern/20 hover:text-foreground"
         onClick={onJoin}
-        disabled={joining || done}
+        disabled={checking || joining || done}
       >
-        {joining
+        {checking
+          ? tCommon("loading")
+          : joining
           ? tCommon("loading")
           : done
             ? t("actions.joined")

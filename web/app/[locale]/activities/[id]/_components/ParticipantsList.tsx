@@ -1,8 +1,11 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { listActivityParticipants } from "@/lib/api/activities";
+import { defaultLocale, isLocale } from "@/lib/i18n";
 
 type Participant = {
   id: string;
@@ -15,6 +18,12 @@ export function ParticipantsList({
   activityId: string;
 }) {
   const t = useTranslations("activities");
+  const params = useParams();
+  const localeParam = params?.locale;
+  const locale =
+    typeof localeParam === "string" && isLocale(localeParam)
+      ? localeParam
+      : defaultLocale;
   const [participants, setParticipants] = React.useState<Participant[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -55,7 +64,12 @@ export function ParticipantsList({
           <ul className="list-disc pl-5">
             {participants.map((p) => (
               <li key={p.id}>
-                {p.displayName?.trim() || t("fallback.neighbor")}
+                <Link
+                  href={`/${locale}/users/${encodeURIComponent(p.id)}`}
+                  className="underline decoration-fern/60 underline-offset-2 hover:text-foreground"
+                >
+                  {p.displayName?.trim() || t("fallback.neighbor")}
+                </Link>
               </li>
             ))}
           </ul>

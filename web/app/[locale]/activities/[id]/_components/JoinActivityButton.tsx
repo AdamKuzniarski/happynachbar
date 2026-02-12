@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -15,6 +16,7 @@ export function JoinActivityButton({
 }) {
   const t = useTranslations("activities");
   const tCommon = useTranslations("common");
+  const router = useRouter();
   const [joining, setJoining] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -51,6 +53,7 @@ export function JoinActivityButton({
         return;
       }
       setDone(true);
+      router.refresh();
     } finally {
       setJoining(false);
     }

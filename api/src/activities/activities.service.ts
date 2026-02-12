@@ -22,6 +22,41 @@ type ParticipantRow = {
   displayName: string | null;
 };
 
+const activityListInclude = Prisma.validator<Prisma.ActivityInclude>()({
+  images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+  createdBy: {
+    include: { profile: { select: { displayName: true } } },
+  },
+  _count: { select: { participants: true } },
+});
+
+type ActivityListRow = Prisma.ActivityGetPayload<{
+  include: typeof activityListInclude;
+}>;
+
+const activityDetailInclude = Prisma.validator<Prisma.ActivityInclude>()({
+  images: { orderBy: { sortOrder: 'asc' } },
+  createdBy: {
+    include: { profile: { select: { displayName: true } } },
+  },
+  _count: { select: { participants: true } },
+});
+
+type ActivityDetailRow = Prisma.ActivityGetPayload<{
+  include: typeof activityDetailInclude;
+}>;
+
+type ParticipantListRow = Prisma.ActivityParticipantGetPayload<{
+  select: {
+    user: {
+      select: {
+        id: true;
+        profile: { select: { displayName: true } };
+      };
+    };
+  };
+}>;
+
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
@@ -85,20 +120,16 @@ export class ActivitiesService {
       ];
     }
 
-    const [totalCount, rows] = await this.prisma.$transaction([
+    const [totalCount, rows] = await this.prisma.$transaction<
+      [number, ActivityListRow[]]
+    >([
       this.prisma.activity.count({ where }),
       this.prisma.activity.findMany({
         where,
         take: take + 1,
         ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        include: {
-          images: { orderBy: { sortOrder: 'asc' }, take: 1 },
-          createdBy: {
-            include: { profile: { select: { displayName: true } } },
-          },
-          _count: { select: { participants: true } },
-        },
+        include: activityListInclude,
       }),
     ]);
 
@@ -129,16 +160,10 @@ export class ActivitiesService {
   // Detail public route GET /activities/:id
 
   async getById(id: string): Promise<ActivityDetailDto> {
-    const a = await this.prisma.activity.findFirst({
+    const a = (await this.prisma.activity.findFirst({
       where: { id, status: 'ACTIVE' },
-      include: {
-        images: { orderBy: { sortOrder: 'asc' } },
-        createdBy: {
-          include: { profile: { select: { displayName: true } } },
-        },
-        _count: { select: { participants: true } },
-      },
-    });
+      include: activityDetailInclude,
+    })) as ActivityDetailRow | null;
 
     if (!a) throw new NotFoundException('Activity not found');
 
@@ -388,7 +413,7 @@ export class ActivitiesService {
     if (activity.createdById !== userId)
       throw new ForbiddenException('Not owner');
 
-    const rows = await this.prisma.activityParticipant.findMany({
+    const rows = (await this.prisma.activityParticipant.findMany({
       where: { activityId },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -399,7 +424,7 @@ export class ActivitiesService {
           },
         },
       },
-    });
+    })) as ParticipantListRow[];
 
     return rows.map((r) => ({
       id: r.user.id,

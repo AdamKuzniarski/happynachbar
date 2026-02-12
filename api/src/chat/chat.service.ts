@@ -170,6 +170,40 @@ export class ChatService {
     return conversation;
   }
 
+  async createOrGetByUser(userId: string, otherUserId: string) {
+    if (userId === otherUserId) {
+      throw new BadRequestException('Cannot start a chat with yourself');
+    }
+
+    const other = await this.prisma.user.findUnique({
+      where: { id: otherUserId },
+      select: { id: true },
+    });
+    if (!other) throw new NotFoundException('User not found');
+
+    const [participantAId, participantBId] = sortPair(userId, otherUserId);
+
+    const existing = await this.prisma.conversation.findFirst({
+      where: {
+        participantAId,
+        participantBId,
+        activityId: null,
+      },
+      select: { id: true },
+    });
+
+    if (existing) return existing;
+
+    return this.prisma.conversation.create({
+      data: {
+        participantAId,
+        participantBId,
+        activityId: null,
+      },
+      select: { id: true },
+    });
+  }
+
   async listMessages(
     userId: string,
     conversationId: string,

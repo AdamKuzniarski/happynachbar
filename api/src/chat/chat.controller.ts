@@ -39,6 +39,15 @@ export class ChatController {
     return this.chat.createOrGetByActivity(req.user.userId, id);
   }
 
+  @Post('conversations/by-user/:id')
+  @ApiOkResponse({ type: ConversationDto })
+  createOrGetByUser(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.chat.createOrGetByUser(req.user.userId, id);
+  }
+
   @Get('conversations')
   @ApiOkResponse({ type: ListConversationsResponseDto })
   listConversations(@Req() req: any) {

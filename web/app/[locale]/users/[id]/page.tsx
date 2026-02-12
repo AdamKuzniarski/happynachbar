@@ -4,6 +4,7 @@ import { CircleArrowLeft } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { getTranslations } from "next-intl/server";
+import { StartChatButton } from "./StartChatButton";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -109,6 +110,10 @@ export default async function PublicUserProfilePage({
                 </dd>
               </div>
             </dl>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <StartChatButton userId={id} />
           </div>
         </section>
       </div>

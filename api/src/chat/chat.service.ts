@@ -233,6 +233,59 @@ export class ChatService {
     });
   }
 
+  async createOrGetGroupByActivity(userId: string, activityId: string) {
+    const activity = await this.prisma.activity.findFirst({
+      where: { id: activityId, status: 'ACTIVE' },
+      select: { id: true, createdById: true },
+    });
+
+    if (!activity) throw new NotFoundException('Activity not found');
+
+    const isParticipant = await this.prisma.activityParticipant.findFirst({
+      where: { activityId, userId },
+      select: { id: true },
+    });
+
+    if (!isParticipant && activity.createdById !== userId) {
+      throw new ForbiddenException('Not allowed');
+    }
+
+    let conversation = await this.prisma.conversation.findFirst({
+      where: { activityId, type: 'GROUP' },
+      select: { id: true },
+    });
+
+    if (!conversation) {
+      conversation = await this.prisma.conversation.create({
+        data: {
+          activityId,
+          type: 'GROUP',
+          participantAId: activity.createdById,
+          participantBId: activity.createdById,
+          participants: {
+            create: [
+              { userId: activity.createdById },
+              ...(userId === activity.createdById ? [] : [{ userId }]),
+            ],
+          },
+        },
+        select: { id: true },
+      });
+
+      return conversation;
+    }
+
+    await this.prisma.conversationParticipant.upsert({
+      where: {
+        conversationId_userId: { conversationId: conversation.id, userId },
+      },
+      update: {},
+      create: { conversationId: conversation.id, userId },
+    });
+
+    return conversation;
+  }
+
   async listMessages(
     userId: string,
     conversationId: string,

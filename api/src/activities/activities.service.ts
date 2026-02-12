@@ -200,6 +200,17 @@ export class ActivitiesService {
       },
     });
 
+    await this.prisma.conversation.create({
+      data: {
+        activityId: a.id,
+        type: 'GROUP',
+        participantAId: userId,
+        participantBId: userId,
+        participants: { create: { userId } },
+      },
+      select: { id: true },
+    });
+
     return this.getById(a.id);
   }
 
@@ -270,7 +281,7 @@ export class ActivitiesService {
   async join(userId: string, activityId: string): Promise<{ ok: true }> {
     const existing = await this.prisma.activity.findUnique({
       where: { id: activityId },
-      select: { id: true, status: true },
+      select: { id: true, status: true, createdById: true },
     });
 
     if (!existing || existing.status !== 'ACTIVE')
@@ -290,6 +301,37 @@ export class ActivitiesService {
       throw error;
     }
 
+    const group = await this.prisma.conversation.findFirst({
+      where: { activityId, type: 'GROUP' },
+      select: { id: true },
+    });
+
+    if (!group) {
+      await this.prisma.conversation.create({
+        data: {
+          activityId,
+          type: 'GROUP',
+          participantAId: existing.createdById,
+          participantBId: existing.createdById,
+          participants: {
+            create: [
+              { userId: existing.createdById },
+              ...(userId === existing.createdById ? [] : [{ userId }]),
+            ],
+          },
+        },
+        select: { id: true },
+      });
+    } else {
+      await this.prisma.conversationParticipant.upsert({
+        where: {
+          conversationId_userId: { conversationId: group.id, userId },
+        },
+        update: {},
+        create: { conversationId: group.id, userId },
+      });
+    }
+
     return { ok: true };
   }
 
@@ -297,6 +339,17 @@ export class ActivitiesService {
     await this.prisma.activityParticipant.deleteMany({
       where: { activityId, userId },
     });
+
+    const group = await this.prisma.conversation.findFirst({
+      where: { activityId, type: 'GROUP' },
+      select: { id: true },
+    });
+
+    if (group) {
+      await this.prisma.conversationParticipant.deleteMany({
+        where: { conversationId: group.id, userId },
+      });
+    }
 
     return { ok: true };
   }

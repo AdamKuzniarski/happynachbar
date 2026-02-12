@@ -8,6 +8,7 @@ import { ActivityActions } from "./_components/ActivityActions";
 import { JoinActivityButton } from "./_components/JoinActivityButton";
 import { ParticipantsList } from "./_components/ParticipantsList";
 import { GroupChatButton } from "./_components/GroupChatButton";
+import { ParticipantsPreview } from "./_components/ParticipantsPreview";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
@@ -100,6 +101,13 @@ export default async function ActivityDetailPage({
                 </div>
               </div>
 
+              <div className="shrink-0">
+                <ActivityActions
+                  id={a.id}
+                  createdById={a.createdById}
+                  currentUserId={currentUserId}
+                />
+              </div>
             </div>
           </header>
 
@@ -161,16 +169,18 @@ export default async function ActivityDetailPage({
 
             <div className="mt-6">
               {!isOwner ? (
-                <JoinActivityButton
-                  activityId={a.id}
-                  isAuthenticated={isAuthenticated}
-                />
+                <>
+                  <JoinActivityButton
+                    activityId={a.id}
+                    isAuthenticated={isAuthenticated}
+                  />
+                  <ParticipantsPreview
+                    activityId={a.id}
+                    participantsCount={a.participantsCount}
+                    fetchParticipants={false}
+                  />
+                </>
               ) : null}
-              <ActivityActions
-                id={a.id}
-                createdById={a.createdById}
-                currentUserId={currentUserId}
-              />
             </div>
 
             {isOwner ? (

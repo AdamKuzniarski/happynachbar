@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { UserCheck, UserX } from "lucide-react";
+import { UserCheck, UserPlus, UserX } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import {
@@ -134,7 +134,7 @@ export function JoinActivityButton({
             tCommon("loading")
           ) : (
             <>
-              <UserCheck className="h-4 w-4" aria-hidden="true" />
+              <UserPlus className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">{t("actions.join")}</span>
             </>
           )}

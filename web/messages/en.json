@@ -157,6 +157,8 @@
       "bio": "Bio",
       "memberSince": "Member since"
     },
+    "loadingParticipants": "Loading participants…",
+    "noParticipants": "No participants yet.",
     "aria": {
       "profileLink": "Go to profile"
     },

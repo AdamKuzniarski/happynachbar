@@ -120,4 +120,11 @@ export class ActivitiesController {
   isJoined(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.activities.isJoined(req.user.userId, id);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/participants')
+  listParticipants(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.listParticipants(req.user.userId, id);
+  }
 }

@@ -17,6 +17,11 @@ import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
 import { ActivityCardDto, ActivityDetailDto } from './dto/activity.dto';
 import { ActivityCategory as ApiActivityCategory } from './dto/activity-category.enum';
 
+type ParticipantRow = {
+  id: string;
+  displayName: string | null;
+};
+
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
@@ -314,5 +319,38 @@ export class ActivitiesService {
     });
 
     return { joined: !!joined };
+  }
+
+  async listParticipants(
+    userId: string,
+    activityId: string,
+  ): Promise<ParticipantRow[]> {
+    const activity = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true, createdById: true },
+    });
+
+    if (!activity || activity.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+    if (activity.createdById !== userId)
+      throw new ForbiddenException('Not owner');
+
+    const rows = await this.prisma.activityParticipant.findMany({
+      where: { activityId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        user: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true } },
+          },
+        },
+      },
+    });
+
+    return rows.map((r) => ({
+      id: r.user.id,
+      displayName: r.user.profile?.displayName ?? null,
+    }));
   }
 }

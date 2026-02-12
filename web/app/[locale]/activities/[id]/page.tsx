@@ -6,6 +6,7 @@ import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { ActivityActions } from "./_components/ActivityActions";
 import { JoinActivityButton } from "./_components/JoinActivityButton";
+import { ParticipantsList } from "./_components/ParticipantsList";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
@@ -144,12 +145,6 @@ export default async function ActivityDetailPage({
 
                 <dd className="mt-1 font-medium">{formatDate(a?.updatedAt)}</dd>
               </div>
-              <div>
-                <dt className="opacity-80">{t("labels.participants")}</dt>
-                <dd className="mt-1 font-medium">
-                  {a?.participantsCount ?? 0}
-                </dd>
-              </div>
             </dl>
 
             {a?.description ? (
@@ -176,6 +171,8 @@ export default async function ActivityDetailPage({
                 currentUserId={currentUserId}
               />
             </div>
+
+            {isOwner ? <ParticipantsList activityId={a.id} /> : null}
           </div>
         </section>
       </div>

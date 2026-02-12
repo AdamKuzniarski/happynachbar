@@ -145,7 +145,8 @@
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "join": "Teilnehmen",
-      "joined": "Du nimmst teil"
+      "joined": "Du nimmst teil",
+      "leave": "Teilnahme zurückziehen"
     },
     "labels": {
       "postalCode": "PLZ",

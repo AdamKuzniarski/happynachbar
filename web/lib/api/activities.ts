@@ -129,6 +129,25 @@ export async function joinActivity(
   }
 }
 
+export async function leaveActivity(
+  id: string,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}/join`, {
+      method: "DELETE",
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function getActivityJoinStatus(
   id: string,
 ): Promise<

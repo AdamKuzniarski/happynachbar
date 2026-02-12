@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { getActivityJoinStatus, joinActivity } from "@/lib/api/activities";
+import {
+  getActivityJoinStatus,
+  joinActivity,
+  leaveActivity,
+} from "@/lib/api/activities";
 
 export function JoinActivityButton({
   activityId,
@@ -19,6 +23,7 @@ export function JoinActivityButton({
   const router = useRouter();
   const [checking, setChecking] = React.useState(false);
   const [joining, setJoining] = React.useState(false);
+  const [leaving, setLeaving] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -62,12 +67,43 @@ export function JoinActivityButton({
     }
   }
 
+  async function onLeave() {
+    if (leaving || !done) return;
+    setError(null);
+    setLeaving(true);
+    try {
+      const res = await leaveActivity(activityId);
+      if (!res.ok) {
+        const msg = Array.isArray(res.message)
+          ? res.message.join(", ")
+          : res.message ?? t("errors.invalidResponse");
+        setError(msg);
+        return;
+      }
+      setDone(false);
+      router.refresh();
+    } finally {
+      setLeaving(false);
+    }
+  }
+
   return (
     <div className="flex flex-col items-center gap-2">
       {done ? (
-        <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
-          {t("actions.joined")}
-        </span>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
+            {t("actions.joined")}
+          </span>
+          <Button
+            type="button"
+            variant="secondary"
+            className="hover:bg-fern/20 hover:text-foreground"
+            onClick={onLeave}
+            disabled={checking || leaving}
+          >
+            {checking || leaving ? tCommon("loading") : t("actions.leave")}
+          </Button>
+        </div>
       ) : (
         <Button
           type="button"

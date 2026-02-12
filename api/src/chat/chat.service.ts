@@ -82,11 +82,13 @@ export class ChatService {
     createdAt: Date;
     editedAt?: Date | null;
     deletedAt?: Date | null;
+    senderDisplayName?: string | null;
   }): MessageDto {
     return {
       id: message.id,
       conversationId: message.conversationId,
       senderId: message.senderId,
+      senderDisplayName: message.senderDisplayName ?? null,
       body: message.deletedAt ? null : message.body,
       createdAt: message.createdAt.toISOString(),
       editedAt: message.editedAt ? message.editedAt.toISOString() : null,
@@ -109,7 +111,16 @@ export class ChatService {
   ): Promise<ConversationRow[]> {
     return this.prisma.conversation.findMany({
       where: {
-        OR: [{ participantAId: userId }, { participantBId: userId }],
+        OR: [
+          {
+            type: 'DIRECT',
+            OR: [{ participantAId: userId }, { participantBId: userId }],
+          },
+          {
+            type: 'GROUP',
+            participants: { some: { userId } },
+          },
+        ],
       },
       orderBy: { updatedAt: 'desc' },
       include: {
@@ -125,14 +136,29 @@ export class ChatService {
 
   async assertConversationAccess(userId: string, conversationId: string) {
     const convo = await this.prisma.conversation.findFirst({
-      where: {
-        id: conversationId,
-        OR: [{ participantAId: userId }, { participantBId: userId }],
+      where: { id: conversationId },
+      select: {
+        id: true,
+        type: true,
+        participantAId: true,
+        participantBId: true,
       },
-      select: { id: true },
     });
 
     if (!convo) throw new NotFoundException('Conversation not found');
+    if (convo.type === 'DIRECT') {
+      if (convo.participantAId !== userId && convo.participantBId !== userId) {
+        throw new NotFoundException('Conversation not found');
+      }
+      return;
+    }
+
+    const member = await this.prisma.conversationParticipant.findUnique({
+      where: { conversationId_userId: { conversationId, userId } },
+      select: { id: true },
+    });
+
+    if (!member) throw new NotFoundException('Conversation not found');
   }
 
   async createOrGetByActivity(userId: string, activityId: string) {
@@ -164,6 +190,7 @@ export class ChatService {
         participantAId,
         participantBId,
         activityId,
+        type: 'DIRECT',
       },
     });
 
@@ -188,6 +215,7 @@ export class ChatService {
         participantAId,
         participantBId,
         activityId: null,
+        type: 'DIRECT',
       },
       select: { id: true },
     });
@@ -199,6 +227,7 @@ export class ChatService {
         participantAId,
         participantBId,
         activityId: null,
+        type: 'DIRECT',
       },
       select: { id: true },
     });
@@ -218,21 +247,27 @@ export class ChatService {
       take: take + 1,
       ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      include: {
+        User: { select: { profile: { select: { displayName: true } } } },
+      },
     });
 
     const hasMore = rows.length > take;
     const page = rows.slice(0, take);
     const nextCursor = hasMore && page.length ? page[page.length - 1].id : null;
 
-    const items = page.map((m) => ({
-      id: m.id,
-      conversationId: m.conversationId,
-      senderId: m.senderId,
-      body: m.deletedAt ? null : m.body,
-      createdAt: m.createdAt.toISOString(),
-      editedAt: m.editedAt ? m.editedAt.toISOString() : null,
-      deletedAt: m.deletedAt ? m.deletedAt.toISOString() : null,
-    }));
+    const items = page.map((m) =>
+      this.toMessageDto({
+        id: m.id,
+        conversationId: m.conversationId,
+        senderId: m.senderId,
+        body: m.body,
+        createdAt: m.createdAt,
+        editedAt: m.editedAt,
+        deletedAt: m.deletedAt,
+        senderDisplayName: m.User?.profile?.displayName ?? null,
+      }),
+    );
 
     await this.touchRead(userId, conversationId);
 
@@ -249,6 +284,9 @@ export class ChatService {
     const [message] = await this.prisma.$transaction([
       this.prisma.message.create({
         data: { conversationId, senderId: userId, body },
+        include: {
+          User: { select: { profile: { select: { displayName: true } } } },
+        },
       }),
       this.prisma.conversation.update({
         where: { id: conversationId },
@@ -256,7 +294,16 @@ export class ChatService {
       }),
     ]);
 
-    return this.toMessageDto(message);
+    return this.toMessageDto({
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      body: message.body,
+      createdAt: message.createdAt,
+      editedAt: message.editedAt,
+      deletedAt: message.deletedAt,
+      senderDisplayName: message.User?.profile?.displayName ?? null,
+    });
   }
 
   async listConversations(
@@ -265,6 +312,7 @@ export class ChatService {
     const conversations = await this.listConversationRows(userId);
 
     const items = conversations.map((c) => {
+      const isGroup = c.type === 'GROUP';
       const other =
         c.participantAId === userId ? c.participantB : c.participantA;
       const last = c.messages[0];
@@ -275,11 +323,14 @@ export class ChatService {
         (!lastReadAt || last.createdAt > lastReadAt);
       return {
         id: c.id,
-        participantId: other.id,
-        participantDisplayName: other.profile?.displayName ?? 'Neighbor',
-        participantAvatarUrl: other.profile?.avatarUrl ?? null,
+        participantId: isGroup ? null : other.id,
+        participantDisplayName: isGroup
+          ? c.activity?.title ?? 'Activity chat'
+          : other.profile?.displayName ?? 'Neighbor',
+        participantAvatarUrl: isGroup ? null : other.profile?.avatarUrl ?? null,
         activityId: c.activityId,
         activityTitle: c.activity?.title ?? null,
+        type: c.type,
         hasUnread,
         lastMessageBody: last
           ? last.deletedAt
@@ -319,8 +370,8 @@ export class ChatService {
     messageId: string,
     body: string,
   ): Promise<MessageDto> {
-    const message: MessageWithMeta | null =
-      await this.prisma.message.findUnique({
+    const message: MessageWithMeta | null = await this.prisma.message.findUnique(
+      {
         where: { id: messageId },
         select: {
           id: true,
@@ -331,7 +382,8 @@ export class ChatService {
           editedAt: true,
           deletedAt: true,
         },
-      });
+      },
+    );
 
     if (!message) throw new NotFoundException('Message not found');
     await this.assertConversationAccess(userId, message.conversationId);
@@ -348,9 +400,21 @@ export class ChatService {
     const updated = await this.prisma.message.update({
       where: { id: messageId },
       data: { body: nextBody, editedAt: new Date() },
+      include: {
+        User: { select: { profile: { select: { displayName: true } } } },
+      },
     });
 
-    return this.toMessageDto(updated);
+    return this.toMessageDto({
+      id: updated.id,
+      conversationId: updated.conversationId,
+      senderId: updated.senderId,
+      body: updated.body,
+      createdAt: updated.createdAt,
+      editedAt: updated.editedAt,
+      deletedAt: updated.deletedAt,
+      senderDisplayName: updated.User?.profile?.displayName ?? null,
+    });
   }
 
   async deleteMessage(userId: string, messageId: string): Promise<MessageDto> {
@@ -377,8 +441,20 @@ export class ChatService {
     const updated = await this.prisma.message.update({
       where: { id: messageId },
       data: { deletedAt: message.deletedAt ?? new Date() },
+      include: {
+        User: { select: { profile: { select: { displayName: true } } } },
+      },
     });
 
-    return this.toMessageDto(updated);
+    return this.toMessageDto({
+      id: updated.id,
+      conversationId: updated.conversationId,
+      senderId: updated.senderId,
+      body: updated.body,
+      createdAt: updated.createdAt,
+      editedAt: updated.editedAt,
+      deletedAt: updated.deletedAt,
+      senderDisplayName: updated.User?.profile?.displayName ?? null,
+    });
   }
 }

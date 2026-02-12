@@ -64,21 +64,21 @@ export function JoinActivityButton({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Button
-        type="button"
-        variant="primary"
-        className="hover:bg-fern/20 hover:text-foreground"
-        onClick={onJoin}
-        disabled={checking || joining || done}
-      >
-        {checking
-          ? tCommon("loading")
-          : joining
-          ? tCommon("loading")
-          : done
-            ? t("actions.joined")
-            : t("actions.join")}
-      </Button>
+      {done ? (
+        <span className="inline-flex items-center rounded-full bg-fern/15 px-3 py-1 text-xs font-semibold ring-1 ring-fern/30">
+          {t("actions.joined")}
+        </span>
+      ) : (
+        <Button
+          type="button"
+          variant="primary"
+          className="hover:bg-fern/20 hover:text-foreground"
+          onClick={onJoin}
+          disabled={checking || joining}
+        >
+          {checking || joining ? tCommon("loading") : t("actions.join")}
+        </Button>
+      )}
       <FormError message={error} />
     </div>
   );

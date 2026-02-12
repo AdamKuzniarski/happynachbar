@@ -62,6 +62,16 @@ export function ChatInbox() {
   }, [refreshConversations]);
 
   React.useEffect(() => {
+    const interval = window.setInterval(() => {
+      refreshConversations({ silent: true }).catch(() => {});
+    }, 10000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [refreshConversations]);
+
+  React.useEffect(() => {
     let alive = true;
     fetch(`${API_BASE_URL}/users/me`, { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))

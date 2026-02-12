@@ -62,6 +62,7 @@ export function JoinActivityButton({
         return;
       }
       setDone(true);
+      window.dispatchEvent(new Event("chat:refresh"));
       router.refresh();
     } finally {
       setJoining(false);
@@ -82,6 +83,7 @@ export function JoinActivityButton({
         return;
       }
       setDone(false);
+      window.dispatchEvent(new Event("chat:refresh"));
       router.refresh();
     } finally {
       setLeaving(false);

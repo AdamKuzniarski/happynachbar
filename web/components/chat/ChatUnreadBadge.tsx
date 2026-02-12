@@ -63,17 +63,34 @@ export function ChatUnreadBadge({ className }: { className: string }) {
       refreshUnread();
     }
 
+    function handleRefresh() {
+      if (socketRef.current) {
+        joinConversations(socketRef.current).catch(() => {});
+      }
+      refreshUnread();
+    }
+
     window.addEventListener("chat:read", handleRead);
+    window.addEventListener("chat:refresh", handleRefresh);
 
     const interval = window.setInterval(() => {
       if (!alive) return;
       refreshUnread();
     }, 20000);
 
+    const joinInterval = window.setInterval(() => {
+      if (!alive) return;
+      if (socketRef.current) {
+        joinConversations(socketRef.current).catch(() => {});
+      }
+    }, 5000);
+
     return () => {
       alive = false;
       window.removeEventListener("chat:read", handleRead);
+      window.removeEventListener("chat:refresh", handleRefresh);
       window.clearInterval(interval);
+      window.clearInterval(joinInterval);
       socket.disconnect();
       socketRef.current = null;
     };

@@ -28,6 +28,7 @@ model User {
   profile                                        UserProfile?
   warningsCreated                                UserWarning[]      @relation("WarningsCreatedBy")
   warningsReceived                               UserWarning[]      @relation("WarningsReceived")
+  conversationParticipants                       ConversationParticipant[]
 }
 
 model UserProfile {
@@ -124,17 +125,31 @@ model Conversation {
   participantAId                         String             @db.Uuid
   participantBId                         String             @db.Uuid
   activityId                             String?            @db.Uuid
+  type                                   ConversationType   @default(DIRECT)
   createdAt                              DateTime           @default(now())
   updatedAt                              DateTime           @updatedAt
   activity                               Activity?          @relation(fields: [activityId], references: [id])
   participantA                           User               @relation("Conversation_participantAIdToUser", fields: [participantAId], references: [id], onDelete: Cascade)
   participantB                           User               @relation("Conversation_participantBIdToUser", fields: [participantBId], references: [id], onDelete: Cascade)
+  participants                           ConversationParticipant[]
   reads                                  ConversationRead[]
   messages                               Message[]
 
   @@unique([participantAId, participantBId, activityId])
   @@index([participantAId, updatedAt])
   @@index([participantBId, updatedAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  userId         String       @db.Uuid
+  joinedAt       DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, joinedAt])
 }
 
 model ConversationRead {
@@ -206,4 +221,9 @@ enum AuditAction {
   ACTIVITY_RESTORED
   ACTIVITIES_BULK_STATUS_CHANGED
   ACTIVITY_EDITED
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
 }

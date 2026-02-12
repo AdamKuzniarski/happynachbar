@@ -51,12 +51,14 @@ export function GroupChatButton({
         onClick={onOpen}
         disabled={loading}
         aria-label={t("actions.groupChat")}
-        title={t("actions.groupChat")}
       >
         {loading ? (
           tCommon("loading")
         ) : (
-          <MessagesSquare className="h-4 w-4" aria-hidden="true" />
+          <>
+            <MessagesSquare className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">{t("actions.groupChat")}</span>
+          </>
         )}
       </Button>
       <FormError message={error} />

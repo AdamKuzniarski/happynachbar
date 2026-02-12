@@ -95,16 +95,13 @@ export function JoinActivityButton({
     <div className="flex flex-col items-center gap-2">
       {done ? (
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            className="hover:bg-fern/20 hover:text-foreground"
-            disabled
+          <span
+            className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-4 py-2 text-sm font-medium text-foreground"
             aria-label={t("actions.joined")}
-            title={t("actions.joined")}
           >
             <UserCheck className="h-4 w-4" aria-hidden="true" />
-          </Button>
+            <span className="sr-only">{t("actions.joined")}</span>
+          </span>
           <Button
             type="button"
             variant="secondary"
@@ -112,12 +109,14 @@ export function JoinActivityButton({
             onClick={onLeave}
             disabled={checking || leaving}
             aria-label={t("actions.leave")}
-            title={t("actions.leave")}
           >
             {checking || leaving ? (
               tCommon("loading")
             ) : (
-              <UserX className="h-4 w-4" aria-hidden="true" />
+              <>
+                <UserX className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">{t("actions.leave")}</span>
+              </>
             )}
           </Button>
           <GroupChatButton activityId={activityId} />
@@ -130,12 +129,14 @@ export function JoinActivityButton({
           onClick={onJoin}
           disabled={checking || joining}
           aria-label={t("actions.join")}
-          title={t("actions.join")}
         >
           {checking || joining ? (
             tCommon("loading")
           ) : (
-            <UserCheck className="h-4 w-4" aria-hidden="true" />
+            <>
+              <UserCheck className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">{t("actions.join")}</span>
+            </>
           )}
         </Button>
       )}

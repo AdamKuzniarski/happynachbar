@@ -129,6 +129,26 @@ export async function joinActivity(
   }
 }
 
+export async function getActivityJoinStatus(
+  id: string,
+): Promise<
+  | { ok: true; joined: boolean }
+  | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    const res = await apiFetch<{ joined: boolean }>(
+      `/activities/${encodeURIComponent(id)}/joined`,
+    );
+    return { ok: true, joined: !!res?.joined };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function uploadActivityImages(files: File[]) {
   if (!files.length) return [];
 

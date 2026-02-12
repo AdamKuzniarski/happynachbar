@@ -295,4 +295,24 @@ export class ActivitiesService {
 
     return { ok: true };
   }
+
+  async isJoined(
+    userId: string,
+    activityId: string,
+  ): Promise<{ joined: boolean }> {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true },
+    });
+
+    if (!existing || existing.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+
+    const joined = await this.prisma.activityParticipant.findFirst({
+      where: { activityId, userId },
+      select: { id: true },
+    });
+
+    return { joined: !!joined };
+  }
 }

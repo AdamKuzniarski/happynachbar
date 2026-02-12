@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { joinActivity } from "@/lib/api/activities";
+import { getActivityJoinStatus, joinActivity } from "@/lib/api/activities";
 
 export function JoinActivityButton({
   activityId,
@@ -18,6 +18,19 @@ export function JoinActivityButton({
   const [joining, setJoining] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    let active = true;
+    (async () => {
+      const res = await getActivityJoinStatus(activityId);
+      if (!active) return;
+      if (res.ok) setDone(res.joined);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [activityId, isAuthenticated]);
 
   async function onJoin() {
     if (joining || done) return;

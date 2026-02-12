@@ -146,7 +146,8 @@
       "delete": "Löschen",
       "join": "Teilnehmen",
       "joined": "Du nimmst teil",
-      "leave": "Teilnahme zurückziehen"
+      "leave": "Teilnahme zurückziehen",
+      "groupChat": "Gruppenchat"
     },
     "labels": {
       "postalCode": "PLZ",
@@ -234,6 +235,8 @@
     "emptyInbox": "Noch keine Chats.",
     "neighbor": "Nachbar",
     "activityLabel": " · zur Aktivität: {title}",
+    "groupChat": "Gruppenchat",
+    "groupLabel": " · Gruppe",
     "errors": {
       "unknown": "Unbekannter Fehler"
     },

@@ -31,6 +31,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     null,
   );
   const [activityTitle, setActivityTitle] = React.useState<string | null>(null);
+  const [conversationType, setConversationType] = React.useState<
+    "DIRECT" | "GROUP" | null
+  >(null);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editingText, setEditingText] = React.useState("");
@@ -74,11 +77,13 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         const item = res?.items?.find((c) => c.id === conversationId);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);
+        setConversationType(item?.type ?? null);
       })
       .catch(() => {
         if (!alive) return;
         setParticipantName(null);
         setActivityTitle(null);
+        setConversationType(null);
       });
 
     return () => {
@@ -190,9 +195,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   return (
     <>
       <h1 className="text-lg font-semibold text-center">
-        {t("chatWith", {
-          name: participantName?.trim() ? participantName : t("creator"),
-        })}
+        {conversationType === "GROUP"
+          ? t("groupChat")
+          : t("chatWith", {
+              name: participantName?.trim() ? participantName : t("creator"),
+            })}
         {activityTitle?.trim() ? (
           <span className="mt-1 block text-sm font-normal opacity-75">
             {t("activityTitle", { title: activityTitle })}
@@ -213,7 +220,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
               const isMine = !!currentUserId && m.senderId === currentUserId;
               const authorLabel = isMine
                 ? t("you")
-                : participantName?.trim() || t("creator");
+                : conversationType === "GROUP"
+                  ? m.senderDisplayName?.trim() || t("neighbor")
+                  : participantName?.trim() || t("creator");
               const alignment = isMine ? "ml-auto text-right" : "mr-auto text-left";
               const bubble =
                 isMine

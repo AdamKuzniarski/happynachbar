@@ -10,6 +10,7 @@ import {
   joinActivity,
   leaveActivity,
 } from "@/lib/api/activities";
+import { GroupChatButton } from "./GroupChatButton";
 
 export function JoinActivityButton({
   activityId,
@@ -103,6 +104,7 @@ export function JoinActivityButton({
           >
             {checking || leaving ? tCommon("loading") : t("actions.leave")}
           </Button>
+          <GroupChatButton activityId={activityId} />
         </div>
       ) : (
         <Button

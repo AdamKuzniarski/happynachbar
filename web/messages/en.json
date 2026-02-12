@@ -146,7 +146,8 @@
       "delete": "Delete",
       "join": "Join activity",
       "joined": "You are participating",
-      "leave": "Leave"
+      "leave": "Leave",
+      "groupChat": "Group chat"
     },
     "labels": {
       "postalCode": "Postal code",
@@ -234,6 +235,8 @@
     "emptyInbox": "No chats yet.",
     "neighbor": "Neighbor",
     "activityLabel": " · about activity: {title}",
+    "groupChat": "Activity chat",
+    "groupLabel": " · group",
     "errors": {
       "unknown": "Unknown error"
     },

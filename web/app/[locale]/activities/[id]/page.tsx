@@ -7,6 +7,7 @@ import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { ActivityActions } from "./_components/ActivityActions";
 import { JoinActivityButton } from "./_components/JoinActivityButton";
 import { ParticipantsList } from "./_components/ParticipantsList";
+import { GroupChatButton } from "./_components/GroupChatButton";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
@@ -172,7 +173,14 @@ export default async function ActivityDetailPage({
               />
             </div>
 
-            {isOwner ? <ParticipantsList activityId={a.id} /> : null}
+            {isOwner ? (
+              <>
+                <div className="mt-4 flex justify-center">
+                  <GroupChatButton activityId={a.id} />
+                </div>
+                <ParticipantsList activityId={a.id} />
+              </>
+            ) : null}
           </div>
         </section>
       </div>

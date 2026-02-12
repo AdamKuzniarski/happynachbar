@@ -170,14 +170,26 @@ export function ChatInbox() {
               >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
-                    {c.participantDisplayName?.trim()?.[0] ?? "N"}
+                    {(c.type === "GROUP"
+                      ? c.activityTitle ?? t("groupChat")
+                      : c.participantDisplayName ?? t("neighbor")
+                    )
+                      .trim()
+                      .charAt(0) || "N"}
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold">
-                      {c.participantDisplayName || t("neighbor")}
-                      {c.activityTitle ? (
+                      {c.type === "GROUP"
+                        ? c.activityTitle ?? t("groupChat")
+                        : c.participantDisplayName || t("neighbor")}
+                      {c.type === "DIRECT" && c.activityTitle ? (
                         <span className="text-xs font-normal opacity-70">
                           {t("activityLabel", { title: c.activityTitle })}
+                        </span>
+                      ) : null}
+                      {c.type === "GROUP" ? (
+                        <span className="text-xs font-normal opacity-70">
+                          {t("groupLabel")}
                         </span>
                       ) : null}
                     </div>

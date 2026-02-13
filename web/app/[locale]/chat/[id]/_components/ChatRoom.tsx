@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { ArrowUpRight, Pencil, Trash2, User } from "lucide-react";
-import { io, type Socket } from "socket.io-client";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -14,11 +13,10 @@ import {
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useChatSocket } from "./useChatSocket";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-type SocketMessage = Message;
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const locale = useLocale();
@@ -40,7 +38,6 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editingText, setEditingText] = React.useState("");
-  const socketRef = React.useRef<Socket | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -105,17 +102,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     };
   }, [conversationId, t]);
 
-  React.useEffect(() => {
-    const socket = io(`${API_BASE_URL}/chat`, {
-      withCredentials: true,
-    });
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      socket.emit("chat:join", { conversationId });
-    });
-
-    socket.on("message:new", (msg: SocketMessage) => {
+  const handleNewMessage = React.useCallback(
+    (msg: Message) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) => [...prev, msg]);
       markConversationRead(conversationId)
@@ -123,25 +111,25 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           window.dispatchEvent(new Event("chat:read"));
         })
         .catch(() => {});
-    });
+    },
+    [conversationId],
+  );
 
-    function handleMessageUpdate(msg: SocketMessage) {
+  const handleMessageUpdate = React.useCallback(
+    (msg: Message) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) =>
         prev.map((item) => (item.id === msg.id ? msg : item)),
       );
-    }
+    },
+    [conversationId],
+  );
 
-    socket.on("message:updated", handleMessageUpdate);
-    socket.on("message:deleted", handleMessageUpdate);
-
-    return () => {
-      socket.off("message:updated", handleMessageUpdate);
-      socket.off("message:deleted", handleMessageUpdate);
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [conversationId]);
+  const { sendMessage, editMessage, deleteMessage: emitDeleteMessage } =
+    useChatSocket(conversationId, {
+      onNewMessage: handleNewMessage,
+      onUpdateMessage: handleMessageUpdate,
+    });
 
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -151,10 +139,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
-    socketRef.current?.emit("message:send", {
-      conversationId,
-      body,
-    });
+    sendMessage(body);
     setText("");
   }
 
@@ -174,16 +159,13 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     if (!editingId) return;
     const body = editingText.trim();
     if (!body) return;
-    socketRef.current?.emit("message:edit", {
-      messageId: editingId,
-      body,
-    });
+    editMessage(editingId, body);
     cancelEdit();
   }
 
   function deleteMessage(messageId: string) {
     if (!window.confirm(t("confirmDelete"))) return;
-    socketRef.current?.emit("message:delete", { messageId });
+    emitDeleteMessage(messageId);
     if (editingId === messageId) cancelEdit();
   }
 

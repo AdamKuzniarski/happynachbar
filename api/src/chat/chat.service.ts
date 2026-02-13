@@ -328,23 +328,15 @@ export class ChatService {
   ): Promise<ListMessagesResponseDto> {
     await this.assertConversationAccess(userId, conversationId);
 
-    const take = clamp(q.take ?? 20, 1, 50);
-
     const rows = await this.prisma.message.findMany({
       where: { conversationId },
-      take: take + 1,
-      ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       include: {
         User: { select: { profile: { select: { displayName: true } } } },
       },
     });
 
-    const hasMore = rows.length > take;
-    const page = rows.slice(0, take);
-    const nextCursor = hasMore && page.length ? page[page.length - 1].id : null;
-
-    const items = page.map((m) =>
+    const items = rows.map((m) =>
       this.toMessageDto({
         id: m.id,
         conversationId: m.conversationId,
@@ -359,7 +351,7 @@ export class ChatService {
 
     await this.touchRead(userId, conversationId);
 
-    return { items, nextCursor };
+    return { items, nextCursor: null };
   }
 
   async createMessage(

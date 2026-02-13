@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUpRight, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpRight, Pencil, Trash2, User } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -28,6 +28,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [text, setText] = React.useState("");
+  const [participantId, setParticipantId] = React.useState<string | null>(null);
   const [participantName, setParticipantName] = React.useState<string | null>(
     null,
   );
@@ -77,6 +78,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       .then((res) => {
         if (!alive) return;
         const item = res?.items?.find((c) => c.id === conversationId);
+        setParticipantId(item?.participantId ?? null);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);
         setActivityId(item?.activityId ?? null);
@@ -84,6 +86,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       })
       .catch(() => {
         if (!alive) return;
+        setParticipantId(null);
         setParticipantName(null);
         setActivityTitle(null);
         setActivityId(null);
@@ -199,11 +202,24 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   return (
     <>
       <h1 className="text-lg font-semibold text-center">
-        {conversationType === "GROUP"
-          ? t("groupChat")
-          : t("chatWith", {
-              name: participantName?.trim() ? participantName : t("creator"),
-            })}
+        {conversationType === "GROUP" ? (
+          t("groupChat")
+        ) : participantId && participantName?.trim() ? (
+          <span>
+            {t("chatWith", { name: "" }).trim()}{" "}
+            <Link
+              href={`/${locale}/users/${encodeURIComponent(participantId)}`}
+              className="inline-flex items-center gap-1 rounded-md px-1 text-foreground/90 hover:bg-fern/10 hover:text-foreground"
+            >
+              <User className="h-4 w-4" aria-hidden="true" />
+              {participantName}
+            </Link>
+          </span>
+        ) : (
+          t("chatWith", {
+            name: participantName?.trim() ? participantName : t("creator"),
+          })
+        )}
         {activityTitle?.trim() ? (
           <span className="mt-1 block text-sm font-normal opacity-75">
             {conversationType === "GROUP" && activityId ? (

@@ -11,7 +11,10 @@ import {
   ListMessagesResponseDto,
   MessageDto,
 } from './dto/chat-messages.dto';
-import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
+import {
+  ConversationListItemDto,
+  ListConversationsResponseDto,
+} from './dto/chat-conversations.dto';
 import { UnreadCountDto } from './dto/chat-unread.dto';
 
 function sortPair(a: string, b: string) {
@@ -132,6 +135,38 @@ export class ChatService {
         },
       },
     });
+  }
+
+  private toConversationListItem(
+    userId: string,
+    c: ConversationRow,
+  ): ConversationListItemDto {
+    const isGroup = c.type === 'GROUP';
+    const other = c.participantAId === userId ? c.participantB : c.participantA;
+    const last = c.messages[0];
+    const lastReadAt = c.reads[0]?.lastReadAt;
+    const hasUnread =
+      !!last &&
+      last.senderId !== userId &&
+      (!lastReadAt || last.createdAt > lastReadAt);
+    return {
+      id: c.id,
+      participantId: isGroup ? null : other.id,
+      participantDisplayName: isGroup
+        ? c.activity?.title ?? 'Activity chat'
+        : other.profile?.displayName ?? 'Neighbor',
+      participantAvatarUrl: isGroup ? null : other.profile?.avatarUrl ?? null,
+      activityId: c.activityId,
+      activityTitle: c.activity?.title ?? null,
+      type: c.type,
+      hasUnread,
+      lastMessageBody: last
+        ? last.deletedAt
+          ? 'Nachricht gelöscht'
+          : last.body
+        : null,
+      lastMessageAt: last?.createdAt ? last.createdAt.toISOString() : null,
+    };
   }
 
   async assertConversationAccess(userId: string, conversationId: string) {
@@ -364,37 +399,33 @@ export class ChatService {
   ): Promise<ListConversationsResponseDto> {
     const conversations = await this.listConversationRows(userId);
 
-    const items = conversations.map((c) => {
-      const isGroup = c.type === 'GROUP';
-      const other =
-        c.participantAId === userId ? c.participantB : c.participantA;
-      const last = c.messages[0];
-      const lastReadAt = c.reads[0]?.lastReadAt;
-      const hasUnread =
-        !!last &&
-        last.senderId !== userId &&
-        (!lastReadAt || last.createdAt > lastReadAt);
-      return {
-        id: c.id,
-        participantId: isGroup ? null : other.id,
-        participantDisplayName: isGroup
-          ? c.activity?.title ?? 'Activity chat'
-          : other.profile?.displayName ?? 'Neighbor',
-        participantAvatarUrl: isGroup ? null : other.profile?.avatarUrl ?? null,
-        activityId: c.activityId,
-        activityTitle: c.activity?.title ?? null,
-        type: c.type,
-        hasUnread,
-        lastMessageBody: last
-          ? last.deletedAt
-            ? 'Nachricht gelöscht'
-            : last.body
-          : null,
-        lastMessageAt: last?.createdAt ? last.createdAt.toISOString() : null,
-      };
-    });
+    const items = conversations.map((c) =>
+      this.toConversationListItem(userId, c),
+    );
 
     return { items };
+  }
+
+  async getConversation(
+    userId: string,
+    conversationId: string,
+  ): Promise<ConversationListItemDto> {
+    await this.assertConversationAccess(userId, conversationId);
+    const convo = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        ...conversationInclude,
+        reads: {
+          where: { userId },
+          take: 1,
+          select: { lastReadAt: true },
+        },
+      },
+    });
+
+    if (!convo) throw new NotFoundException('Conversation not found');
+
+    return this.toConversationListItem(userId, convo);
   }
 
   async markRead(userId: string, conversationId: string) {

@@ -5,7 +5,7 @@ import { ArrowUpRight, Pencil, Trash2, User } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  listConversations,
+  getConversation,
   listMessages,
   markConversationRead,
   type Message,
@@ -44,9 +44,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     let alive = true;
     setLoading(true);
     (async () => {
-      const [messagesRes, conversationsRes, meRes] = await Promise.allSettled([
+      const [messagesRes, conversationRes, meRes] = await Promise.allSettled([
         listMessages(conversationId),
-        listConversations(),
+        getConversation(conversationId),
         fetch(`${API_BASE_URL}/users/me`, { credentials: "include" }).then(
           (res) => (res.ok ? res.json() : null),
         ),
@@ -70,10 +70,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         setError(msg);
       }
 
-      if (conversationsRes.status === "fulfilled") {
-        const item = conversationsRes.value?.items?.find(
-          (c) => c.id === conversationId,
-        );
+      if (conversationRes.status === "fulfilled") {
+        const item = conversationRes.value;
         setParticipantId(item?.participantId ?? null);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);

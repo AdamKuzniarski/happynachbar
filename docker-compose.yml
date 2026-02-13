@@ -21,6 +21,7 @@ services:
       retries: 10
 
   api:
+    init: true
     build:
       context: ./api
     ports:

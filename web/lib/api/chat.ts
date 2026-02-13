@@ -29,7 +29,7 @@ let conversationsCache:
   | { data: { items: ConversationListItem[] }; ts: number }
   | null = null;
 let conversationsInFlight:
-  | Promise<{ items: ConversationListItem[] }>
+  | Promise<{ items: ConversationListItem[] } | undefined>
   | null = null;
 
 export async function listConversations({
@@ -49,7 +49,7 @@ export async function listConversations({
   const req = apiFetch<{ items: ConversationListItem[] }>("/chat/conversations");
   conversationsInFlight = req;
   try {
-    const data = await req;
+    const data = (await req) ?? { items: [] };
     conversationsCache = { data, ts: Date.now() };
     return data;
   } finally {

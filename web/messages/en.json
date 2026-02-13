@@ -238,6 +238,7 @@
     "emptyInbox": "No chats yet.",
     "neighbor": "Neighbor",
     "activityLabel": " · about activity: {title}",
+    "loadMore": "Load older messages",
     "groupChat": "Activity chat",
     "groupLabel": " · group",
     "errors": {

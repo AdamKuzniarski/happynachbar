@@ -238,6 +238,7 @@
     "emptyInbox": "Noch keine Chats.",
     "neighbor": "Nachbar",
     "activityLabel": " · zur Aktivität: {title}",
+    "loadMore": "Ältere Nachrichten laden",
     "groupChat": "Gruppenchat",
     "groupLabel": " · Gruppe",
     "errors": {

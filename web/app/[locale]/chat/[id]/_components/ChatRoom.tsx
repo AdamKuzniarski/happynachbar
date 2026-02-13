@@ -46,76 +46,64 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   React.useEffect(() => {
     let alive = true;
     setLoading(true);
-    listMessages(conversationId)
-      .then((res) => {
-        if (!alive) return;
-        const items = res?.items ?? [];
+    (async () => {
+      const [messagesRes, conversationsRes, meRes] = await Promise.allSettled([
+        listMessages(conversationId),
+        listConversations(),
+        fetch(`${API_BASE_URL}/users/me`, { credentials: "include" }).then(
+          (res) => (res.ok ? res.json() : null),
+        ),
+      ]);
+
+      if (!alive) return;
+
+      if (messagesRes.status === "fulfilled") {
+        const items = messagesRes.value?.items ?? [];
         setMessages(items.slice().reverse());
-        setError(null);
         markConversationRead(conversationId)
           .then(() => {
             window.dispatchEvent(new Event("chat:read"));
           })
           .catch(() => {});
-      })
-      .catch((e) => {
-        if (!alive) return;
-        setError(e instanceof Error ? e.message : t("errors.unknown"));
-      })
-      .finally(() => {
-        if (!alive) return;
-        setLoading(false);
-      });
+      } else {
+        const msg =
+          messagesRes.reason instanceof Error
+            ? messagesRes.reason.message
+            : t("errors.unknown");
+        setError(msg);
+      }
 
-    return () => {
-      alive = false;
-    };
-  }, [conversationId]);
-
-  React.useEffect(() => {
-    let alive = true;
-    listConversations()
-      .then((res) => {
-        if (!alive) return;
-        const item = res?.items?.find((c) => c.id === conversationId);
+      if (conversationsRes.status === "fulfilled") {
+        const item = conversationsRes.value?.items?.find(
+          (c) => c.id === conversationId,
+        );
         setParticipantId(item?.participantId ?? null);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);
         setActivityId(item?.activityId ?? null);
         setConversationType(item?.type ?? null);
-      })
-      .catch(() => {
-        if (!alive) return;
+      } else {
         setParticipantId(null);
         setParticipantName(null);
         setActivityTitle(null);
         setActivityId(null);
         setConversationType(null);
-      });
+      }
 
-    return () => {
-      alive = false;
-    };
-  }, [conversationId]);
-
-  React.useEffect(() => {
-    let alive = true;
-    fetch(`${API_BASE_URL}/users/me`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!alive) return;
-        const id = typeof data?.id === "string" ? data.id : null;
+      if (meRes.status === "fulfilled") {
+        const id = typeof meRes.value?.id === "string" ? meRes.value.id : null;
         setCurrentUserId(id);
-      })
-      .catch(() => {
-        if (!alive) return;
+      } else {
         setCurrentUserId(null);
-      });
+      }
+
+      setLoading(false);
+    })();
 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [conversationId, t]);
 
   React.useEffect(() => {
     const socket = io(`${API_BASE_URL}/chat`, {

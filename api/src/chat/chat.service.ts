@@ -21,10 +21,6 @@ function sortPair(a: string, b: string) {
   return a < b ? [a, b] : [b, a];
 }
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
-
 const conversationInclude = {
   participantA: {
     select: {
@@ -153,9 +149,9 @@ export class ChatService {
       id: c.id,
       participantId: isGroup ? null : other.id,
       participantDisplayName: isGroup
-        ? c.activity?.title ?? 'Activity chat'
-        : other.profile?.displayName ?? 'Neighbor',
-      participantAvatarUrl: isGroup ? null : other.profile?.avatarUrl ?? null,
+        ? (c.activity?.title ?? 'Activity chat')
+        : (other.profile?.displayName ?? 'Neighbor'),
+      participantAvatarUrl: isGroup ? null : (other.profile?.avatarUrl ?? null),
       activityId: c.activityId,
       activityTitle: c.activity?.title ?? null,
       type: c.type,
@@ -327,6 +323,7 @@ export class ChatService {
     q: ChatMessagesQueryDto,
   ): Promise<ListMessagesResponseDto> {
     await this.assertConversationAccess(userId, conversationId);
+    void q;
 
     const rows = await this.prisma.message.findMany({
       where: { conversationId },
@@ -446,8 +443,8 @@ export class ChatService {
     messageId: string,
     body: string,
   ): Promise<MessageDto> {
-    const message: MessageWithMeta | null = await this.prisma.message.findUnique(
-      {
+    const message: MessageWithMeta | null =
+      await this.prisma.message.findUnique({
         where: { id: messageId },
         select: {
           id: true,
@@ -458,8 +455,7 @@ export class ChatService {
           editedAt: true,
           deletedAt: true,
         },
-      },
-    );
+      });
 
     if (!message) throw new NotFoundException('Message not found');
     await this.assertConversationAccess(userId, message.conversationId);

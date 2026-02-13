@@ -185,10 +185,7 @@ export default async function ActivityDetailPage({
 
             {isOwner ? (
               <>
-                <div className="mt-4 flex justify-center">
-                  <GroupChatButton activityId={a.id} />
-                </div>
-                <ParticipantsList activityId={a.id} />
+                <ParticipantsList activityId={a.id} showGroupChat />
               </>
             ) : null}
           </div>

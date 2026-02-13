@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { ArrowUpRight, Pencil, Trash2 } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
   listConversations,
@@ -31,6 +32,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     null,
   );
   const [activityTitle, setActivityTitle] = React.useState<string | null>(null);
+  const [activityId, setActivityId] = React.useState<string | null>(null);
   const [conversationType, setConversationType] = React.useState<
     "DIRECT" | "GROUP" | null
   >(null);
@@ -77,12 +79,14 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         const item = res?.items?.find((c) => c.id === conversationId);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);
+        setActivityId(item?.activityId ?? null);
         setConversationType(item?.type ?? null);
       })
       .catch(() => {
         if (!alive) return;
         setParticipantName(null);
         setActivityTitle(null);
+        setActivityId(null);
         setConversationType(null);
       });
 
@@ -202,7 +206,22 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
             })}
         {activityTitle?.trim() ? (
           <span className="mt-1 block text-sm font-normal opacity-75">
-            {t("activityTitle", { title: activityTitle })}
+            {conversationType === "GROUP" && activityId ? (
+              <span className="inline-flex items-center gap-2 text-foreground/80 hover:text-foreground">
+                {t("activityTitle", { title: "" })}
+                <Link
+                  href={`/${locale}/activities/${encodeURIComponent(
+                    activityId,
+                  )}`}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-foreground/90 hover:bg-fern/10"
+                >
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  {activityTitle}
+                </Link>
+              </span>
+            ) : (
+              t("activityTitle", { title: activityTitle })
+            )}
           </span>
         ) : null}
       </h1>

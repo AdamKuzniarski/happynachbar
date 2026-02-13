@@ -147,6 +147,7 @@
       "join": "Join activity",
       "joinCta": "Join this activity",
       "joinHelper": "One click adds you to the participants list.",
+      "joinedHelper": "You're already participating.",
       "joined": "You are participating",
       "leave": "Leave",
       "groupChat": "Group chat"

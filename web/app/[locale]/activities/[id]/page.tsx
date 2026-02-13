@@ -7,7 +7,6 @@ import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { ActivityActions } from "./_components/ActivityActions";
 import { JoinActivityButton } from "./_components/JoinActivityButton";
 import { ParticipantsList } from "./_components/ParticipantsList";
-import { GroupChatButton } from "./_components/GroupChatButton";
 import { ParticipantsPreview } from "./_components/ParticipantsPreview";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";

@@ -147,8 +147,9 @@
       "join": "Teilnehmen",
       "joinCta": "An der Aktivität teilnehmen",
       "joinHelper": "Mit einem Klick wirst du als Teilnehmende*r eingetragen.",
+      "joinedHelper": "Du nimmst an dieser Aktivität teil.",
       "joined": "Du nimmst teil",
-      "leave": "Teilnahme zurückziehen",
+      "leave": "Verlassen",
       "groupChat": "Gruppenchat"
     },
     "labels": {

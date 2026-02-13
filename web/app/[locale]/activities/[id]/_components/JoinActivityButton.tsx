@@ -94,32 +94,35 @@ export function JoinActivityButton({
   return (
     <div className="flex flex-col items-center gap-2">
       {done ? (
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <span
-            className="inline-flex items-center justify-center rounded-md border-2 border-fern bg-surface px-4 py-2 text-sm font-medium text-foreground"
-            aria-label={t("actions.joined")}
-          >
-            <UserCheck className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">{t("actions.joined")}</span>
-          </span>
-          <Button
-            type="button"
-            variant="secondary"
-            className="hover:bg-fern/20 hover:text-foreground"
-            onClick={onLeave}
-            disabled={checking || leaving}
-            aria-label={t("actions.leave")}
-          >
-            {checking || leaving ? (
-              tCommon("loading")
-            ) : (
-              <>
-                <UserX className="h-4 w-4" aria-hidden="true" />
-                <span className="sr-only">{t("actions.leave")}</span>
-              </>
-            )}
-          </Button>
-          <GroupChatButton activityId={activityId} />
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-full">
+            <div className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-fern bg-surface px-5 py-4 text-base font-medium text-foreground">
+              <UserCheck className="h-4 w-4" aria-hidden="true" />
+              <span>{t("actions.joined")}</span>
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:flex-row">
+            <div className="w-full">
+              <GroupChatButton activityId={activityId} label />
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full gap-2 hover:bg-fern/20 hover:text-foreground"
+              onClick={onLeave}
+              disabled={checking || leaving}
+              aria-label={t("actions.leave")}
+            >
+              {checking || leaving ? (
+                tCommon("loading")
+              ) : (
+                <>
+                  <UserX className="h-4 w-4" aria-hidden="true" />
+                  <span>{t("actions.leave")}</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       ) : (
         <>

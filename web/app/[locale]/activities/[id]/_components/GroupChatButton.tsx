@@ -11,8 +11,10 @@ import { defaultLocale, isLocale } from "@/lib/i18n";
 
 export function GroupChatButton({
   activityId,
+  label = false,
 }: {
   activityId: string;
+  label?: boolean;
 }) {
   const t = useTranslations("activities");
   const tCommon = useTranslations("common");
@@ -47,7 +49,9 @@ export function GroupChatButton({
       <Button
         type="button"
         variant="secondary"
-        className="hover:bg-fern/20 hover:text-foreground"
+        className={`hover:bg-fern/20 hover:text-foreground ${
+          label ? "w-full gap-2" : ""
+        }`}
         onClick={onOpen}
         disabled={loading}
         aria-label={t("actions.groupChat")}
@@ -57,7 +61,11 @@ export function GroupChatButton({
         ) : (
           <>
             <MessagesSquare className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">{t("actions.groupChat")}</span>
+            {label ? (
+              <span>{t("actions.groupChat")}</span>
+            ) : (
+              <span className="sr-only">{t("actions.groupChat")}</span>
+            )}
           </>
         )}
       </Button>

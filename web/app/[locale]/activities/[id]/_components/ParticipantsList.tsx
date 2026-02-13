@@ -59,7 +59,7 @@ export function ParticipantsList({
       <div className="text-sm font-semibold">{t("labels.participants")}</div>
       <div className="mt-2 rounded-xl bg-fern/10 p-4 text-sm ring-1 ring-fern/20">
         <div className="flex items-center justify-center">
-          {showGroupChat ? <GroupChatButton activityId={activityId} /> : null}
+          {showGroupChat ? <GroupChatButton activityId={activityId} label /> : null}
         </div>
         {loading ? (
           <span className="mt-2 inline-block opacity-70">

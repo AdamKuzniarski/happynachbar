@@ -145,6 +145,8 @@
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "join": "Teilnehmen",
+      "joinCta": "An der Aktivität teilnehmen",
+      "joinHelper": "Mit einem Klick wirst du als Teilnehmende*r eingetragen.",
       "joined": "Du nimmst teil",
       "leave": "Teilnahme zurückziehen",
       "groupChat": "Gruppenchat"

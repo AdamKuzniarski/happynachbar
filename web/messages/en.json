@@ -145,6 +145,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "join": "Join activity",
+      "joinCta": "Join this activity",
+      "joinHelper": "One click adds you to the participants list.",
       "joined": "You are participating",
       "leave": "Leave",
       "groupChat": "Group chat"

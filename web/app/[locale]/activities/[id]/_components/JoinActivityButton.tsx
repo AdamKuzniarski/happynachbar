@@ -122,23 +122,29 @@ export function JoinActivityButton({
           <GroupChatButton activityId={activityId} />
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="primary"
-          className="hover:bg-fern/20 hover:text-foreground"
-          onClick={onJoin}
-          disabled={checking || joining}
-          aria-label={t("actions.join")}
-        >
-          {checking || joining ? (
-            tCommon("loading")
-          ) : (
-            <>
-              <UserPlus className="h-4 w-4" aria-hidden="true" />
-              <span className="sr-only">{t("actions.join")}</span>
-            </>
-          )}
-        </Button>
+        <>
+          <Button
+            type="button"
+            variant="primary"
+            className="w-full gap-2 py-3 text-base hover:bg-fern/20 hover:text-foreground"
+            onClick={onJoin}
+            disabled={checking || joining}
+            aria-label={t("actions.join")}
+          >
+            {checking || joining ? (
+              tCommon("loading")
+            ) : (
+              <>
+                <UserPlus className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">{t("actions.join")}</span>
+                <span>{t("actions.joinCta")}</span>
+              </>
+            )}
+          </Button>
+          <p className="mt-2 text-center text-xs opacity-70">
+            {t("actions.joinHelper")}
+          </p>
+        </>
       )}
       <FormError message={error} />
     </div>

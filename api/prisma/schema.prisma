@@ -27,6 +27,8 @@ model User {
   profile                                        UserProfile?
   warningsCreated                                UserWarning[]      @relation("WarningsCreatedBy")
   warningsReceived                               UserWarning[]      @relation("WarningsReceived")
+  passwordResetTokenHash                         String?            @unique
+  passwordResetExpiresAt                         DateTime? 
 }
 
 model UserProfile {
@@ -192,3 +194,4 @@ enum AuditAction {
   ACTIVITIES_BULK_STATUS_CHANGED
   ACTIVITY_EDITED
 }
+

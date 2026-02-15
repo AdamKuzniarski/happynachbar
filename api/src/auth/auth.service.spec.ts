@@ -1,9 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { MailService } from '../mail/mail.service';
 
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
@@ -25,6 +27,18 @@ describe('AuthService (unit)', () => {
     signAsync: jest.fn(),
   } as unknown as JwtService;
 
+  const configMock = {
+    get: jest.fn((key: string) => {
+      if (key === 'WEB_URL') return 'http://localhost:3000';
+      return undefined;
+    }),
+    getOrThrow: jest.fn(() => 'jwt-secret'),
+  } as unknown as ConfigService;
+
+  const mailMock = {
+    sendVerificationEmail: jest.fn(),
+  } as unknown as MailService;
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -36,6 +50,8 @@ describe('AuthService (unit)', () => {
           useValue: prismaMock,
         },
         { provide: JwtService, useValue: jwtMock },
+        { provide: ConfigService, useValue: configMock },
+        { provide: MailService, useValue: mailMock },
       ],
     }).compile();
 
@@ -55,6 +71,10 @@ describe('AuthService (unit)', () => {
         createdAt,
         updatedAt,
       });
+      (jwtMock.signAsync as unknown as jest.Mock).mockResolvedValue('TOKEN');
+      (mailMock.sendVerificationEmail as unknown as jest.Mock).mockResolvedValue(
+        { messageId: 'm1' },
+      );
 
       const res = await service.signup(' A@B.DE', 'pw');
 
@@ -64,6 +84,7 @@ describe('AuthService (unit)', () => {
         data: {
           email: 'a@b.de',
           passwordHash: 'HASHED',
+          emailVerifiedAt: null,
           profile: { create: {} },
         },
         select: { id: true, email: true, createdAt: true, updatedAt: true },
@@ -86,6 +107,9 @@ describe('AuthService (unit)', () => {
         id: 'u1',
         email: 'a@b.de',
         passwordHash: 'HASHED',
+        role: 'USER',
+        isBanned: false,
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
       });
 
       (bcrypt.compare as unknown as jest.Mock).mockResolvedValue(true);
@@ -96,7 +120,14 @@ describe('AuthService (unit)', () => {
 
       expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'a@b.de' },
-        select: { id: true, email: true, passwordHash: true },
+        select: {
+          id: true,
+          email: true,
+          passwordHash: true,
+          role: true,
+          isBanned: true,
+          emailVerifiedAt: true,
+        },
       });
 
       expect(bcrypt.compare).toHaveBeenCalledWith('pw', 'HASHED');
@@ -109,6 +140,7 @@ describe('AuthService (unit)', () => {
       expect(jwtMock.signAsync).toHaveBeenCalledWith({
         sub: 'u1',
         email: 'a@b.de',
+        role: 'USER',
       });
 
       expect(res).toEqual({ access_token: 'TOKEN' });
@@ -134,6 +166,9 @@ describe('AuthService (unit)', () => {
         id: 'u1',
         email: 'a@b.de',
         passwordHash: 'HASHED',
+        role: 'USER',
+        isBanned: false,
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
       });
 
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as any);

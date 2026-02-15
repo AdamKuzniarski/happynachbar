@@ -15,22 +15,29 @@ async function readJsonSafe(res: Response) {
 export async function requestPasswordReset(
   email: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const response = await fetch(`${getApiUrl()}/auth/forgot-password`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-    cache: "no-store",
-  });
+  try {
+    const response = await fetch(`${getApiUrl()}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+      cache: "no-store",
+    });
 
-  const payload = await readJsonSafe(response);
+    const payload = await readJsonSafe(response);
 
-  if (!response.ok) {
-    const msg =
-      (Array.isArray(payload?.message)
-        ? payload.message.join(", ")
-        : payload?.message) || "Request failed";
-    return { ok: false, error: msg };
+    if (!response.ok) {
+      const msg =
+        (Array.isArray(payload?.message)
+          ? payload.message.join(", ")
+          : payload?.message) || "Request failed";
+      return { ok: false, error: msg };
+    }
+
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      error: "Verbindung zum Server fehlgeschlagen. Bitte erneut versuchen.",
+    };
   }
-
-  return { ok: true };
 }

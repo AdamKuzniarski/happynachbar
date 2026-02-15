@@ -11,15 +11,13 @@ function normalizePath(pathname: string) {
 
 function hasLocalePrefix(pathname: string) {
   return locales.some(
-    (locale) =>
-      pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
   );
 }
 
 function getLocaleFromPath(pathname: string) {
   const match = locales.find(
-    (locale) =>
-      pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
   );
   return match ?? defaultLocale;
 }
@@ -35,7 +33,8 @@ function stripLocalePrefix(pathname: string) {
 
 function decodeBase64Url(input: string) {
   const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padding = normalized.length % 4 === 0 ? "" : "=".repeat(4 - (normalized.length % 4));
+  const padding =
+    normalized.length % 4 === 0 ? "" : "=".repeat(4 - (normalized.length % 4));
   return atob(`${normalized}${padding}`);
 }
 
@@ -72,8 +71,10 @@ const PUBLIC_PATHS = new Set<string>([
   "/", // landing page
   "/auth/login", // login page
   "/auth/register", // register page
+  "/auth/forgot", // forgot password page
+  "/auth/reset", // reset password page (link from email)
   "/teaser", // activity teaser page
-  "/auth/verify"
+  "/auth/verify",
 ]);
 
 function buildRedirect(req: NextRequest, pathname: string) {

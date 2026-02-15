@@ -259,12 +259,27 @@ export class AuthService {
 
     const tokenHash = this.hashToken(trimmedToken);
     const now = new Date();
+    const resetCandidate = await this.prisma.user.findFirst({
+      where: {
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: { gt: now },
+        isBanned: false,
+        emailVerifiedAt: { not: null },
+      },
+      select: { id: true },
+    });
+
+    if (!resetCandidate) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
     const passwordHash = await bcrypt.hash(newPassword, 12);
 
     const result = await this.prisma.user.updateMany({
       where: {
+        id: resetCandidate.id,
         passwordResetTokenHash: tokenHash,
-        passwordResetExpiresAt: { gt: now },
+        passwordResetExpiresAt: { gt: new Date() },
         isBanned: false,
         emailVerifiedAt: { not: null },
       },

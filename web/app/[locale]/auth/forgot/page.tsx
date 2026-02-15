@@ -35,6 +35,8 @@ export default function ForgotPasswordPage() {
         return;
       }
       setSubmitted(true);
+    } catch {
+      setError("Es ist ein unerwarteter Fehler aufgetreten.");
     } finally {
       setLoading(false);
     }

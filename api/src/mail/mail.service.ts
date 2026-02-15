@@ -107,4 +107,38 @@ export class MailService {
       throw e;
     }
   }
+
+  async sendPasswordResetEmail(to: string, link: string) {
+    const from = this.env('MAIL_FROM', 'noreply@happynachbar.local');
+    if (!from) throw new Error('MAIL_FROM is not set');
+
+    const subject = 'Password zurücksetzen';
+
+    try {
+      await this.verifyOnce();
+      const transporter = this.getTransporter();
+
+      const info = await transporter.sendMail({
+        from,
+        to,
+        subject,
+        text: `Du hast ein neues Passwort angefordert.\n\nLink zum Zurücksetzen:\n${link}\n\nWenn du das nicht warst, ignoriere diese Mail.`,
+        html: `<p>Du hast ein neues Passwort angefordert.</p>
+               <p><a href="${link}">Passwort zurücksetzen</a></p>
+               <p><small>${link}</small></p>
+               <p><small>Wenn du das nicht warst, ignoriere diese Mail.</small></p>`,
+      });
+
+      this.logger.log(
+        `Password reset email sent to=${to} messageId=${info.messageId}`,
+      );
+      return info;
+    } catch (e: any) {
+      this.logger.error(
+        `sendPasswordResetEmail failed to=${to}`,
+        e?.stack ?? String(e),
+      );
+      throw e;
+    }
+  }
 }

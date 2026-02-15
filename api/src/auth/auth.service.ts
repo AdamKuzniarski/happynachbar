@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
 import type { StringValue } from 'ms';
+import * as crypto from 'crypto';
 
 type VerifyEmailPayload = {
   sub: string;
@@ -52,6 +53,20 @@ export class AuthService {
       secret: this.getEmailTokenSecret(),
       expiresIn: this.getEmailTokenExpiresIn(),
     });
+  }
+
+  private getPasswordResetTtlMinutes(): number {
+    const raw = this.config.get<string>('PASSWORD_RESET_TTL_MINUTES');
+    const parsed = raw != null ? Number(raw) : NaN;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 60;
+  }
+
+  private hashToken(rawToken: string): string {
+    return crypto.createHash('sha256').update(rawToken).digest('hex');
+  }
+
+  private generateResetToken(): string {
+    return crypto.randomBytes(32).toString('hex');
   }
 
   async signup(email: string, password: string, displayName?: string) {
@@ -185,5 +200,101 @@ export class AuthService {
     const access_token = await this.jwt.signAsync(payload);
 
     return { access_token };
+  }
+
+  async requestPasswordReset(email: string) {
+    const normalized = this.normalizeEmail(email);
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalized },
+      select: { id: true, email: true, isBanned: true, emailVerifiedAt: true },
+    });
+
+    if (!user) return { ok: true };
+    if (user.isBanned) return { ok: true };
+
+    if (!user.emailVerifiedAt) {
+      try {
+        await this.resendVerificationEmail(user.email);
+      } catch {}
+      return { ok: true };
+    }
+
+    const rawToken = this.generateResetToken();
+    const tokenHash = this.hashToken(rawToken);
+    const expiresAt = new Date(
+      Date.now() + this.getPasswordResetTtlMinutes() * 60_000,
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: expiresAt,
+      },
+    });
+
+    const webUrl =
+      this.config.get<string>('WEB_URL') ?? 'http://localhost:3000';
+    const resetLink = `${webUrl}/de/auth/reset?token=${encodeURIComponent(rawToken)}`;
+
+    try {
+      await this.mail.sendPasswordResetEmail(user.email, resetLink);
+    } catch {
+      await this.prisma.user
+        .update({
+          where: { id: user.id },
+          data: { passwordResetTokenHash: null, passwordResetExpiresAt: null },
+        })
+        .catch(() => {});
+    }
+
+    return { ok: true };
+  }
+
+  async resetPassword(rawToken: string, newPassword) {
+    const trimmedToken = rawToken?.trim();
+    if (!trimmedToken)
+      throw new BadRequestException('Invalid or expired token');
+
+    const tokenHash = this.hashToken(trimmedToken);
+    const now = new Date();
+    const resetCandidate = await this.prisma.user.findFirst({
+      where: {
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: { gt: now },
+        isBanned: false,
+        emailVerifiedAt: { not: null },
+      },
+      select: { id: true },
+    });
+
+    if (!resetCandidate) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    const result = await this.prisma.user.updateMany({
+      where: {
+        id: resetCandidate.id,
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: { gt: new Date() },
+        isBanned: false,
+        emailVerifiedAt: { not: null },
+      },
+      data: {
+        passwordHash,
+        passwordResetTokenHash: null,
+        passwordResetExpiresAt: null,
+        lastActiveAt: now,
+      },
+    });
+
+    if (result.count !== 1) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
+    return { ok: true };
   }
 }

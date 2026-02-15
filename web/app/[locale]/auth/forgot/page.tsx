@@ -1,44 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import * as React from "react";
-import { loginAndSetCookie } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
-import { useTranslations } from "next-intl";
 import { defaultLocale, isLocale } from "@/lib/i18n";
+import { requestPasswordReset } from "./actions";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function ForgotPasswordPage() {
   const params = useParams();
-  const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
   const localeParam = params?.locale;
   const locale =
     typeof localeParam === "string" && isLocale(localeParam)
       ? localeParam
       : defaultLocale;
+
   const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
 
     setError(null);
     setLoading(true);
     try {
-      const result = await loginAndSetCookie(email.trim(), password);
+      const result = await requestPasswordReset(email.trim().toLowerCase());
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      router.push(`/${locale}/homepage`);
-      router.refresh();
+      setSubmitted(true);
     } finally {
       setLoading(false);
     }
@@ -48,10 +44,11 @@ export default function LoginPage() {
     <main className="px-4">
       <div className="mx-auto mt-10 max-w-sm">
         <h1 className="text-center text-2xl font-bold sm:text-3xl">
-          {t("loginTitle")}
+          Passwort vergessen
         </h1>
         <p className="mt-4 text-center text-sm text-foreground/80">
-          {t("loginSubtitle")}
+          Gib deine E-Mail-Adresse ein. Wenn ein Konto existiert, senden wir dir
+          einen Reset-Link.
         </p>
       </div>
 
@@ -60,34 +57,26 @@ export default function LoginPage() {
         className="mx-auto mt-8 flex max-w-sm flex-col gap-3"
       >
         <Input
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder={t("emailPlaceholder")}
-        />
-        <Input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder={t("passwordPlaceholder")}
-          type="password"
+          placeholder="E-Mail"
+          autoComplete="email"
+          required
         />
         <FormError message={error} />
-        <Button disabled={loading}>
-          {loading ? tCommon("loading") : t("loginButton")}
+        {submitted ? (
+          <p className="text-sm text-foreground/80">
+            Wenn ein Konto existiert, wurde eine E-Mail versendet.
+          </p>
+        ) : null}
+        <Button disabled={loading || submitted}>
+          {loading ? "Senden..." : "Reset-Link senden"}
         </Button>
         <p className="text-center text-xs">
-          <Link href={`/${locale}/auth/forgot`} className="underline font-semibold">
-            Passwort vergessen?
+          <Link href={`/${locale}/auth/login`} className="underline font-semibold">
+            Zurück zum Login
           </Link>
-        </p>
-        <p className="text-center text-xs">
-          {t("registerPrompt")}{" "}
-          <Link
-            href={`/${locale}/auth/register`}
-            className="underline font-semibold"
-          >
-            {t("registerLink")}
-          </Link>
-          .
         </p>
       </form>
     </main>

@@ -1,16 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ConversationType } from '@prisma/client';
 
 export class ConversationListItemDto {
   @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   id!: string;
 
-  @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
-  participantId!: string;
+  @ApiPropertyOptional({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
+  participantId!: string | null;
 
-  @ApiProperty({ example: 'Neighbor' })
-  participantDisplayName!: string;
+  @ApiPropertyOptional({ example: 'Neighbor' })
+  participantDisplayName!: string | null;
 
-  @ApiProperty({ example: 'https://example.com/avatar.png', nullable: true })
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.png', nullable: true })
   participantAvatarUrl!: string | null;
 
   @ApiProperty({
@@ -21,6 +22,9 @@ export class ConversationListItemDto {
 
   @ApiProperty({ example: 'Gemeinsamer Spaziergang', nullable: true })
   activityTitle!: string | null;
+
+  @ApiProperty({ enum: ConversationType, example: ConversationType.DIRECT })
+  type!: ConversationType;
 
   @ApiProperty({ example: true })
   hasUnread!: boolean;

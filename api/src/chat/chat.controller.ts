@@ -20,7 +20,10 @@ import {
   EditMessageDto,
   ListMessagesResponseDto,
 } from './dto/chat-messages.dto';
-import { ListConversationsResponseDto } from './dto/chat-conversations.dto';
+import {
+  ConversationListItemDto,
+  ListConversationsResponseDto,
+} from './dto/chat-conversations.dto';
 import { UnreadCountDto } from './dto/chat-unread.dto';
 
 @ApiTags('chat')
@@ -39,10 +42,34 @@ export class ChatController {
     return this.chat.createOrGetByActivity(req.user.userId, id);
   }
 
+  @Post('conversations/by-user/:id')
+  @ApiOkResponse({ type: ConversationDto })
+  createOrGetByUser(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.chat.createOrGetByUser(req.user.userId, id);
+  }
+
+  @Post('conversations/group/:id')
+  @ApiOkResponse({ type: ConversationDto })
+  createOrGetGroupByActivity(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.chat.createOrGetGroupByActivity(req.user.userId, id);
+  }
+
   @Get('conversations')
   @ApiOkResponse({ type: ListConversationsResponseDto })
   listConversations(@Req() req: any) {
     return this.chat.listConversations(req.user.userId);
+  }
+
+  @Get('conversations/:id')
+  @ApiOkResponse({ type: ConversationListItemDto })
+  getConversation(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.chat.getConversation(req.user.userId, id);
   }
 
   @Post('conversations/:id/read')

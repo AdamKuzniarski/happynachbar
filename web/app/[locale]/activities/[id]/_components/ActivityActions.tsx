@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { deleteActivity } from "@/lib/api/activities";
@@ -72,7 +73,7 @@ export function ActivityActions({
   }
 
   return (
-    <div className="mt-4 flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-2">
       {canManage ? (
         <div className="flex justify-center gap-2">
           <Button
@@ -81,8 +82,10 @@ export function ActivityActions({
             className="hover:bg-fern/20 hover:text-foreground"
             onClick={onEdit}
             disabled={deleting}
+            aria-label={t("actions.edit")}
           >
-            {t("actions.edit")}
+            <Pencil className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">{t("actions.edit")}</span>
           </Button>
           <Button
             type="button"
@@ -90,8 +93,16 @@ export function ActivityActions({
             className="hover:bg-fern/20 hover:text-foreground"
             onClick={onDelete}
             disabled={deleting}
+            aria-label={t("actions.delete")}
           >
-            {deleting ? tCommon("deleting") : t("actions.delete")}
+            {deleting ? (
+              tCommon("deleting")
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">{t("actions.delete")}</span>
+              </>
+            )}
           </Button>
         </div>
       ) : null}

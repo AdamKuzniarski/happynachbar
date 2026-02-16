@@ -37,6 +37,9 @@ export class MessageDto {
   @ApiProperty({ example: '1b5f3d0e-1a2b-4c3d-9e0f-123456789abc' })
   senderId!: string;
 
+  @ApiPropertyOptional({ example: 'Neighbor', nullable: true })
+  senderDisplayName!: string | null;
+
   @ApiPropertyOptional({
     example: 'Hallo!',
     nullable: true,

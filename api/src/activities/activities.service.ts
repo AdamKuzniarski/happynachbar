@@ -17,6 +17,46 @@ import { ListActivitiesResponseDto } from './dto/list-activities.response.dto';
 import { ActivityCardDto, ActivityDetailDto } from './dto/activity.dto';
 import { ActivityCategory as ApiActivityCategory } from './dto/activity-category.enum';
 
+type ParticipantRow = {
+  id: string;
+  displayName: string | null;
+};
+
+const activityListInclude = Prisma.validator<Prisma.ActivityInclude>()({
+  images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+  createdBy: {
+    include: { profile: { select: { displayName: true } } },
+  },
+  _count: { select: { participants: true } },
+});
+
+type ActivityListRow = Prisma.ActivityGetPayload<{
+  include: typeof activityListInclude;
+}>;
+
+const activityDetailInclude = Prisma.validator<Prisma.ActivityInclude>()({
+  images: { orderBy: { sortOrder: 'asc' } },
+  createdBy: {
+    include: { profile: { select: { displayName: true } } },
+  },
+  _count: { select: { participants: true } },
+});
+
+type ActivityDetailRow = Prisma.ActivityGetPayload<{
+  include: typeof activityDetailInclude;
+}>;
+
+type ParticipantListRow = Prisma.ActivityParticipantGetPayload<{
+  select: {
+    user: {
+      select: {
+        id: true;
+        profile: { select: { displayName: true } };
+      };
+    };
+  };
+}>;
+
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
@@ -80,24 +120,19 @@ export class ActivitiesService {
       ];
     }
 
-    const [totalCount, rows] = await this.prisma.$transaction([
-      this.prisma.activity.count({ where }),
-      this.prisma.activity.findMany({
-        where,
-        take: take + 1,
-        ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        include: {
-          images: { orderBy: { sortOrder: 'asc' }, take: 1 },
-          createdBy: {
-            select: {
-              id: true,
-              profile: { select: { displayName: true } },
-            },
-          },
-        },
-      }),
-    ]);
+    const [totalCount, rows] = await this.prisma.$transaction(
+      async (tx): Promise<[number, ActivityListRow[]]> => {
+        const total = await tx.activity.count({ where });
+        const items = await tx.activity.findMany({
+          where,
+          take: take + 1,
+          ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          include: activityListInclude,
+        });
+        return [total, items];
+      },
+    );
 
     const hasMore = rows.length > take;
     const page = rows.slice(0, take);
@@ -117,6 +152,7 @@ export class ActivitiesService {
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
       thumbnailUrl: a.images[0]?.url ?? null,
+      participantsCount: a._count?.participants ?? 0,
     }));
 
     return { items, nextCursor, totalCount };
@@ -125,15 +161,10 @@ export class ActivitiesService {
   // Detail public route GET /activities/:id
 
   async getById(id: string): Promise<ActivityDetailDto> {
-    const a = await this.prisma.activity.findFirst({
+    const a = (await this.prisma.activity.findFirst({
       where: { id, status: 'ACTIVE' },
-      include: {
-        images: { orderBy: { sortOrder: 'asc' } },
-        createdBy: {
-          select: { id: true, profile: { select: { displayName: true } } },
-        },
-      },
-    });
+      include: activityDetailInclude,
+    })) as ActivityDetailRow | null;
 
     if (!a) throw new NotFoundException('Activity not found');
 
@@ -158,6 +189,7 @@ export class ActivitiesService {
       })),
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
+      participantsCount: a._count?.participants ?? 0,
     };
   }
 
@@ -192,6 +224,17 @@ export class ActivitiesService {
           select: { id: true, profile: { select: { displayName: true } } },
         },
       },
+    });
+
+    await this.prisma.conversation.create({
+      data: {
+        activityId: a.id,
+        type: 'GROUP',
+        participantAId: userId,
+        participantBId: userId,
+        participants: { create: { userId } },
+      },
+      select: { id: true },
     });
 
     return this.getById(a.id);
@@ -259,5 +302,134 @@ export class ActivitiesService {
     });
 
     return { ok: true };
+  }
+
+  async join(userId: string, activityId: string): Promise<{ ok: true }> {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true, createdById: true },
+    });
+
+    if (!existing || existing.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+
+    try {
+      await this.prisma.activityParticipant.create({
+        data: { activityId, userId },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return { ok: true };
+      }
+      throw error;
+    }
+
+    const group = await this.prisma.conversation.findFirst({
+      where: { activityId, type: 'GROUP' },
+      select: { id: true },
+    });
+
+    if (!group) {
+      await this.prisma.conversation.create({
+        data: {
+          activityId,
+          type: 'GROUP',
+          participantAId: existing.createdById,
+          participantBId: existing.createdById,
+          participants: {
+            create: [
+              { userId: existing.createdById },
+              ...(userId === existing.createdById ? [] : [{ userId }]),
+            ],
+          },
+        },
+        select: { id: true },
+      });
+    } else {
+      await this.prisma.conversationParticipant.upsert({
+        where: {
+          conversationId_userId: { conversationId: group.id, userId },
+        },
+        update: {},
+        create: { conversationId: group.id, userId },
+      });
+    }
+
+    return { ok: true };
+  }
+
+  async leave(userId: string, activityId: string): Promise<{ ok: true }> {
+    await this.prisma.activityParticipant.deleteMany({
+      where: { activityId, userId },
+    });
+
+    const group = await this.prisma.conversation.findFirst({
+      where: { activityId, type: 'GROUP' },
+      select: { id: true },
+    });
+
+    if (group) {
+      await this.prisma.conversationParticipant.deleteMany({
+        where: { conversationId: group.id, userId },
+      });
+    }
+
+    return { ok: true };
+  }
+
+  async isJoined(
+    userId: string,
+    activityId: string,
+  ): Promise<{ joined: boolean }> {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true },
+    });
+
+    if (!existing || existing.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+
+    const joined = await this.prisma.activityParticipant.findFirst({
+      where: { activityId, userId },
+      select: { id: true },
+    });
+
+    return { joined: !!joined };
+  }
+
+  async listParticipants(
+    userId: string,
+    activityId: string,
+  ): Promise<ParticipantRow[]> {
+    const activity = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true, createdById: true },
+    });
+
+    if (!activity || activity.status !== 'ACTIVE')
+      throw new NotFoundException('Activity not found');
+    if (activity.createdById !== userId)
+      throw new ForbiddenException('Not owner');
+
+    const rows = (await this.prisma.activityParticipant.findMany({
+      where: { activityId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        user: {
+          select: {
+            id: true,
+            profile: { select: { displayName: true } },
+          },
+        },
+      },
+    })) as ParticipantListRow[];
+
+    return rows.map((r) => ({
+      id: r.user.id,
+      displayName: r.user.profile?.displayName ?? null,
+    }));
   }
 }

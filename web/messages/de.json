@@ -143,17 +143,27 @@
       "create": "Erstellen",
       "cancel": "Abbrechen",
       "edit": "Bearbeiten",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "join": "Teilnehmen",
+      "joinCta": "An der Aktivität teilnehmen",
+      "joinHelper": "Mit einem Klick wirst du als Teilnehmende*r eingetragen.",
+      "joinedHelper": "Du nimmst an dieser Aktivität teil.",
+      "joined": "Du nimmst teil",
+      "leave": "Verlassen",
+      "groupChat": "Gruppenchat"
     },
     "labels": {
       "postalCode": "PLZ",
       "createdBy": "Erstellt von",
       "start": "Start",
       "updated": "Aktualisiert",
+      "participants": "Teilnehmende",
       "description": "Beschreibung",
       "bio": "Bio",
       "memberSince": "Mitglied seit"
     },
+    "loadingParticipants": "Teilnehmende werden geladen…",
+    "noParticipants": "Noch keine Teilnehmenden.",
     "aria": {
       "profileLink": "Zum Profil"
     },
@@ -228,6 +238,9 @@
     "emptyInbox": "Noch keine Chats.",
     "neighbor": "Nachbar",
     "activityLabel": " · zur Aktivität: {title}",
+    "loadMore": "Ältere Nachrichten laden",
+    "groupChat": "Gruppenchat",
+    "groupLabel": " · Gruppe",
     "errors": {
       "unknown": "Unbekannter Fehler"
     },

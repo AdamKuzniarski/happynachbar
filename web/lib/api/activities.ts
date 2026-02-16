@@ -110,6 +110,89 @@ export async function deleteActivity(
   }
 }
 
+export async function joinActivity(
+  id: string,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}/join`, {
+      method: "POST",
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
+export async function leaveActivity(
+  id: string,
+): Promise<
+  { ok: true } | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    await apiFetch(`/activities/${encodeURIComponent(id)}/join`, {
+      method: "DELETE",
+    });
+    return { ok: true };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
+export async function getActivityJoinStatus(
+  id: string,
+): Promise<
+  | { ok: true; joined: boolean }
+  | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    const res = await apiFetch<{ joined: boolean }>(
+      `/activities/${encodeURIComponent(id)}/joined`,
+    );
+    return { ok: true, joined: !!res?.joined };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
+export type ActivityParticipant = {
+  id: string;
+  displayName: string | null;
+};
+
+export async function listActivityParticipants(
+  id: string,
+): Promise<
+  | { ok: true; participants: ActivityParticipant[] }
+  | { ok: false; status: number; message?: string | string[] }
+> {
+  try {
+    const res = await apiFetch<ActivityParticipant[]>(
+      `/activities/${encodeURIComponent(id)}/participants`,
+    );
+    return { ok: true, participants: res ?? [] };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      status: 400,
+      message: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function uploadActivityImages(files: File[]) {
   if (!files.length) return [];
 

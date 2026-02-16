@@ -5,6 +5,9 @@ import { formatDate } from "@/lib/format";
 import type { ActivityDetail } from "@/lib/api/types";
 import { ActivityImageGallery } from "./_components/ActivityImageGallery";
 import { ActivityActions } from "./_components/ActivityActions";
+import { JoinActivityButton } from "./_components/JoinActivityButton";
+import { ParticipantsList } from "./_components/ParticipantsList";
+import { ParticipantsPreview } from "./_components/ParticipantsPreview";
 import { CircleArrowLeft, User } from "lucide-react";
 import { StartChatButton } from "./creator/StartChatButton";
 import { Button } from "@/components/ui/Button";
@@ -53,6 +56,7 @@ export default async function ActivityDetailPage({
     a?.createdById &&
     currentUserId === a.createdById
   );
+  const isAuthenticated = !!currentUserId;
   const creatorHref =
     currentUserId && a?.createdById && currentUserId === a.createdById
       ? `/${locale}/profile`
@@ -96,6 +100,13 @@ export default async function ActivityDetailPage({
                 </div>
               </div>
 
+              <div className="shrink-0">
+                <ActivityActions
+                  id={a.id}
+                  createdById={a.createdById}
+                  currentUserId={currentUserId}
+                />
+              </div>
             </div>
           </header>
 
@@ -156,12 +167,26 @@ export default async function ActivityDetailPage({
             ) : null}
 
             <div className="mt-6">
-              <ActivityActions
-                id={a.id}
-                createdById={a.createdById}
-                currentUserId={currentUserId}
-              />
+              {!isOwner ? (
+                <>
+                  <JoinActivityButton
+                    activityId={a.id}
+                    isAuthenticated={isAuthenticated}
+                  />
+                  <ParticipantsPreview
+                    activityId={a.id}
+                    participantsCount={a.participantsCount}
+                    fetchParticipants={false}
+                  />
+                </>
+              ) : null}
             </div>
+
+            {isOwner ? (
+              <>
+                <ParticipantsList activityId={a.id} showGroupChat />
+              </>
+            ) : null}
           </div>
         </section>
       </div>

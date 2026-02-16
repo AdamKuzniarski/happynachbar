@@ -99,4 +99,32 @@ export class ActivitiesController {
   archive(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.activities.archive(req.user.userId, id);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/join')
+  join(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.join(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/join')
+  leave(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.leave(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/joined')
+  isJoined(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.isJoined(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/participants')
+  listParticipants(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.listParticipants(req.user.userId, id);
+  }
 }

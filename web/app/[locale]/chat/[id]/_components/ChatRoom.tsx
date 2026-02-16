@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Pencil, Trash2 } from "lucide-react";
-import { io, type Socket } from "socket.io-client";
+import { ArrowUpRight, Pencil, Trash2, User } from "lucide-react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  listConversations,
+  getConversation,
   listMessages,
   markConversationRead,
   type Message,
@@ -13,11 +13,10 @@ import {
 import { FormError } from "@/components/ui/FormError";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useChatSocket } from "./useChatSocket";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-type SocketMessage = Message;
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const locale = useLocale();
@@ -27,95 +26,82 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [text, setText] = React.useState("");
+  const [participantId, setParticipantId] = React.useState<string | null>(null);
   const [participantName, setParticipantName] = React.useState<string | null>(
     null,
   );
   const [activityTitle, setActivityTitle] = React.useState<string | null>(null);
+  const [activityId, setActivityId] = React.useState<string | null>(null);
+  const [conversationType, setConversationType] = React.useState<
+    "DIRECT" | "GROUP" | null
+  >(null);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editingText, setEditingText] = React.useState("");
-  const socketRef = React.useRef<Socket | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     let alive = true;
     setLoading(true);
-    listMessages(conversationId)
-      .then((res) => {
-        if (!alive) return;
-        const items = res?.items ?? [];
+    (async () => {
+      const [messagesRes, conversationRes, meRes] = await Promise.allSettled([
+        listMessages(conversationId),
+        getConversation(conversationId),
+        fetch(`${API_BASE_URL}/users/me`, { credentials: "include" }).then(
+          (res) => (res.ok ? res.json() : null),
+        ),
+      ]);
+
+      if (!alive) return;
+
+      if (messagesRes.status === "fulfilled") {
+        const items = messagesRes.value?.items ?? [];
         setMessages(items.slice().reverse());
-        setError(null);
         markConversationRead(conversationId)
           .then(() => {
             window.dispatchEvent(new Event("chat:read"));
           })
           .catch(() => {});
-      })
-      .catch((e) => {
-        if (!alive) return;
-        setError(e instanceof Error ? e.message : t("errors.unknown"));
-      })
-      .finally(() => {
-        if (!alive) return;
-        setLoading(false);
-      });
+      } else {
+        const msg =
+          messagesRes.reason instanceof Error
+            ? messagesRes.reason.message
+            : t("errors.unknown");
+        setError(msg);
+      }
 
-    return () => {
-      alive = false;
-    };
-  }, [conversationId]);
-
-  React.useEffect(() => {
-    let alive = true;
-    listConversations()
-      .then((res) => {
-        if (!alive) return;
-        const item = res?.items?.find((c) => c.id === conversationId);
+      if (conversationRes.status === "fulfilled") {
+        const item = conversationRes.value;
+        setParticipantId(item?.participantId ?? null);
         setParticipantName(item?.participantDisplayName ?? null);
         setActivityTitle(item?.activityTitle ?? null);
-      })
-      .catch(() => {
-        if (!alive) return;
+        setActivityId(item?.activityId ?? null);
+        setConversationType(item?.type ?? null);
+      } else {
+        setParticipantId(null);
         setParticipantName(null);
         setActivityTitle(null);
-      });
+        setActivityId(null);
+        setConversationType(null);
+      }
 
-    return () => {
-      alive = false;
-    };
-  }, [conversationId]);
-
-  React.useEffect(() => {
-    let alive = true;
-    fetch(`${API_BASE_URL}/users/me`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!alive) return;
-        const id = typeof data?.id === "string" ? data.id : null;
+      if (meRes.status === "fulfilled") {
+        const id = typeof meRes.value?.id === "string" ? meRes.value.id : null;
         setCurrentUserId(id);
-      })
-      .catch(() => {
-        if (!alive) return;
+      } else {
         setCurrentUserId(null);
-      });
+      }
+
+      setLoading(false);
+    })();
 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [conversationId, t]);
 
-  React.useEffect(() => {
-    const socket = io(`${API_BASE_URL}/chat`, {
-      withCredentials: true,
-    });
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      socket.emit("chat:join", { conversationId });
-    });
-
-    socket.on("message:new", (msg: SocketMessage) => {
+  const handleNewMessage = React.useCallback(
+    (msg: Message) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) => [...prev, msg]);
       markConversationRead(conversationId)
@@ -123,25 +109,25 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           window.dispatchEvent(new Event("chat:read"));
         })
         .catch(() => {});
-    });
+    },
+    [conversationId],
+  );
 
-    function handleMessageUpdate(msg: SocketMessage) {
+  const handleMessageUpdate = React.useCallback(
+    (msg: Message) => {
       if (msg.conversationId !== conversationId) return;
       setMessages((prev) =>
         prev.map((item) => (item.id === msg.id ? msg : item)),
       );
-    }
+    },
+    [conversationId],
+  );
 
-    socket.on("message:updated", handleMessageUpdate);
-    socket.on("message:deleted", handleMessageUpdate);
-
-    return () => {
-      socket.off("message:updated", handleMessageUpdate);
-      socket.off("message:deleted", handleMessageUpdate);
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [conversationId]);
+  const { sendMessage, editMessage, deleteMessage: emitDeleteMessage } =
+    useChatSocket(conversationId, {
+      onNewMessage: handleNewMessage,
+      onUpdateMessage: handleMessageUpdate,
+    });
 
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -151,10 +137,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
-    socketRef.current?.emit("message:send", {
-      conversationId,
-      body,
-    });
+    sendMessage(body);
     setText("");
   }
 
@@ -174,28 +157,55 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     if (!editingId) return;
     const body = editingText.trim();
     if (!body) return;
-    socketRef.current?.emit("message:edit", {
-      messageId: editingId,
-      body,
-    });
+    editMessage(editingId, body);
     cancelEdit();
   }
 
   function deleteMessage(messageId: string) {
     if (!window.confirm(t("confirmDelete"))) return;
-    socketRef.current?.emit("message:delete", { messageId });
+    emitDeleteMessage(messageId);
     if (editingId === messageId) cancelEdit();
   }
 
   return (
     <>
       <h1 className="text-lg font-semibold text-center">
-        {t("chatWith", {
-          name: participantName?.trim() ? participantName : t("creator"),
-        })}
+        {conversationType === "GROUP" ? (
+          t("groupChat")
+        ) : participantId && participantName?.trim() ? (
+          <span>
+            {t("chatWith", { name: "" }).trim()}{" "}
+            <Link
+              href={`/${locale}/users/${encodeURIComponent(participantId)}`}
+              className="inline-flex items-center gap-1 rounded-md px-1 text-foreground/90 hover:bg-fern/10 hover:text-foreground"
+            >
+              <User className="h-4 w-4" aria-hidden="true" />
+              {participantName}
+            </Link>
+          </span>
+        ) : (
+          t("chatWith", {
+            name: participantName?.trim() ? participantName : t("creator"),
+          })
+        )}
         {activityTitle?.trim() ? (
           <span className="mt-1 block text-sm font-normal opacity-75">
-            {t("activityTitle", { title: activityTitle })}
+            {conversationType === "GROUP" && activityId ? (
+              <span className="inline-flex items-center gap-2 text-foreground/80 hover:text-foreground">
+                {t("activityTitle", { title: "" })}
+                <Link
+                  href={`/${locale}/activities/${encodeURIComponent(
+                    activityId,
+                  )}`}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-foreground/90 hover:bg-fern/10"
+                >
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  {activityTitle}
+                </Link>
+              </span>
+            ) : (
+              t("activityTitle", { title: activityTitle })
+            )}
           </span>
         ) : null}
       </h1>
@@ -213,7 +223,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
               const isMine = !!currentUserId && m.senderId === currentUserId;
               const authorLabel = isMine
                 ? t("you")
-                : participantName?.trim() || t("creator");
+                : conversationType === "GROUP"
+                  ? m.senderDisplayName?.trim() || t("neighbor")
+                  : participantName?.trim() || t("creator");
               const alignment = isMine ? "ml-auto text-right" : "mr-auto text-left";
               const bubble =
                 isMine

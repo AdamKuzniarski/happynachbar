@@ -27,6 +27,7 @@ export function ChatInbox() {
   const [loading, setLoading] = React.useState(true);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [socketConnected, setSocketConnected] = React.useState(false);
+  const [visibleCount, setVisibleCount] = React.useState(10);
   const socketRef = React.useRef<Socket | null>(null);
   const joinedRef = React.useRef<Set<string>>(new Set());
 
@@ -39,6 +40,7 @@ export function ChatInbox() {
         const res = await listConversations();
         const nextItems = res?.items ?? [];
         setItems(nextItems);
+        setVisibleCount((prev) => Math.min(Math.max(prev, 10), nextItems.length));
         setError(null);
         const socket = socketRef.current;
         if (socket) {
@@ -59,6 +61,16 @@ export function ChatInbox() {
 
   React.useEffect(() => {
     refreshConversations().catch(() => {});
+  }, [refreshConversations]);
+
+  React.useEffect(() => {
+    const interval = window.setInterval(() => {
+      refreshConversations({ silent: true }).catch(() => {});
+    }, 10000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
   }, [refreshConversations]);
 
   React.useEffect(() => {
@@ -157,8 +169,9 @@ export function ChatInbox() {
       {items.length === 0 ? (
         <p className="text-sm opacity-70">{t("emptyInbox")}</p>
       ) : (
-        <ul className="space-y-3">
-          {items.map((c) => (
+        <>
+          <ul className="space-y-3">
+            {items.slice(0, visibleCount).map((c) => (
             <li key={c.id}>
               <Link
                 href={`/${locale}/chat/${encodeURIComponent(c.id)}`}
@@ -170,14 +183,26 @@ export function ChatInbox() {
               >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-fern/10 flex items-center justify-center text-sm font-semibold">
-                    {c.participantDisplayName?.trim()?.[0] ?? "N"}
+                    {(c.type === "GROUP"
+                      ? c.activityTitle ?? t("groupChat")
+                      : c.participantDisplayName ?? t("neighbor")
+                    )
+                      .trim()
+                      .charAt(0) || "N"}
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold">
-                      {c.participantDisplayName || t("neighbor")}
-                      {c.activityTitle ? (
+                      {c.type === "GROUP"
+                        ? c.activityTitle ?? t("groupChat")
+                        : c.participantDisplayName || t("neighbor")}
+                      {c.type === "DIRECT" && c.activityTitle ? (
                         <span className="text-xs font-normal opacity-70">
                           {t("activityLabel", { title: c.activityTitle })}
+                        </span>
+                      ) : null}
+                      {c.type === "GROUP" ? (
+                        <span className="text-xs font-normal opacity-70">
+                          {t("groupLabel")}
                         </span>
                       ) : null}
                     </div>
@@ -185,8 +210,24 @@ export function ChatInbox() {
                 </div>
               </Link>
             </li>
-          ))}
-        </ul>
+            ))}
+          </ul>
+          {items.length > visibleCount ? (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                className="text-sm font-semibold text-foreground/80 hover:text-foreground"
+                onClick={() =>
+                  setVisibleCount((prev) =>
+                    Math.min(prev + 10, items.length),
+                  )
+                }
+              >
+                {t("loadMore")}
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );

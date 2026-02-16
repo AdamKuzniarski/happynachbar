@@ -12,7 +12,11 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
 import type { StringValue } from 'ms';
+
+import { Prisma } from '@prisma/client';
+
 import * as crypto from 'crypto';
+
 
 type VerifyEmailPayload = {
   sub: string;
@@ -92,7 +96,7 @@ export class AuthService {
 
       try {
         await this.mail.sendVerificationEmail(user.email, verifyLink);
-      } catch (e) {
+      } catch {
         await this.prisma.user.delete({ where: { id: user.id } });
         throw new InternalServerErrorException(
           'Could not send verification email',
@@ -100,8 +104,11 @@ export class AuthService {
       }
 
       return user;
-    } catch (error: any) {
-      if (error?.code === 'P2002') {
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('Email already in use');
       }
       throw error;

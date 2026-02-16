@@ -28,7 +28,12 @@ model User {
   profile                                        UserProfile?
   warningsCreated                                UserWarning[]      @relation("WarningsCreatedBy")
   warningsReceived                               UserWarning[]      @relation("WarningsReceived")
+
   conversationParticipants                       ConversationParticipant[]
+
+  passwordResetTokenHash                         String?            @unique
+  passwordResetExpiresAt                         DateTime? 
+
 }
 
 model UserProfile {

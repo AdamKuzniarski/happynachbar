@@ -15,7 +15,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const origins = (
-    configService.get<string>('CORS_ORIGINS') ?? 'http://localhost:3000'
+    configService.get<string>('CORS_ORIGINS') ?? 'http://localhost:3000 , http://localhost:8081'
   )
     .split(',')
     .map((s) => s.trim())

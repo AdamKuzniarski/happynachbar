@@ -22,35 +22,62 @@ type JwtPayload = {
 };
 
 type AuthedSocket = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  { userId?: string }
+    DefaultEventsMap,
+    DefaultEventsMap,
+    DefaultEventsMap,
+    { userId?: string }
 >;
+
+function getBearerFromHeader(raw?: string) {
+  if (!raw) return null;
+  const prefix = 'Bearer ';
+  if (!raw.startsWith(prefix)) return null;
+  const token = raw.slice(prefix.length).trim();
+  return token.length > 0 ? token : null;
+}
 
 function parseCookie(header?: string): Record<string, string> {
   if (!header) return {};
   return header
-    .split(';')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .reduce<Record<string, string>>((acc, part) => {
-      const idx = part.indexOf('=');
-      if (idx === -1) return acc;
-      const key = part.slice(0, idx).trim();
-      const value = part.slice(idx + 1).trim();
-      if (key) acc[key] = value;
-      return acc;
-    }, {});
+      .split(';')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .reduce<Record<string, string>>((acc, part) => {
+        const idx = part.indexOf('=');
+        if (idx === -1) return acc;
+        const key = part.slice(0, idx).trim();
+        const value = part.slice(idx + 1).trim();
+        if (key) acc[key] = value;
+        return acc;
+      }, {});
 }
 
 function parseOrigins(raw?: string) {
   return new Set(
-    (raw ?? 'http://localhost:3000')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean),
+      (raw ?? 'http://localhost:3000')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
   );
+}
+
+function getHandshakeToken(client: AuthedSocket): string | null {
+  const cookies = parseCookie(client.handshake.headers.cookie);
+
+  const tokenFromCookie = cookies[COOKIE_NAME];
+
+  const tokenFromAuth =
+      typeof client.handshake.auth?.token === 'string'
+          ? client.handshake.auth.token.trim()
+          : '';
+
+  const tokenFromHeader = getBearerFromHeader(
+      typeof client.handshake.headers.authorization === 'string'
+          ? client.handshake.headers.authorization
+          : undefined,
+  );
+
+  return tokenFromCookie || tokenFromAuth || tokenFromHeader || null;
 }
 
 @WebSocketGateway({
@@ -64,9 +91,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly allowedOrigins: Set<string>;
 
   constructor(
-    private config: ConfigService,
-    private jwt: JwtService,
-    private chat: ChatService,
+      private config: ConfigService,
+      private jwt: JwtService,
+      private chat: ChatService,
   ) {
     this.allowedOrigins = parseOrigins(this.config.get<string>('CORS_ORIGINS'));
   }
@@ -78,8 +105,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const cookies = parseCookie(client.handshake.headers.cookie);
-    const token = cookies[COOKIE_NAME];
+    const token = getHandshakeToken(client);
 
     if (!token) {
       client.disconnect(true);
@@ -105,7 +131,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const conversationId =
-      typeof payload?.conversationId === 'string' ? payload.conversationId : '';
+        typeof payload?.conversationId === 'string' ? payload.conversationId : '';
     if (!conversationId) return;
 
     await this.chat.assertConversationAccess(userId, conversationId);
@@ -115,8 +141,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message:send')
   async handleSend(
-    client: AuthedSocket,
-    payload: { conversationId?: string; body?: string },
+      client: AuthedSocket,
+      payload: { conversationId?: string; body?: string },
   ) {
     const userId = client.data.userId;
     if (!userId) {
@@ -125,24 +151,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const conversationId =
-      typeof payload?.conversationId === 'string' ? payload.conversationId : '';
+        typeof payload?.conversationId === 'string' ? payload.conversationId : '';
     const body = typeof payload?.body === 'string' ? payload.body.trim() : '';
     if (!conversationId || !body) return;
 
     const message: MessageDto = await this.chat.createMessage(
-      userId,
-      conversationId,
-      body,
+        userId,
+        conversationId,
+        body,
     );
     this.server
-      .to(`conversation:${conversationId}`)
-      .emit('message:new', message);
+        .to(`conversation:${conversationId}`)
+        .emit('message:new', message);
   }
 
   @SubscribeMessage('message:edit')
   async handleEdit(
-    client: AuthedSocket,
-    payload: { messageId?: string; body?: string },
+      client: AuthedSocket,
+      payload: { messageId?: string; body?: string },
   ) {
     const userId = client.data.userId;
     if (!userId) {
@@ -151,14 +177,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const messageId =
-      typeof payload?.messageId === 'string' ? payload.messageId : '';
+        typeof payload?.messageId === 'string' ? payload.messageId : '';
     const body = typeof payload?.body === 'string' ? payload.body.trim() : '';
     if (!messageId || !body) return;
 
     const message = await this.chat.editMessage(userId, messageId, body);
     this.server
-      .to(`conversation:${message.conversationId}`)
-      .emit('message:updated', message);
+        .to(`conversation:${message.conversationId}`)
+        .emit('message:updated', message);
   }
 
   @SubscribeMessage('message:delete')
@@ -170,12 +196,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const messageId =
-      typeof payload?.messageId === 'string' ? payload.messageId : '';
+        typeof payload?.messageId === 'string' ? payload.messageId : '';
     if (!messageId) return;
 
     const message = await this.chat.deleteMessage(userId, messageId);
     this.server
-      .to(`conversation:${message.conversationId}`)
-      .emit('message:deleted', message);
+        .to(`conversation:${message.conversationId}`)
+        .emit('message:deleted', message);
   }
 }

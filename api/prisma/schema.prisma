@@ -187,6 +187,20 @@ model Message {
   @@index([senderId, createdAt])
 }
 
+model ActivityLike {
+  id         String   @id @default(uuid()) @db.Uuid
+  activityId String   @db.Uuid
+  userId     String   @db.Uuid
+  createdAt  DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, userId])
+  @@index([activityId, createdAt])
+  @@index([userId, createdAt])
+}
+
 enum UserRole {
   USER
   MODERATOR

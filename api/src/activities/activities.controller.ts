@@ -14,8 +14,8 @@ import {
 import {
   ApiBearerAuth,
   ApiOkResponse,
-  ApiTags,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { ActivitiesService } from './activities.service';
@@ -32,7 +32,6 @@ import { ActivityDetailDto } from './dto/activity.dto';
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
-  //Public feed
   @Get()
   @ApiQuery({ name: 'plz', required: false, example: '10115' })
   @ApiQuery({ name: 'q', required: false, example: 'coffee' })
@@ -60,19 +59,28 @@ export class ActivitiesController {
   })
   @ApiOkResponse({ type: ListActivitiesResponseDto })
   async list(
-    @Query() q: ListActivitiesQueryDto,
+      @Query() q: ListActivitiesQueryDto,
   ): Promise<ListActivitiesResponseDto> {
     return this.activities.list(q);
   }
 
-  //Public detail
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('favorites')
+  @ApiOkResponse({ type: ListActivitiesResponseDto })
+  async listFavorites(
+      @Req() req: any,
+      @Query() q: ListActivitiesQueryDto,
+  ): Promise<ListActivitiesResponseDto> {
+    return this.activities.listFavorites(req.user.userId, q);
+  }
+
   @Get(':id')
   @ApiOkResponse({ type: ActivityDetailDto })
   getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.activities.getById(id);
   }
 
-  //Create auth
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -80,19 +88,17 @@ export class ActivitiesController {
     return this.activities.create(req.user.userId, dto);
   }
 
-  //Update auth + owner
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   update(
-    @Req() req: any,
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() dto: UpdateActivityDto,
+      @Req() req: any,
+      @Param('id', new ParseUUIDPipe()) id: string,
+      @Body() dto: UpdateActivityDto,
   ) {
     return this.activities.update(req.user.userId, id, dto);
   }
 
-  // Delete auth + owner → ARCHIVED
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -145,10 +151,7 @@ export class ActivitiesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id/participants')
-  listParticipants(
-    @Req() req: any,
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ) {
+  listParticipants(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.activities.listParticipants(req.user.userId, id);
   }
 }

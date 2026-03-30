@@ -3,8 +3,13 @@ import { ActivityCategory } from './dto/activity-category.enum';
 
 describe('ActivitiesService', () => {
   it('returns items + nextCursor with deterministic pagination', async () => {
+    const count = jest.fn().mockResolvedValue(3);
+    const findMany = jest.fn();
+    const tx = { activity: { count, findMany } };
+
     const prismaMock = {
-      activity: { findMany: jest.fn() },
+      activity: tx.activity,
+      $transaction: jest.fn((cb: (arg: typeof tx) => unknown) => cb(tx)),
     };
 
     const service = new ActivitiesService(prismaMock as any);
@@ -23,18 +28,20 @@ describe('ActivitiesService', () => {
       updatedAt: new Date('2026-01-01T10:00:00.000Z'),
     });
 
-    prismaMock.activity.findMany.mockResolvedValue([
-      row('a1'),
-      row('a2'),
-      row('a3'),
-    ]); // take+1
+    findMany.mockResolvedValue([row('a1'), row('a2'), row('a3')]); // take+1
 
     const res = await service.list({
       take: 2,
       category: ActivityCategory.OUTDOOR,
     } as any);
 
-    expect(prismaMock.activity.findMany).toHaveBeenCalledWith(
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: 'ACTIVE' }),
+      }),
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         take: 3,
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
@@ -49,17 +56,23 @@ describe('ActivitiesService', () => {
       thumbnailUrl: expect.any(String),
       createdBy: { displayName: 'Anna' },
     });
+    expect(res.totalCount).toBe(3);
   });
 
   it('uses cursor + skip:1', async () => {
+    const count = jest.fn().mockResolvedValue(0);
+    const findMany = jest.fn().mockResolvedValue([]);
+    const tx = { activity: { count, findMany } };
+
     const prismaMock = {
-      activity: { findMany: jest.fn().mockResolvedValue([]) },
+      activity: tx.activity,
+      $transaction: jest.fn((cb: (arg: typeof tx) => unknown) => cb(tx)),
     };
     const service = new ActivitiesService(prismaMock as any);
 
     await service.list({ cursor: 'a2', take: 20 } as any);
 
-    expect(prismaMock.activity.findMany).toHaveBeenCalledWith(
+    expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         cursor: { id: 'a2' },
         skip: 1,

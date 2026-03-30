@@ -117,10 +117,10 @@ export class ActivitiesService {
       }
 
       const existingAnd = Array.isArray(where.AND)
-          ? where.AND
-          : where.AND
-              ? [where.AND]
-              : [];
+        ? where.AND
+        : where.AND
+          ? [where.AND]
+          : [];
 
       where.AND = [
         ...existingAnd,
@@ -134,17 +134,17 @@ export class ActivitiesService {
     }
 
     const [totalCount, rows] = await this.prisma.$transaction(
-        async (tx): Promise<[number, ActivityListRow[]]> => {
-          const total = await tx.activity.count({ where });
-          const items = await tx.activity.findMany({
-            where,
-            take: take + 1,
-            ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
-            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-            include: activityListInclude,
-          });
-          return [total, items];
-        },
+      async (tx): Promise<[number, ActivityListRow[]]> => {
+        const total = await tx.activity.count({ where });
+        const items = await tx.activity.findMany({
+          where,
+          take: take + 1,
+          ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          include: activityListInclude,
+        });
+        return [total, items];
+      },
     );
 
     const hasMore = rows.length > take;
@@ -211,8 +211,8 @@ export class ActivitiesService {
 
   // Create (auth)
   async create(
-      userId: string,
-      dto: CreateActivityDto,
+    userId: string,
+    dto: CreateActivityDto,
   ): Promise<ActivityDetailDto> {
     const a = await this.prisma.activity.create({
       data: {
@@ -224,14 +224,14 @@ export class ActivitiesService {
         scheduledAt: dto.startAt ? new Date(dto.startAt) : null,
         createdById: userId,
         images: dto.imageUrls?.length
-            ? {
+          ? {
               create: dto.imageUrls.map((url, idx) => ({
                 url,
                 sortOrder: idx,
                 alt: dto.title,
               })),
             }
-            : undefined,
+          : undefined,
       },
       include: {
         images: { orderBy: { sortOrder: 'asc' } },
@@ -257,9 +257,9 @@ export class ActivitiesService {
 
   // Update (auth + owner)
   async update(
-      userId: string,
-      id: string,
-      dto: UpdateActivityDto,
+    userId: string,
+    id: string,
+    dto: UpdateActivityDto,
   ): Promise<ActivityDetailDto> {
     const existing = await this.prisma.activity.findUnique({
       where: { id },
@@ -340,8 +340,8 @@ export class ActivitiesService {
       });
     } catch (error: unknown) {
       if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2002'
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
       ) {
         return { ok: true };
       }
@@ -402,8 +402,8 @@ export class ActivitiesService {
   }
 
   async isJoined(
-      userId: string,
-      activityId: string,
+    userId: string,
+    activityId: string,
   ): Promise<{ joined: boolean }> {
     const existing = await this.prisma.activity.findUnique({
       where: { id: activityId },
@@ -431,8 +431,8 @@ export class ActivitiesService {
       });
     } catch (error: unknown) {
       if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2002'
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
       ) {
         return { ok: true };
       }
@@ -453,8 +453,8 @@ export class ActivitiesService {
   }
 
   async isLiked(
-      userId: string,
-      activityId: string,
+    userId: string,
+    activityId: string,
   ): Promise<{ liked: boolean }> {
     await this.ensureActiveActivity(activityId);
 
@@ -467,8 +467,8 @@ export class ActivitiesService {
   }
 
   async listParticipants(
-      userId: string,
-      activityId: string,
+    userId: string,
+    activityId: string,
   ): Promise<ParticipantRow[]> {
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },

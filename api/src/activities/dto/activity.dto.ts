@@ -97,4 +97,3 @@ export class ActivityDetailDto extends ActivityCardDto {
   @ApiProperty({ type: () => [ActivityImageDto] })
   images!: ActivityImageDto[];
 }
-

@@ -76,18 +76,18 @@ export class ActivitiesService {
     }
   }
 
-  // Public route GET /activities
-  async list(q: ListActivitiesQueryDto): Promise<ListActivitiesResponseDto> {
-    const take = clamp(q.take ?? 20, 1, 50);
-
-    const where: Prisma.ActivityWhereInput = { status: 'ACTIVE' };
-
+  private applyListFilters(
+      where: Prisma.ActivityWhereInput,
+      q: ListActivitiesQueryDto,
+  ): void {
     if (q.plz) {
       where.plz = q.plz.length === 5 ? q.plz : { startsWith: q.plz };
     }
+
     if (q.category) {
       where.category = q.category as unknown as PrismaActivityCategory;
     }
+
     if (q.createdById) {
       where.createdById = q.createdById;
     }
@@ -117,10 +117,10 @@ export class ActivitiesService {
       }
 
       const existingAnd = Array.isArray(where.AND)
-        ? where.AND
-        : where.AND
-          ? [where.AND]
-          : [];
+          ? where.AND
+          : where.AND
+              ? [where.AND]
+              : [];
 
       where.AND = [
         ...existingAnd,
@@ -132,19 +132,27 @@ export class ActivitiesService {
         },
       ];
     }
+  }
+
+  // Public route GET /activities
+  async list(q: ListActivitiesQueryDto): Promise<ListActivitiesResponseDto> {
+    const take = clamp(q.take ?? 20, 1, 50);
+
+    const where: Prisma.ActivityWhereInput = { status: 'ACTIVE' };
+    this.applyListFilters(where, q);
 
     const [totalCount, rows] = await this.prisma.$transaction(
-      async (tx): Promise<[number, ActivityListRow[]]> => {
-        const total = await tx.activity.count({ where });
-        const items = await tx.activity.findMany({
-          where,
-          take: take + 1,
-          ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
-          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-          include: activityListInclude,
-        });
-        return [total, items];
-      },
+        async (tx): Promise<[number, ActivityListRow[]]> => {
+          const total = await tx.activity.count({ where });
+          const items = await tx.activity.findMany({
+            where,
+            take: take + 1,
+            ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            include: activityListInclude,
+          });
+          return [total, items];
+        },
     );
 
     const hasMore = rows.length > take;
@@ -167,6 +175,62 @@ export class ActivitiesService {
       thumbnailUrl: a.images[0]?.url ?? null,
       participantsCount: a._count?.participants ?? 0,
       likesCount: a._count?.likes ?? 0,
+    }));
+
+    return { items, nextCursor, totalCount };
+  }
+
+  // Auth route GET /activities/favorites
+  async listFavorites(
+      userId: string,
+      q: ListActivitiesQueryDto,
+  ): Promise<ListActivitiesResponseDto> {
+    const take = clamp(q.take ?? 20, 1, 50);
+
+    const where: Prisma.ActivityWhereInput = {
+      status: 'ACTIVE',
+      likes: {
+        some: { userId },
+      },
+    };
+
+    this.applyListFilters(where, q);
+
+    const [totalCount, rows] = await this.prisma.$transaction(
+        async (tx): Promise<[number, ActivityListRow[]]> => {
+          const total = await tx.activity.count({ where });
+          const items = await tx.activity.findMany({
+            where,
+            take: take + 1,
+            ...(q.cursor ? { cursor: { id: q.cursor }, skip: 1 } : {}),
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            include: activityListInclude,
+          });
+          return [total, items];
+        },
+    );
+
+    const hasMore = rows.length > take;
+    const page = rows.slice(0, take);
+    const nextCursor = hasMore && page.length ? page[page.length - 1].id : null;
+
+    const items: ActivityCardDto[] = page.map((a) => ({
+      id: a.id,
+      title: a.title,
+      category: a.category as ApiActivityCategory,
+      startAt: a.scheduledAt ?? a.createdAt,
+      locationLabel: undefined,
+      plz: a.plz,
+      createdBy: {
+        id: a.createdBy.id,
+        displayName: a.createdBy.profile?.displayName ?? 'Neighbor',
+      },
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt,
+      thumbnailUrl: a.images[0]?.url ?? null,
+      participantsCount: a._count?.participants ?? 0,
+      likesCount: a._count?.likes ?? 0,
+      isLiked: true,
     }));
 
     return { items, nextCursor, totalCount };
@@ -211,8 +275,8 @@ export class ActivitiesService {
 
   // Create (auth)
   async create(
-    userId: string,
-    dto: CreateActivityDto,
+      userId: string,
+      dto: CreateActivityDto,
   ): Promise<ActivityDetailDto> {
     const a = await this.prisma.activity.create({
       data: {
@@ -224,14 +288,14 @@ export class ActivitiesService {
         scheduledAt: dto.startAt ? new Date(dto.startAt) : null,
         createdById: userId,
         images: dto.imageUrls?.length
-          ? {
+            ? {
               create: dto.imageUrls.map((url, idx) => ({
                 url,
                 sortOrder: idx,
                 alt: dto.title,
               })),
             }
-          : undefined,
+            : undefined,
       },
       include: {
         images: { orderBy: { sortOrder: 'asc' } },
@@ -257,9 +321,9 @@ export class ActivitiesService {
 
   // Update (auth + owner)
   async update(
-    userId: string,
-    id: string,
-    dto: UpdateActivityDto,
+      userId: string,
+      id: string,
+      dto: UpdateActivityDto,
   ): Promise<ActivityDetailDto> {
     const existing = await this.prisma.activity.findUnique({
       where: { id },
@@ -340,8 +404,8 @@ export class ActivitiesService {
       });
     } catch (error: unknown) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
       ) {
         return { ok: true };
       }
@@ -402,8 +466,8 @@ export class ActivitiesService {
   }
 
   async isJoined(
-    userId: string,
-    activityId: string,
+      userId: string,
+      activityId: string,
   ): Promise<{ joined: boolean }> {
     const existing = await this.prisma.activity.findUnique({
       where: { id: activityId },
@@ -431,8 +495,8 @@ export class ActivitiesService {
       });
     } catch (error: unknown) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
       ) {
         return { ok: true };
       }
@@ -453,8 +517,8 @@ export class ActivitiesService {
   }
 
   async isLiked(
-    userId: string,
-    activityId: string,
+      userId: string,
+      activityId: string,
   ): Promise<{ liked: boolean }> {
     await this.ensureActiveActivity(activityId);
 
@@ -467,8 +531,8 @@ export class ActivitiesService {
   }
 
   async listParticipants(
-    userId: string,
-    activityId: string,
+      userId: string,
+      activityId: string,
   ): Promise<ParticipantRow[]> {
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },

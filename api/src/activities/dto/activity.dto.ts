@@ -79,7 +79,8 @@ export class ActivityCardDto {
   likesCount?: number;
 
   @ApiPropertyOptional({ example: false })
-  isFavorited?: boolean;
+
+  isLiked?: boolean;
 
   @ApiPropertyOptional({
     example: 'https://picsum.photos/seed/happynachbar/640/480',

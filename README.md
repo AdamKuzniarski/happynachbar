@@ -19,7 +19,7 @@
     <img width="640" height="360" src="./web/public/ Homepage.png" alt="Happynachbar preview">
   </a>
 
-  <h1 align="center">Happynachbar</h1>
+  <h1 align="center">happynachbar</h1>
 
   <p align="center">
     A neighborhood platform for discovering, creating, and discussing local activities.

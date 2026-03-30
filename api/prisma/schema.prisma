@@ -7,33 +7,34 @@ datasource db {
 }
 
 model User {
-  email                                          String             @unique
-  createdAt                                      DateTime           @default(now())
-  updatedAt                                      DateTime           @updatedAt
+  email                                          String                @unique
+  createdAt                                      DateTime              @default(now())
+  updatedAt                                      DateTime              @updatedAt
   passwordHash                                   String
-  id                                             String             @id @default(uuid()) @db.Uuid
+  id                                             String                @id @default(uuid()) @db.Uuid
   lastActiveAt                                   DateTime?
   emailVerifiedAt                                DateTime?
-  role                                           UserRole           @default(USER)
+  role                                           UserRole              @default(USER)
   banReason                                      String?
   bannedAt                                       DateTime?
-  isBanned                                       Boolean            @default(false)
+  isBanned                                       Boolean               @default(false)
   createdActivities                              Activity[]
   activityParticipants                           ActivityParticipant[]
-  auditLogs                                      AuditLog[]         @relation("AuditLogsByActor")
-  Conversation_Conversation_participantAIdToUser Conversation[]     @relation("Conversation_participantAIdToUser")
-  Conversation_Conversation_participantBIdToUser Conversation[]     @relation("Conversation_participantBIdToUser")
+  auditLogs                                      AuditLog[]            @relation("AuditLogsByActor")
+  Conversation_Conversation_participantAIdToUser Conversation[]        @relation("Conversation_participantAIdToUser")
+  Conversation_Conversation_participantBIdToUser Conversation[]        @relation("Conversation_participantBIdToUser")
   ConversationRead                               ConversationRead[]
   Message                                        Message[]
   profile                                        UserProfile?
-  warningsCreated                                UserWarning[]      @relation("WarningsCreatedBy")
-  warningsReceived                               UserWarning[]      @relation("WarningsReceived")
+  warningsCreated                                UserWarning[]         @relation("WarningsCreatedBy")
+  warningsReceived                               UserWarning[]         @relation("WarningsReceived")
 
-  conversationParticipants                       ConversationParticipant[]
+  conversationParticipants ConversationParticipant[]
 
-  passwordResetTokenHash                         String?            @unique
-  passwordResetExpiresAt                         DateTime? 
+  passwordResetTokenHash String?   @unique
+  passwordResetExpiresAt DateTime?
 
+  acivityLikes ActivityLike[]
 }
 
 model UserProfile {
@@ -50,20 +51,21 @@ model UserProfile {
 }
 
 model Activity {
-  id           String           @id @default(uuid()) @db.Uuid
+  id           String                @id @default(uuid()) @db.Uuid
   title        String
   description  String?
-  status       ActivityStatus   @default(ACTIVE)
-  plz          String           @db.VarChar(5)
-  createdById  String           @db.Uuid
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  status       ActivityStatus        @default(ACTIVE)
+  plz          String                @db.VarChar(5)
+  createdById  String                @db.Uuid
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
   category     ActivityCategory
   scheduledAt  DateTime?
-  createdBy    User             @relation(fields: [createdById], references: [id])
+  createdBy    User                  @relation(fields: [createdById], references: [id])
   images       ActivityImage[]
   participants ActivityParticipant[]
   Conversation Conversation[]
+  likes        ActivityLike[]
 
   @@index([plz, status, category, createdAt])
   @@index([createdAt])
@@ -126,19 +128,19 @@ model AuditLog {
 }
 
 model Conversation {
-  id                                     String             @id @default(uuid()) @db.Uuid
-  participantAId                         String             @db.Uuid
-  participantBId                         String             @db.Uuid
-  activityId                             String?            @db.Uuid
-  type                                   ConversationType   @default(DIRECT)
-  createdAt                              DateTime           @default(now())
-  updatedAt                              DateTime           @updatedAt
-  activity                               Activity?          @relation(fields: [activityId], references: [id])
-  participantA                           User               @relation("Conversation_participantAIdToUser", fields: [participantAId], references: [id], onDelete: Cascade)
-  participantB                           User               @relation("Conversation_participantBIdToUser", fields: [participantBId], references: [id], onDelete: Cascade)
-  participants                           ConversationParticipant[]
-  reads                                  ConversationRead[]
-  messages                               Message[]
+  id             String                    @id @default(uuid()) @db.Uuid
+  participantAId String                    @db.Uuid
+  participantBId String                    @db.Uuid
+  activityId     String?                   @db.Uuid
+  type           ConversationType          @default(DIRECT)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  activity       Activity?                 @relation(fields: [activityId], references: [id])
+  participantA   User                      @relation("Conversation_participantAIdToUser", fields: [participantAId], references: [id], onDelete: Cascade)
+  participantB   User                      @relation("Conversation_participantBIdToUser", fields: [participantBId], references: [id], onDelete: Cascade)
+  participants   ConversationParticipant[]
+  reads          ConversationRead[]
+  messages       Message[]
 
   @@unique([participantAId, participantBId, activityId])
   @@index([participantAId, updatedAt])

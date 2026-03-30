@@ -123,8 +123,32 @@ export class ActivitiesController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Post(':id/like')
+  like(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.like(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/like')
+  unlike(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.unlike(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/liked')
+  isLiked(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.activities.isLiked(req.user.userId, id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get(':id/participants')
-  listParticipants(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
+  listParticipants(
+    @Req() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
     return this.activities.listParticipants(req.user.userId, id);
   }
 }

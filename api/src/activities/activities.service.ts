@@ -27,7 +27,7 @@ const activityListInclude = Prisma.validator<Prisma.ActivityInclude>()({
   createdBy: {
     include: { profile: { select: { displayName: true } } },
   },
-  _count: { select: { participants: true } },
+  _count: { select: { participants: true, likes: true } },
 });
 
 type ActivityListRow = Prisma.ActivityGetPayload<{
@@ -39,7 +39,7 @@ const activityDetailInclude = Prisma.validator<Prisma.ActivityInclude>()({
   createdBy: {
     include: { profile: { select: { displayName: true } } },
   },
-  _count: { select: { participants: true } },
+  _count: { select: { participants: true, likes: true } },
 });
 
 type ActivityDetailRow = Prisma.ActivityGetPayload<{
@@ -65,7 +65,18 @@ function clamp(n: number, min: number, max: number) {
 export class ActivitiesService {
   constructor(private prisma: PrismaService) {}
 
-  //Public route GET /activities
+  private async ensureActiveActivity(activityId: string): Promise<void> {
+    const existing = await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      select: { id: true, status: true },
+    });
+
+    if (!existing || existing.status !== 'ACTIVE') {
+      throw new NotFoundException('Activity not found');
+    }
+  }
+
+  // Public route GET /activities
   async list(q: ListActivitiesQueryDto): Promise<ListActivitiesResponseDto> {
     const take = clamp(q.take ?? 20, 1, 50);
 
@@ -74,9 +85,12 @@ export class ActivitiesService {
     if (q.plz) {
       where.plz = q.plz.length === 5 ? q.plz : { startsWith: q.plz };
     }
-    if (q.category)
+    if (q.category) {
       where.category = q.category as unknown as PrismaActivityCategory;
-    if (q.createdById) where.createdById = q.createdById;
+    }
+    if (q.createdById) {
+      where.createdById = q.createdById;
+    }
 
     if (q.q?.trim()) {
       const term = q.q.trim();
@@ -86,7 +100,6 @@ export class ActivitiesService {
       ];
     }
 
-    //  Zeitraumfilter
     if (q.startFrom || q.startTo) {
       const createdRange: Prisma.DateTimeFilter = {};
       const scheduledRange: Prisma.DateTimeNullableFilter = {};
@@ -143,7 +156,7 @@ export class ActivitiesService {
       title: a.title,
       category: a.category as ApiActivityCategory,
       startAt: a.scheduledAt ?? a.createdAt,
-      locationLabel: undefined, // optional in DTO
+      locationLabel: undefined,
       plz: a.plz,
       createdBy: {
         id: a.createdBy.id,
@@ -153,20 +166,22 @@ export class ActivitiesService {
       updatedAt: a.updatedAt,
       thumbnailUrl: a.images[0]?.url ?? null,
       participantsCount: a._count?.participants ?? 0,
+      likesCount: a._count?.likes ?? 0,
     }));
 
     return { items, nextCursor, totalCount };
   }
 
   // Detail public route GET /activities/:id
-
   async getById(id: string): Promise<ActivityDetailDto> {
     const a = (await this.prisma.activity.findFirst({
       where: { id, status: 'ACTIVE' },
       include: activityDetailInclude,
     })) as ActivityDetailRow | null;
 
-    if (!a) throw new NotFoundException('Activity not found');
+    if (!a) {
+      throw new NotFoundException('Activity not found');
+    }
 
     return {
       id: a.id,
@@ -190,11 +205,11 @@ export class ActivitiesService {
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
       participantsCount: a._count?.participants ?? 0,
+      likesCount: a._count?.likes ?? 0,
     };
   }
 
   // Create (auth)
-
   async create(
     userId: string,
     dto: CreateActivityDto,
@@ -251,13 +266,16 @@ export class ActivitiesService {
       select: { id: true, createdById: true, status: true },
     });
 
-    if (!existing || existing.status !== 'ACTIVE')
+    if (!existing || existing.status !== 'ACTIVE') {
       throw new NotFoundException('Activity not found');
-    if (existing.createdById !== userId)
+    }
+    if (existing.createdById !== userId) {
       throw new ForbiddenException('Not owner');
+    }
 
     if (dto.imageUrls) {
       await this.prisma.activityImage.deleteMany({ where: { activityId: id } });
+
       if (dto.imageUrls.length) {
         await this.prisma.activityImage.createMany({
           data: dto.imageUrls.map((url, idx) => ({
@@ -284,17 +302,19 @@ export class ActivitiesService {
     return this.getById(id);
   }
 
-  // Delete(auth + owner) -> soft delete -die Dateien werden Archiviert- nicht mehr auf der seite zu sehen, aber in DB existent
+  // Delete(auth + owner) -> soft delete
   async archive(userId: string, id: string): Promise<{ ok: true }> {
     const existing = await this.prisma.activity.findUnique({
       where: { id },
       select: { id: true, createdById: true, status: true },
     });
 
-    if (!existing || existing.status !== 'ACTIVE')
+    if (!existing || existing.status !== 'ACTIVE') {
       throw new NotFoundException('Activity not found');
-    if (existing.createdById !== userId)
+    }
+    if (existing.createdById !== userId) {
       throw new ForbiddenException('Not owner');
+    }
 
     await this.prisma.activity.update({
       where: { id },
@@ -310,8 +330,9 @@ export class ActivitiesService {
       select: { id: true, status: true, createdById: true },
     });
 
-    if (!existing || existing.status !== 'ACTIVE')
+    if (!existing || existing.status !== 'ACTIVE') {
       throw new NotFoundException('Activity not found');
+    }
 
     try {
       await this.prisma.activityParticipant.create({
@@ -389,8 +410,9 @@ export class ActivitiesService {
       select: { id: true, status: true },
     });
 
-    if (!existing || existing.status !== 'ACTIVE')
+    if (!existing || existing.status !== 'ACTIVE') {
       throw new NotFoundException('Activity not found');
+    }
 
     const joined = await this.prisma.activityParticipant.findFirst({
       where: { activityId, userId },
@@ -398,6 +420,50 @@ export class ActivitiesService {
     });
 
     return { joined: !!joined };
+  }
+
+  async like(userId: string, activityId: string): Promise<{ ok: true }> {
+    await this.ensureActiveActivity(activityId);
+
+    try {
+      await this.prisma.activityLike.create({
+        data: { activityId, userId },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return { ok: true };
+      }
+      throw error;
+    }
+
+    return { ok: true };
+  }
+
+  async unlike(userId: string, activityId: string): Promise<{ ok: true }> {
+    await this.ensureActiveActivity(activityId);
+
+    await this.prisma.activityLike.deleteMany({
+      where: { activityId, userId },
+    });
+
+    return { ok: true };
+  }
+
+  async isLiked(
+    userId: string,
+    activityId: string,
+  ): Promise<{ liked: boolean }> {
+    await this.ensureActiveActivity(activityId);
+
+    const liked = await this.prisma.activityLike.findFirst({
+      where: { activityId, userId },
+      select: { id: true },
+    });
+
+    return { liked: !!liked };
   }
 
   async listParticipants(
@@ -409,10 +475,12 @@ export class ActivitiesService {
       select: { id: true, status: true, createdById: true },
     });
 
-    if (!activity || activity.status !== 'ACTIVE')
+    if (!activity || activity.status !== 'ACTIVE') {
       throw new NotFoundException('Activity not found');
-    if (activity.createdById !== userId)
+    }
+    if (activity.createdById !== userId) {
       throw new ForbiddenException('Not owner');
+    }
 
     const rows = (await this.prisma.activityParticipant.findMany({
       where: { activityId },

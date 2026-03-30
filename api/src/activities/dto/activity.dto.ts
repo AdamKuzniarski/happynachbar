@@ -72,6 +72,12 @@ export class ActivityCardDto {
   })
   participantsCount?: number;
 
+  @ApiPropertyOptional({
+    example: 5,
+    description: 'Optional: number of likes',
+  })
+  likesCount?: number;
+
   @ApiPropertyOptional({ example: false })
   isFavorited?: boolean;
 

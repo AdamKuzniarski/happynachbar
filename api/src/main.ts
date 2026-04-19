@@ -14,21 +14,25 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const origins = (
-    configService.get<string>('CORS_ORIGINS') ?? 'http://localhost:3000 , http://localhost:8081'
-  )
+  const rawCorsOrigins =
+    configService.get<string>('CORS_ORIGINS') ??
+    'http://localhost:3000,http://localhost:8081';
+
+  const corsOrigins = rawCorsOrigins
     .split(',')
-    .map((s) => s.trim())
+    .map((value) => value.trim())
     .filter(Boolean);
 
   app.enableCors({
-    origin: origins,
+    origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Swagger enable/disable via env
   const swaggerEnabled =
     (configService.get<string>('SWAGGER_ENABLED') ?? 'true') === 'true';
+
   if (swaggerEnabled) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('happynachbar API')
@@ -48,4 +52,5 @@ async function bootstrap() {
 
   await app.listen(port);
 }
+
 bootstrap();

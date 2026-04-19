@@ -8,17 +8,21 @@ const API_BASE_URL =
 type ApiFetchInit = RequestInit;
 
 export async function apiFetch<T>(
-  path: string,
-  init: ApiFetchInit = {},
+    path: string,
+    init: ApiFetchInit = {},
 ): Promise<T | undefined> {
   const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
+
+  const headers = new Headers(init.headers ?? {});
+
+  if (init.body != null && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const res = await fetch(url, {
     ...init,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init.headers ?? {}),
-    },
+    headers,
     cache: "no-store",
   });
 
@@ -26,11 +30,12 @@ export async function apiFetch<T>(
   const isJson = contentType.includes("application/json");
   const raw = res.status === 204 ? "" : await res.text();
   let data: unknown;
+
   if (isJson && raw) {
     try {
       data = JSON.parse(raw);
     } catch {
-      // fall back to raw text
+      // ignore invalid JSON and fall back to raw text
     }
   }
 
@@ -38,17 +43,17 @@ export async function apiFetch<T>(
     const messageFromJson = (() => {
       if (typeof data !== "object" || data === null) return null;
       if (!("message" in data)) return null;
+
       const message = (data as Record<string, unknown>).message;
 
       if (typeof message === "string") return message;
-      if (
-        Array.isArray(message) &&
-        message.every((m) => typeof m === "string")
-      ) {
+      if (Array.isArray(message) && message.every((m) => typeof m === "string")) {
         return message.join(", ");
       }
+
       return null;
     })();
+
     const msg = messageFromJson || raw || `HTTP ${res.status}`;
     throw new Error(msg);
   }

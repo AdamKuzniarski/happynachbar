@@ -1,10 +1,11 @@
 const API_BASE_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:4000";
-type ApiFetchInit = Omit<RequestInit, "headers"> & {
-  headers?: Record<string, string>;
-};
+    typeof window === "undefined"
+        ? (process.env.API_URL ??
+            process.env.NEXT_PUBLIC_API_URL ??
+            "http://localhost:4000")
+        : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000");
+
+type ApiFetchInit = RequestInit;
 
 export async function apiFetch<T>(
   path: string,

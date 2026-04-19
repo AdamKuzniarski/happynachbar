@@ -36,6 +36,9 @@ services:
       SMTP_TLS_SERVERNAME: ${SMTP_TLS_SERVERNAME}
       MAIL_FROM: ${MAIL_FROM}
       WEB_URL: ${WEB_URL}
+      EMAIL_TOKEN_EXPIRES_IN: ${EMAIL_TOKEN_EXPIRES_IN}
+      EMAIL_TOKEN_SECRET: ${EMAIL_TOKEN_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
       API_PORT: ${API_PORT}
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
@@ -58,6 +61,7 @@ services:
     environment:
       NODE_ENV: production
       API_URL: http://api:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
 
     ports:
       - "3000:3000"
